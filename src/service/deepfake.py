@@ -29,8 +29,7 @@ def generate(deepfake: Deepfake, user: User) -> UUID:
                 "enhance_face": deepfake.enhance_face
             }
         )
-        
-        # The okaris/facefusion model can stream output as it's running.
+
         # The predict method returns an iterator, and you can iterate over that output.
         output_uri = None
         for item in output:
@@ -40,6 +39,11 @@ def generate(deepfake: Deepfake, user: User) -> UUID:
             data.update_usage(user)
 
             deepfake_id = data.add_deepfake(deepfake)
+
+            # TODO we should probably here create a detached process which monitors 
+            #      and updates the db when it comes to the status of the replicate run
+            #      specifically if it's possible to download the generated image
+            #      if it's possible it should mark it in the db by calling the webhook
 
             return deepfake_id
     else:
