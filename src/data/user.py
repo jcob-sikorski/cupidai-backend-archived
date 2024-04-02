@@ -1,6 +1,5 @@
-from pydantic import UUID4
+from uuid import uuid4
 from typing import Optional
-
 from model.user import User
 
 from pymongo import ReturnDocument
@@ -14,12 +13,19 @@ def get_user(name: str) -> Optional[User]:
         return None
 
 def create_user(user: User) -> Optional[User]:
+    # Generate a new UUID for the user
+    user_id = uuid4()
+
+    # Update the id field of the User object
+    user.id = user_id
+
     result = user_col.find_one_and_update(
-        {"_id": user._id},
+        {"_id": user_id},
         {"$set": user.dict()},
         upsert=True,
         return_document=ReturnDocument.AFTER
     )
+
     if result is not None:
         return User(**result)
     else:
