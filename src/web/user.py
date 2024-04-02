@@ -1,0 +1,124 @@
+import os
+from datetime import timedelta
+from fastapi import APIRouter, HTTPException, Depends
+from fastapi.security import (
+    OAuth2PasswordBearer, OAuth2PasswordRequestForm)
+from model.user import User
+if os.getenv("CRYPTID_UNIT_TEST"):
+    from fake import user as service
+else:
+    from service import user as service
+from error import Missing, Duplicate
+
+ACCESS_TOKEN_EXPIRE_MINUTES = 15
+
+router = APIRouter(prefix = "/user")
+
+# --- new auth stuff
+
+# This dependency makes a post to "/user/token"
+# (from a form containing a username and password)
+# return an access token.
+oauth2_dep = OAuth2PasswordBearer(
+    tokenUrl="token"
+    scheme_name="JWT"
+)
+
+reuseable_oauth = OAuth2PasswordBearer(
+    tokenUrl="token",
+    scheme_name="JWT"
+)
+
+def unauthed():
+    raise HTTPException(
+        status_code=401,
+        detail="Incorrect username or password",
+        headers={"WWW-Authenticate": "Bearer"},
+        )
+
+# This endpoint is directed to by any call that has the
+# oauth2_dep() dependency:
+@router.post("/token")
+async def create_access_token(
+    form_data: OAuth2PasswordRequestForm =  Depends()
+):
+    """Get username and password from OAuth form,
+        return access token"""
+    user = service.auth_user(form_data.username, form_data.password)
+    if not user:
+        unauthed()
+    expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+    access_token = service.create_access_token(
+        data={"sub": user.username}, expires=expires
+    )
+    return {"access_token": access_token, "token_type": "bearer"}
+
+@router.get("/token")
+def get_access_token(token: str = Depends(oauth2_dep)) -> dict:
+    """Return the current access token"""
+    return {"token": token}
+
+async def get_current_user(token: str = Depends(reuseable_oauth)) -> SystemUser:
+    try:
+        payload = jwt.decode(
+            token, JWT_SECRET_KEY, algorithms=[ALGORITHM]
+        )
+        token_data = TokenPayload(**payload)
+        
+        if datetime.fromtimestamp(token_data.exp) < datetime.now():
+            raise HTTPException(
+                status_code = status.HTTP_401_UNAUTHORIZED,
+                detail="Token expired",
+                headers={"WWW-Authenticate": "Bearer"},
+            )
+    except(jwt.JWTError, ValidationError):
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Could not validate credentials",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+        
+    user: Union[dict[str, Any], None] = db.get(token_data.sub, None)
+    
+    
+    if user is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Could not find user",
+        )
+    
+    return SystemUser(**user)
+
+# --- previous CRUD stuff
+
+@router.get("/")
+def get_all() -> list[User]:
+    return service.get_all()
+
+@router.get("/{name}")
+def get_one(name) -> User:
+    try:
+        return service.get_one(name)
+    except Missing as exc:
+        raise HTTPException(status_code=404, detail=exc.msg)
+
+@router.post("/", status_code=201)
+def create(user: User) -> User:
+    try:
+        return service.create(user)
+    except Duplicate as exc:
+        raise HTTPException(status_code=409, detail=exc.msg)
+
+@router.patch("/{name}")
+def modify(name: str, user: User) -> User:
+    try:
+        return service.modify(name, user)
+    except Missing as exc:
+        raise HTTPException(status_code=404, detail=exc.msg)
+
+@router.delete("/{name}")
+def delete(name: str) -> None:
+    try:
+        return service.delete(name)
+    except Missing as exc:
+        raise HTTPException(status_code=404, detail=exc.msg)
