@@ -1,10 +1,9 @@
 from fastapi import FastAPI
-from web import deepfake, file, user
+from web import deepfake,  user
 
 app = FastAPI()
 
 app.include_router(user.router)
-app.include_router(file.router)
 app.include_router(deepfake.router)
 
 if __name__ == "__main__":

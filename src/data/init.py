@@ -1,7 +1,10 @@
 """Initialize MongoDB database"""
 
 import os
+from dotenv import load_dotenv
 from pymongo import MongoClient
+
+load_dotenv()
 
 def get_db():
     """Connect to MongoDB database instance"""

@@ -1,1 +1,5 @@
 # Data exceptions
+
+class NotAutorized(Exception):
+    def __init__(self, msg:str):
+        self.msg = msg

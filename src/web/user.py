@@ -6,7 +6,6 @@ from fastapi.security import (
 from starlette.status import HTTP_401_UNAUTHORIZED
 from model.user import User
 from service import user as service
-from error import Missing, Duplicate
 
 ACCESS_TOKEN_EXPIRE_MINUTES = 15
 
@@ -59,36 +58,8 @@ def get_access_token(token: str = Depends(oauth2_dep)) -> dict:
     """Return the current access token"""
     return {"token": token}
 
-# --- previous CRUD stuff
-
-@router.get("/")
-def get_all() -> list[User]:
-    return service.get_all()
-
-@router.get("/{name}")
-def get_one(name) -> User:
-    try:
-        return service.get_one(name)
-    except Missing as exc:
-        raise HTTPException(status_code=404, detail=exc.msg)
-
-@router.post("/", status_code=201)
-def create(user: User) -> User:
-    try:
-        return service.create(user)
-    except Duplicate as exc:
-        raise HTTPException(status_code=409, detail=exc.msg)
-
-@router.patch("/{name}")
-def modify(name: str, user: User) -> User:
-    try:
-        return service.modify(name, user)
-    except Missing as exc:
-        raise HTTPException(status_code=404, detail=exc.msg)
-
-@router.delete("/{name}")
-def delete(name: str) -> None:
-    try:
-        return service.delete(name)
-    except Missing as exc:
-        raise HTTPException(status_code=404, detail=exc.msg)
+@router.post("/")
+async def create_user(user: User):
+    """Create a new user"""
+    created_user = service.create_user(user)
+    return created_user

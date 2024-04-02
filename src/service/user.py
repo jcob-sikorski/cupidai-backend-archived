@@ -62,3 +62,8 @@ def create_access_token(data: dict,
     src.update({"exp": now + expires})
     encoded_jwt = jwt.encode(src, JWT_SECRET_KEY, algorithm=ALGORITHM)
     return encoded_jwt
+
+def create_user(user: User):
+    if (new_user := data.create_user(user)):
+        return new_user
+    return None
