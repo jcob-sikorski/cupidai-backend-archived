@@ -1,4 +1,5 @@
-import datetime
+import datetime as datetime_outer
+from datetime import datetime as datetime_inner
 import os
 from jose import jwt
 from model.user import User
@@ -53,12 +54,12 @@ def auth_user(name: str, plain: str) -> Optional[User]:
     return user
 
 def create_access_token(data: dict,
-    expires: Optional[datetime.timedelta] = None
+    expires: Optional[datetime_outer.timedelta] = None
 ):
     """Return a JWT access token"""
     src = data.copy()
-    now = datetime.utcnow()
-    expires = expires or datetime.timedelta(minutes=TOKEN_EXPIRES)
+    now = datetime_inner.utcnow()
+    expires = expires or datetime_outer.timedelta(minutes=TOKEN_EXPIRES)
     src.update({"exp": now + expires})
     encoded_jwt = jwt.encode(src, JWT_SECRET_KEY, algorithm=ALGORITHM)
     return encoded_jwt

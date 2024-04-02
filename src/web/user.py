@@ -40,7 +40,7 @@ def get_current_user(token: str = Depends(oauth2_dep)) -> User:
 # oauth2_dep() dependency:
 @router.post("/token")
 async def create_access_token(
-    form_data: OAuth2PasswordRequestForm =  Depends()
+    form_data: OAuth2PasswordRequestForm = Depends()
 ):
     """Get username and password from OAuth form,
         return access token"""
@@ -49,14 +49,9 @@ async def create_access_token(
         unauthed()
     expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
     access_token = service.create_access_token(
-        data={"sub": user.username}, expires=expires
+        data={"sub": user.name}, expires=expires
     )
     return {"access_token": access_token, "token_type": "bearer"}
-
-@router.get("/token")
-def get_access_token(token: str = Depends(oauth2_dep)) -> dict:
-    """Return the current access token"""
-    return {"token": token}
 
 @router.post("/")
 async def create_user(form_data: OAuth2PasswordRequestForm = Depends()):
