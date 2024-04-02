@@ -1,4 +1,3 @@
-from collections import Counter, defaultdict
 import data.deepfake as data
 
 from pydantic import UUID4
@@ -6,7 +5,6 @@ from pydantic import UUID4
 from fastapi import Depends
 
 from model.deepfake import DeepfakeStatus, DeepfakeUsage, Deepfake
-from web.user import oauth2_dep
 
 from model.user import User
 
@@ -23,7 +21,6 @@ def get_usage(user: User) -> DeepfakeUsage:
 def generate(deepfake: Deepfake, user: User) -> UUID4:
     if data.has_permissions(user):
         # TODO call here the runpod API
-        
         pass
     else:
         raise NotAutorized(msg=f"Invalid permissions")
