@@ -8,9 +8,9 @@ from service import deepfake as service
 
 router = APIRouter(prefix = "/deepfake")
 
-@router.get("/get-status/{generation_id}")
-async def get_status(generation_id: str, _: User = Depends(get_current_user)) -> DeepfakeStatus:
-    return service.get_status(generation_id)
+@router.get("/get-status/{deepfake_id}")
+async def get_status(deepfake_id: str, _: User = Depends(get_current_user)) -> DeepfakeStatus:
+    return service.get_status(deepfake_id)
 
     
 @router.get("/get-usage")

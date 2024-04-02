@@ -10,8 +10,8 @@ from data.billing import get_current_plan
 from pymongo import ReturnDocument
 from .init import deepfake_col, deepfake_status_col, deepfake_usage_col, plan_col
 
-def get_status(generation_id: str) -> Optional[DeepfakeStatus]:
-    result = deepfake_status_col.find_one({"_id": generation_id})
+def get_status(deepfake_id: str) -> Optional[DeepfakeStatus]:
+    result = deepfake_status_col.find_one({"_id": deepfake_id})
     if result is not None:
         return DeepfakeStatus(**result)
     else:
@@ -37,10 +37,8 @@ def update_usage(user: User) -> Optional[DeepfakeUsage]:
     else:
         return None
     
-def create_deepfake_status(output_uri: str) -> Optional[str]:
-    deepfake_id = str(ObjectId())
-
-    deepfake_status = DeepfakeStatus(output_uri=output_uri, status="in progress")
+def create_status(deepfake_id: str) -> Optional[DeepfakeStatus]:
+    deepfake_status = DeepfakeStatus(output_uri=None, status="in progress")
 
     result = deepfake_status_col.find_one_and_update(
         {"_id": deepfake_id},
@@ -50,7 +48,21 @@ def create_deepfake_status(output_uri: str) -> Optional[str]:
     )
 
     if result is not None:
-        return deepfake_id
+        return DeepfakeStatus(**result)
+    else:
+        return None
+
+def update_status(deepfake_id: str, output_uri: str) -> Optional[DeepfakeStatus]:
+    result = deepfake_status_col.find_one_and_update(
+        {"_id": deepfake_id},
+        {"$set": {"output_uri": output_uri}},
+        upsert=True,
+        return_document=ReturnDocument.AFTER
+    )
+
+
+    if result is not None:
+        return DeepfakeStatus(**result)
     else:
         return None
 

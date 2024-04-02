@@ -2,7 +2,7 @@ from pydantic import BaseModel
 from typing import Optional
 
 class DeepfakeStatus(BaseModel):
-    output_uri: str
+    output_uri: Optional[str]
     status: str
 
 class DeepfakeUsage(BaseModel):
