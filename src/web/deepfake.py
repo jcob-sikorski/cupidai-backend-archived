@@ -21,8 +21,3 @@ async def get_usage(user: User = Depends(get_current_user)) -> DeepfakeUsage:
 @router.post("/generate", status_code=201)
 async def generate(deepfake: Deepfake, user: User = Depends(get_current_user)) -> str:
     return service.generate(deepfake, user)
-
-
-@router.post("/webhook", status_code=201)
-async def webhook(deepfake_status: DeepfakeStatus) -> None:
-    return service.webhook(deepfake_status)

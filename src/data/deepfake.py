@@ -73,10 +73,3 @@ def has_permissions(user: User) -> bool:
     if usage and current_plan and usage.generated_num > current_plan.deepfake_num:
         return False
     return True
-
-def webhook(deepfake_status: DeepfakeStatus) -> None:
-    deepfake_status_col.update_one(
-        {"_id": deepfake_status._id},
-        {"$set": deepfake_status.dict()},
-        upsert=True
-    )

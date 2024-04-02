@@ -52,7 +52,3 @@ def generate(deepfake: Deepfake, user: User) -> str:
         return deepfake_id
     else:
         raise NotAutorized(msg=f"Invalid permissions")
-   
-   
-def webhook(deepfake_status: DeepfakeStatus) -> None:
-    data.webhook(deepfake_status)
