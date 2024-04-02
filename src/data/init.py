@@ -19,10 +19,12 @@ def get_db():
     db = mongoClient['cupidai']
 
     user_col = db['User']
+    plan_col = db['Plan']
+    user_plan_col = db['UserPlan']
     deepfake_col = db['Deepfake']
     deepfake_status_col = db['DeepfakeStatus']
     deepfake_usage_col = db['DeepfakeUsage']
 
-    return user_col, deepfake_col, deepfake_status_col, deepfake_usage_col
+    return user_col, plan_col, user_plan_col, deepfake_col, deepfake_status_col, deepfake_usage_col
 
-user_col, deepfake_col, deepfake_status_col, deepfake_usage_col = get_db()
+user_col, plan_col, user_plan_col, deepfake_col, deepfake_status_col, deepfake_usage_col = get_db()

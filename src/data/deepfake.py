@@ -1,17 +1,15 @@
-from uuid import uuid4, UUID
 from typing import Optional
 
 from model.deepfake import DeepfakeStatus, DeepfakeUsage, Deepfake
 from model.user import User
 from model.billing import Plan
 
-from data.user import get_user
 from data.billing import get_current_plan
 
 from pymongo import ReturnDocument
 from .init import deepfake_col, deepfake_status_col, deepfake_usage_col, plan_col
 
-def get_status(generation_id: UUID) -> Optional[DeepfakeStatus]:
+def get_status(generation_id: str) -> Optional[DeepfakeStatus]:
     result = deepfake_status_col.find_one({"_id": generation_id})
     if result is not None:
         return DeepfakeStatus(**result)
@@ -19,17 +17,15 @@ def get_status(generation_id: UUID) -> Optional[DeepfakeStatus]:
         return None
 
 def get_usage(user: User) -> Optional[DeepfakeUsage]:
-    result = deepfake_usage_col.find_one({"_id": user._id})
+    result = deepfake_usage_col.find_one({"user_id": user.id})
     if result is not None:
         return DeepfakeUsage(**result)
     else:
         return None
     
 def update_usage(user: User) -> Optional[DeepfakeUsage]:
-    user = get_user(user.name)
-
     result = deepfake_usage_col.find_one_and_update(
-        {"_id": user._id},
+        {"user_id": user.id},
         {"$inc": {"generated_num": 1}},
         upsert=True,
         return_document=ReturnDocument.AFTER
@@ -40,8 +36,8 @@ def update_usage(user: User) -> Optional[DeepfakeUsage]:
     else:
         return None
     
-def add_deepfake(deepfake: Deepfake) -> Optional[UUID]:
-    deepfake_id = uuid4()
+def add_deepfake(deepfake: Deepfake) -> Optional[str]:
+    deepfake_id = str(ObjectId())
 
     result = deepfake_col.find_one_and_update(
         {"_id": deepfake_id},

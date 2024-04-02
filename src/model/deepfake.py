@@ -5,6 +5,7 @@ class DeepfakeStatus(BaseModel):
     progress: int
 
 class DeepfakeUsage(BaseModel):
+    user_id: str
     generated_num: int
 
 class Deepfake(BaseModel):

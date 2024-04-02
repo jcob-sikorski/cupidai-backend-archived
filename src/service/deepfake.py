@@ -1,7 +1,5 @@
 import data.deepfake as data
 
-from uuid import uuid4, UUID
-
 import replicate
 
 from model.deepfake import DeepfakeStatus, DeepfakeUsage, Deepfake
@@ -10,7 +8,7 @@ from model.user import User
 
 from error import NotAutorized
 
-def get_status(generation_id: UUID) -> DeepfakeStatus:
+def get_status(generation_id: str) -> DeepfakeStatus:
     return data.get_status(generation_id)
     
 
@@ -18,7 +16,7 @@ def get_usage(user: User) -> DeepfakeUsage:
     return data.get_usage(user)
 
 
-def generate(deepfake: Deepfake, user: User) -> UUID:
+def generate(deepfake: Deepfake, user: User) -> str:
     if data.has_permissions(user):
         output = replicate.run(
             "okaris/facefusion:963e964879a44c24b0b5b9cc612a5c64c60dc2e27e0ace0173b1c3c47ef3a188",

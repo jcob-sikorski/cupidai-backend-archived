@@ -1,4 +1,4 @@
-from uuid import uuid4
+from bson import ObjectId
 from typing import Optional
 from model.user import User
 
@@ -13,11 +13,9 @@ def get_user(name: str) -> Optional[User]:
         return None
 
 def create_user(name: str, hash: str) -> Optional[User]:
-    # Generate a new UUID for the user
-    user_id = uuid4()
+    user_id = str(ObjectId())
 
-    # Create a new User object
-    user = User(name=name, hash=hash)
+    user = User(name=name, hash=hash, id=user_id)
 
     result = user_col.find_one_and_update(
         {"_id": user_id},
