@@ -1,4 +1,5 @@
 from typing import Optional
+from bson import ObjectId
 
 from model.deepfake import DeepfakeStatus, DeepfakeUsage, Deepfake
 from model.user import User
@@ -36,12 +37,14 @@ def update_usage(user: User) -> Optional[DeepfakeUsage]:
     else:
         return None
     
-def add_deepfake(deepfake: Deepfake) -> Optional[str]:
+def create_deepfake_status(output_uri: str) -> Optional[str]:
     deepfake_id = str(ObjectId())
 
-    result = deepfake_col.find_one_and_update(
+    deepfake_status = DeepfakeStatus(output_uri=output_uri, status="in progress")
+
+    result = deepfake_status_col.find_one_and_update(
         {"_id": deepfake_id},
-        {"$set": deepfake.dict()},
+        {"$set": deepfake_status.dict()},
         upsert=True,
         return_document=ReturnDocument.AFTER
     )
@@ -55,7 +58,7 @@ def has_permissions(user: User) -> bool:
     current_plan = get_current_plan(user)
     usage = get_usage(user)
 
-    if usage.generated_num > current_plan.deepfake_num:
+    if usage and current_plan and usage.generated_num > current_plan.deepfake_num:
         return False
     return True
 

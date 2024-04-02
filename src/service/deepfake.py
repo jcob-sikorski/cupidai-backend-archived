@@ -36,7 +36,7 @@ def generate(deepfake: Deepfake, user: User) -> str:
         if output_uri:
             data.update_usage(user)
 
-            deepfake_id = data.add_deepfake(deepfake)
+            deepfake_id = data.create_deepfake_status(output_uri)
 
             # TODO we should probably here create a detached process which monitors 
             #      and updates the db when it comes to the status of the replicate run

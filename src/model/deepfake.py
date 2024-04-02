@@ -1,8 +1,9 @@
 from pydantic import BaseModel
+from typing import Optional
 
 class DeepfakeStatus(BaseModel):
+    output_uri: str
     status: str
-    progress: int
 
 class DeepfakeUsage(BaseModel):
     user_id: str
