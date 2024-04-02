@@ -15,7 +15,7 @@ def gen_file(path: str) -> Generator:
     with open(file=path, mode="rb") as file:
         yield file.read()
     
-def download_one(uri, user: User = Depends(get_current_user)) -> StreamingResponse:
+def download_one(uri, user: User) -> StreamingResponse:
     gen_expr = gen_file(file_path=path)
     response = StreamingResponse(
         content=gen_expr,
@@ -23,5 +23,5 @@ def download_one(uri, user: User = Depends(get_current_user)) -> StreamingRespon
     )
     return response
 
-def upload_one(file: UploadFile, user: User = Depends(get_current_user)) -> UploadStatus:
+def upload_one(file: UploadFile, user: User) -> UploadStatus:
     pass

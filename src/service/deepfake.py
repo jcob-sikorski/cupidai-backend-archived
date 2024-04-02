@@ -5,34 +5,28 @@ from pydantic import UUID4
 
 from fastapi import Depends
 
+from model.deepfake import DeepfakeStatus, DeepfakeUsage, Deepfake
 from web.user import oauth2_dep
+
+from model.user import User
 
 from error import NotAutorized
 
-def get_status(generation_id: UUID4, token: str = Depends(oauth2_dep)) -> DeepfakeStatus:
-    if authed(token):
-        return data.get_status(generation_id)
-    else:
-        raise NotAutorized(msg=f"Token expired")
+def get_status(generation_id: UUID4) -> DeepfakeStatus:
+    return data.get_status(generation_id)
     
 
-def get_usage(deepfake: Deepfake, token: str = Depends(oauth2_dep)) -> DeepfakeUsage:
-    if authed(token):
-        return data.get_usage(deepfake)
-    else:
-        raise NotAutorized(msg=f"Token expired")
+def get_usage(user: User) -> DeepfakeUsage:
+    return data.get_usage(user)
 
 
-def generate(deepfake: Deepfake, token: str = Depends(oauth2_dep)) -> UUID4:
-    if authed(token):
-        if data.has_permissions(token):
-            # TODO call here the runpod API
+def generate(deepfake: Deepfake, user: User) -> UUID4:
+    if data.has_permissions(user):
+        # TODO call here the runpod API
         
-            return service.generate(deepfake, token)
-        else:
-            raise NotAutorized(msg=f"Invalid permissions")
+        pass
     else:
-        raise NotAutorized(msg=f"Token expired")
+        raise NotAutorized(msg=f"Invalid permissions")
    
    
 def webhook(deepfake_status: DeepfakeStatus) -> None:
