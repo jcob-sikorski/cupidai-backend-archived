@@ -12,12 +12,12 @@ def get_user(name: str) -> Optional[User]:
     else:
         return None
 
-def create_user(user: User) -> Optional[User]:
+def create_user(name: str, hash: str) -> Optional[User]:
     # Generate a new UUID for the user
     user_id = uuid4()
 
-    # Update the id field of the User object
-    user.id = user_id
+    # Create a new User object
+    user = User(name=name, hash=hash)
 
     result = user_col.find_one_and_update(
         {"_id": user_id},

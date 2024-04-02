@@ -2,7 +2,6 @@ from typing import Dict
 from pydantic import BaseModel, UUID4
 
 class DeepfakeStatus(BaseModel):
-    _id: UUID4
     status: str
     progress: int
 
