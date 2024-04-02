@@ -1,5 +1,5 @@
 from typing import Dict
-from pydantic import BaseModel, UUID4
+from pydantic import BaseModel
 
 class DeepfakeStatus(BaseModel):
     status: str

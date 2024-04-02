@@ -1,4 +1,4 @@
-import os
+from typing import Optional
 from datetime import timedelta
 from fastapi import APIRouter, HTTPException, Depends
 from fastapi.security import (
@@ -54,7 +54,7 @@ async def create_access_token(
     return {"access_token": access_token, "token_type": "bearer"}
 
 @router.post("/")
-async def create_user(form_data: OAuth2PasswordRequestForm = Depends()):
+async def create_user(form_data: OAuth2PasswordRequestForm = Depends()) -> Optional[User]:
     """Create a new user"""
     created_user = service.create_user(form_data.username, form_data.password)
     return created_user

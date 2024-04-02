@@ -1,4 +1,4 @@
-from pydantic import UUID4
+from uuid import UUID
 from typing import Optional
 
 from model.deepfake import DeepfakeStatus, DeepfakeUsage
@@ -6,7 +6,7 @@ from model.user import User
 
 from .init import user_col, deepfake_col, deepfake_status_col, deepfake_usage_col
 
-def get_status(generation_id: UUID4) -> Optional[DeepfakeStatus]:
+def get_status(generation_id: UUID) -> Optional[DeepfakeStatus]:
     result = deepfake_status_col.find_one({"_id": generation_id})
     if result is not None:
         return DeepfakeStatus(**result)

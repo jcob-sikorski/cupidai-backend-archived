@@ -64,7 +64,7 @@ def create_access_token(data: dict,
     encoded_jwt = jwt.encode(src, JWT_SECRET_KEY, algorithm=ALGORITHM)
     return encoded_jwt
 
-def create_user(name: str, plain: str):
+def create_user(name: str, plain: str) -> Optional[User]:
     hash = get_hash(plain)
     if (new_user := data.create_user(name, hash)):
         return new_user
