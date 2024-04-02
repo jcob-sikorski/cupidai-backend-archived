@@ -5,17 +5,12 @@ from fastapi.security import (
     OAuth2PasswordBearer, OAuth2PasswordRequestForm)
 from starlette.status import HTTP_401_UNAUTHORIZED
 from model.user import User
-if os.getenv("CRYPTID_UNIT_TEST"):
-    from fake import user as service
-else:
-    from service import user as service
+from service import user as service
 from error import Missing, Duplicate
 
 ACCESS_TOKEN_EXPIRE_MINUTES = 15
 
 router = APIRouter(prefix = "/user")
-
-# --- new auth stuff
 
 # This dependency makes a post to "/user/token"
 # (from a form containing a username and password)
