@@ -53,7 +53,7 @@ async def create_access_token(
     )
     return {"access_token": access_token, "token_type": "bearer"}
 
-@router.post("/")
+@router.post("/create-user")
 async def create_user(form_data: OAuth2PasswordRequestForm = Depends()) -> Optional[User]:
     """Create a new user"""
     created_user = service.create_user(form_data.username, form_data.password)

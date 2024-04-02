@@ -1,6 +1,6 @@
 import data.deepfake as data
 
-from uuid import UUID
+from uuid import uuid4, UUID
 
 import replicate
 
@@ -23,21 +23,25 @@ def generate(deepfake: Deepfake, user: User) -> UUID:
         output = replicate.run(
             "okaris/facefusion:963e964879a44c24b0b5b9cc612a5c64c60dc2e27e0ace0173b1c3c47ef3a188",
             input={
-                "source": "https://ucarecdn.com/7277eac7-216d-4a87-8767-61294eb97374/-/preview/712x1000/",
-                "target": "https://ucarecdn.com/dde666f2-2704-413f-9945-13a8fdfb8039/-/preview/701x1000/",
-                "keep_fps": False,
-                "enhance_face": True
+                "source": deepfake.source_uri,
+                "target": deepfake.target_uri,
+                "keep_fps": deepfake.keep_fps,
+                "enhance_face": deepfake.enhance_face
             }
         )
-
+        
         # The okaris/facefusion model can stream output as it's running.
         # The predict method returns an iterator, and you can iterate over that output.
+        output_uri = None
         for item in output:
-            # https://replicate.com/okaris/facefusion/api#output-schema
-            print(item)
-        # TODO on the successful call of API:
-        #       - update deepfake usage
-        #       - return generation id to track deepfake status
+            output_uri = item
+
+        if output_uri:
+            data.update_usage(user)
+
+            deepfake_id = data.add_deepfake(deepfake)
+
+            return deepfake_id
     else:
         raise NotAutorized(msg=f"Invalid permissions")
    

@@ -1,10 +1,13 @@
-from uuid import UUID
+from uuid import uuid4, UUID
 from typing import Optional
 
-from model.deepfake import DeepfakeStatus, DeepfakeUsage
+from model.deepfake import DeepfakeStatus, DeepfakeUsage, Deepfake
 from model.user import User
 
-from .init import user_col, deepfake_col, deepfake_status_col, deepfake_usage_col
+from data.user import get_user
+
+from pymongo import ReturnDocument
+from .init import deepfake_col, deepfake_status_col, deepfake_usage_col
 
 def get_status(generation_id: UUID) -> Optional[DeepfakeStatus]:
     result = deepfake_status_col.find_one({"_id": generation_id})
@@ -19,9 +22,39 @@ def get_usage(user: User) -> Optional[DeepfakeUsage]:
         return DeepfakeUsage(**result)
     else:
         return None
+    
+def update_usage(user: User) -> Optional[DeepfakeUsage]:
+    user = get_user(user.name)
+
+    result = deepfake_usage_col.find_one_and_update(
+        {"_id": user._id},
+        {"$inc": {"generated_num": 1}},
+        upsert=True,
+        return_document=ReturnDocument.AFTER
+    )
+
+    if result is not None:
+        return DeepfakeUsage(**result)
+    else:
+        return None
+    
+def add_deepfake(deepfake: Deepfake) -> Optional[UUID]:
+    deepfake_id = uuid4()
+
+    result = deepfake_col.find_one_and_update(
+        {"_id": deepfake_id},
+        {"$set": deepfake.dict()},
+        upsert=True,
+        return_document=ReturnDocument.AFTER
+    )
+
+    if result is not None:
+        return deepfake_id
+    else:
+        return None
 
 def has_permissions(user: User) -> bool:
-    pass
+    raise NotImplementedError
 
 def webhook(deepfake_status: DeepfakeStatus) -> None:
     deepfake_status_col.update_one(

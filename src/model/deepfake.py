@@ -1,4 +1,3 @@
-from typing import Dict
 from pydantic import BaseModel
 
 class DeepfakeStatus(BaseModel):
@@ -11,7 +10,5 @@ class DeepfakeUsage(BaseModel):
 class Deepfake(BaseModel):
     source_uri: str
     target_uri: str
-    face_to_swap: str
-    max_face_simplicity: float
-    post_processor: str
-    image_blend_ratio: float
+    keep_fps: bool
+    enhance_face: bool
