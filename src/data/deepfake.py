@@ -1,30 +1,30 @@
 from typing import Optional
 from bson import ObjectId
 
-from model.deepfake import DeepfakeStatus, DeepfakeUsage, Deepfake
 from model.user import User
-from model.billing import Plan
+from model.billing import Usage
 
+from model.deepfake import Status
 from data.billing import get_current_plan
 
 from pymongo import ReturnDocument
 from .init import deepfake_status_col, deepfake_usage_col
 
-def get_status(deepfake_id: str) -> Optional[DeepfakeStatus]:
+def get_status(deepfake_id: str) -> Optional[Status]:
     result = deepfake_status_col.find_one({"_id": deepfake_id})
     if result is not None:
-        return DeepfakeStatus(**result)
+        return Status(**result)
     else:
         return None
 
-def get_usage(user: User) -> Optional[DeepfakeUsage]:
+def get_usage(user: User) -> Optional[Usage]:
     result = deepfake_usage_col.find_one({"user_id": user.id})
     if result is not None:
-        return DeepfakeUsage(**result)
+        return Usage(**result)
     else:
         return None
     
-def update_usage(user: User) -> Optional[DeepfakeUsage]:
+def update_usage(user: User) -> Optional[Usage]:
     result = deepfake_usage_col.find_one_and_update(
         {"user_id": user.id},
         {"$inc": {"generated_num": 1}},
@@ -33,12 +33,12 @@ def update_usage(user: User) -> Optional[DeepfakeUsage]:
     )
 
     if result is not None:
-        return DeepfakeUsage(**result)
+        return Usage(**result)
     else:
         return None
     
-def create_status(deepfake_id: str) -> Optional[DeepfakeStatus]:
-    deepfake_status = DeepfakeStatus(output_uri=None, status="in progress")
+def create_status(deepfake_id: str) -> Optional[Status]:
+    deepfake_status = Status(output_uri=None, status="in progress")
 
     result = deepfake_status_col.find_one_and_update(
         {"_id": deepfake_id},
@@ -48,11 +48,11 @@ def create_status(deepfake_id: str) -> Optional[DeepfakeStatus]:
     )
 
     if result is not None:
-        return DeepfakeStatus(**result)
+        return Status(**result)
     else:
         return None
 
-def update_status(deepfake_id: str, output_uri: str) -> Optional[DeepfakeStatus]:
+def update_status(deepfake_id: str, output_uri: str) -> Optional[Status]:
     result = deepfake_status_col.find_one_and_update(
         {"_id": deepfake_id},
         {"$set": {"output_uri": output_uri}},
@@ -62,7 +62,7 @@ def update_status(deepfake_id: str, output_uri: str) -> Optional[DeepfakeStatus]
 
 
     if result is not None:
-        return DeepfakeStatus(**result)
+        return Status(**result)
     else:
         return None
 

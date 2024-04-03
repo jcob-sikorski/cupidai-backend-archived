@@ -18,11 +18,6 @@ class Prompt(BaseModel):
     stylize: Optional[str]
     seed: Optional[str]
 
-# TODO probably we're doing global credits system but lets wait for David
-class Usage(BaseModel):
-    user_id: str
-    generated_num: int
-
 class Progress(BaseModel):
     messageId: str = Field(..., alias="messageId")
     prompt: str

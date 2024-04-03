@@ -1,13 +1,9 @@
 from pydantic import BaseModel
 from typing import Optional
 
-class DeepfakeStatus(BaseModel):
+class Status(BaseModel):
     output_uri: Optional[str]
     status: str
-
-class DeepfakeUsage(BaseModel):
-    user_id: str
-    generated_num: int
 
 class Deepfake(BaseModel):
     source_uri: str

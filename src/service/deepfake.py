@@ -4,7 +4,7 @@ import replicate
 
 import multiprocessing
 
-from model.deepfake import DeepfakeStatus, DeepfakeUsage, Deepfake
+from model.deepfake import Status, Usage, Deepfake
 
 from model.user import User
 
@@ -12,11 +12,11 @@ from bson import ObjectId
 
 from error import NotAutorized
 
-def get_status(deepfake_id: str) -> DeepfakeStatus:
+def get_status(deepfake_id: str) -> Status:
     return data.get_status(deepfake_id)
     
 
-def get_usage(user: User) -> DeepfakeUsage:
+def get_usage(user: User) -> Usage:
     return data.get_usage(user)
 
 

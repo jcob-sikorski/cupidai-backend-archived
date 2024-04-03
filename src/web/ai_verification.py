@@ -4,7 +4,7 @@ from model.user import User
 from model.ai_verification import Settings, Prompt, Progress, Response
 from web.user import get_current_user
 
-from service import deepfake as service
+from service import ai_verification as service
 
 router = APIRouter(prefix = "/ai-verification")
 
