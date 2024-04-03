@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends
 
 from model.user import User
-from model.deepfake import DeepfakeStatus, DeepfakeUsage, Deepfake
+from model.ai_verification import TextToImage, GeneratedImage
 from web.user import get_current_user
 
 from service import deepfake as service
@@ -9,8 +9,8 @@ from service import deepfake as service
 router = APIRouter(prefix = "/ai-verification")
 
 @router.post("/text-to-image", status_code=201)
-async def text_to_img(, : User = Depends(get_current_user)) -> :
-    pass
+async def text_to_image(prompt: TextToImage, user: User = Depends(get_current_user)) -> GeneratedImage:
+    return service.text_to_image(prompt, user)
 
 @router.post("/faceswap", status_code=201)
 async def faceswap(, : User = Depends(get_current_user)) -> :
@@ -20,6 +20,9 @@ async def faceswap(, : User = Depends(get_current_user)) -> :
 async def image_action(, : User = Depends(get_current_user)) -> :
     pass
 
+# @router.post("/isolate", status_code=201)
+# async def webhook(,) -> :
+#     pass
 
 @router.post("/cancel-job", status_code=201)
 async def cancel_job(, : User = Depends(get_current_user)) -> :
@@ -45,3 +48,4 @@ async def get_settings(, : User = Depends(get_current_user)) -> :
 @router.get("/download-settings")
 async def download_settings(, : User = Depends(get_current_user)) -> :
     pass
+
