@@ -40,6 +40,7 @@ def run_inference(deepfake, deepfake_id: str, user: User) -> None:
         data.update_usage(user)
         data.update_status(deepfake_id, output_uri)
 
+
 def generate(deepfake: Deepfake, user: User) -> str:
     if data.has_permissions(user):
         deepfake_id = str(ObjectId())

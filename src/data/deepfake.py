@@ -17,13 +17,15 @@ def get_status(deepfake_id: str) -> Optional[Status]:
     else:
         return None
 
+
 def get_usage(user: User) -> Optional[Usage]:
     result = deepfake_usage_col.find_one({"user_id": user.id})
     if result is not None:
         return Usage(**result)
     else:
         return None
-    
+
+
 def update_usage(user: User) -> Optional[Usage]:
     result = deepfake_usage_col.find_one_and_update(
         {"user_id": user.id},
@@ -36,7 +38,8 @@ def update_usage(user: User) -> Optional[Usage]:
         return Usage(**result)
     else:
         return None
-    
+
+
 def create_status(deepfake_id: str) -> Optional[Status]:
     deepfake_status = Status(output_uri=None, status="in progress")
 
@@ -51,6 +54,7 @@ def create_status(deepfake_id: str) -> Optional[Status]:
         return Status(**result)
     else:
         return None
+
 
 def update_status(deepfake_id: str, output_uri: str) -> Optional[Status]:
     result = deepfake_status_col.find_one_and_update(

@@ -5,6 +5,7 @@ class Status(BaseModel):
     output_uri: Optional[str]
     status: str
 
+
 class Deepfake(BaseModel):
     source_uri: str
     target_uri: str

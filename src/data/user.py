@@ -12,6 +12,7 @@ def get_user(name: str) -> Optional[User]:
     else:
         return None
 
+
 def create_user(name: str, hash: str) -> Optional[User]:
     user_id = str(ObjectId())
 

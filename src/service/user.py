@@ -17,9 +17,11 @@ def verify_password(plain: str, hash: str) -> bool:
     """Hash <plain> and compare with <hash> from the database"""
     return pwd_context.verify(plain, hash)
 
+
 def get_hash(plain: str) -> str:
     """Return the hash of a <plain> string"""
     return pwd_context.hash(plain)
+
 
 def get_jwt_username(token:str) -> Optional[str]:
     """Return username from JWT access <token>"""
@@ -30,7 +32,8 @@ def get_jwt_username(token:str) -> Optional[str]:
     except jwt.JWTError:
         return None
     return username
-    
+
+
 def get_current_user(token: str) -> Optional[User]:
     """Decode an OAuth access <token> and return the User"""
     if not (username := get_jwt_username(token)):
@@ -39,11 +42,13 @@ def get_current_user(token: str) -> Optional[User]:
         return user
     return None
     
+
 def lookup_user(name: str) -> Optional[User]:
     """Return a matching User fron the database for <name>"""
     if (user := data.get_user(name)):
         return user
     return None
+
 
 def auth_user(name: str, plain: str) -> Optional[User]:
     """Authenticate user <name> and <plain> password"""
@@ -52,6 +57,7 @@ def auth_user(name: str, plain: str) -> Optional[User]:
     if not verify_password(plain, user.hash):
         return None
     return user
+
 
 def create_access_token(data: dict,
     expires: Optional[datetime_outer.timedelta] = None
@@ -63,6 +69,7 @@ def create_access_token(data: dict,
     src.update({"exp": now + expires})
     encoded_jwt = jwt.encode(src, JWT_SECRET_KEY, algorithm=ALGORITHM)
     return encoded_jwt
+
 
 def create_user(name: str, plain: str) -> Optional[User]:
     hash = get_hash(plain)

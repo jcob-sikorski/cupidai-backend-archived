@@ -26,6 +26,7 @@ def unauthed():
         headers={"WWW-Authenticate": "Bearer"},
         )
 
+
 def get_current_user(token: str = Depends(oauth2_dep)) -> User:
     user = service.get_current_user(token)
     print(f"user: {user}")
@@ -36,6 +37,7 @@ def get_current_user(token: str = Depends(oauth2_dep)) -> User:
             headers={"WWW-Authenticate": "Bearer"},
         )
     return user
+
 
 # This endpoint is directed to by any call that has the
 # oauth2_dep() dependency:
@@ -53,6 +55,7 @@ async def create_access_token(
         data={"sub": user.name}, expires=expires
     )
     return {"access_token": access_token, "token_type": "bearer"}
+
 
 @router.post("/create-user")
 async def create_user(form_data: OAuth2PasswordRequestForm = Depends()) -> Optional[User]:

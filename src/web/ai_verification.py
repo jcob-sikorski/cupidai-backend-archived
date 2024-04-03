@@ -12,13 +12,16 @@ router = APIRouter(prefix = "/ai-verification")
 async def webhook(progress: Progress) -> None:
     return service.webhook(progress)
 
+
 @router.post("/imagine", status_code=201)
 async def imagine(prompt: Prompt, user: User = Depends(get_current_user)) -> Response:
     return service.imagine(prompt, user)
 
+
 @router.post("/faceswap", status_code=201)
 async def faceswap(source_uri: str, target_uri: str, user: User = Depends(get_current_user)) -> Response:
     return service.faceswap(source_uri, target_uri, user)
+
 
 @router.post("/action", status_code=201)
 async def action(button: str, user: User = Depends(get_current_user)) -> Response:

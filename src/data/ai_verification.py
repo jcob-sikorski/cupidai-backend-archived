@@ -16,7 +16,8 @@ def get_usage(user: User) -> Optional[Usage]:
         return Usage(**result)
     else:
         return None
-    
+
+
 def update_usage(user: User) -> Optional[Usage]:
     result = ai_verification_usage_col.find_one_and_update(
         {"user_id": user.id},
@@ -30,6 +31,7 @@ def update_usage(user: User) -> Optional[Usage]:
     else:
         return None
 
+
 def update_progress(progress: Progress) -> None:
     progress_col.find_one_and_update(
         {"message_id": progress.message_id},
@@ -38,6 +40,7 @@ def update_progress(progress: Progress) -> None:
         return_document=ReturnDocument.AFTER
     )
 
+
 def update_settings(settings: Settings, user: User) -> :
     ai_verification_settings_col.find_one_and_update(
         {"user_id": user.id},
@@ -45,6 +48,7 @@ def update_settings(settings: Settings, user: User) -> :
         upsert=True,
         return_document=ReturnDocument.AFTER
     )
+
 
 def has_permissions(user: User) -> bool:
     current_plan = get_current_plan(user)

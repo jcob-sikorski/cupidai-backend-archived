@@ -8,6 +8,7 @@ class Settings(BaseModel):
     verifier_name: Optional[str]
     note: Optional[str]
 
+
 class Prompt(BaseModel):
     prompt: str
     generation_speed: Optional[str]
@@ -17,6 +18,7 @@ class Prompt(BaseModel):
     step_stop: Optional[str]
     stylize: Optional[str]
     seed: Optional[str]
+
 
 class Progress(BaseModel):
     messageId: str = Field(..., alias="messageId")
@@ -28,6 +30,7 @@ class Progress(BaseModel):
     buttons: Optional[List[str]]
     originatingMessageId: Optional[str] = Field(..., alias="originatingMessageId")
     ref: Optional[str]
+
 
 class Response(BaseModel):
     success: bool

@@ -16,10 +16,12 @@ MIDJOURNEY_TOKEN = os.getenv("MIDJOURNEY_TOKEN")
 def webhook(progress: Progress) -> None:
     data.update_progress(progress)
 
+
 def create_prompt_string(prompt: Prompt) -> str:
     attributes = ["prompt", "generation_speed", "engine_version", "style", "aspect_ratio", "step_stop", "stylize", "seed"]
     prompt_string = " ".join([str(getattr(prompt, attr)) for attr in attributes if getattr(prompt, attr) is not None])
     return prompt_string
+
 
 async def imagine(prompt: Prompt, user: User) -> Response:
     if data.has_permissions(user):
@@ -60,6 +62,7 @@ async def imagine(prompt: Prompt, user: User) -> Response:
     else:
         raise NotAutorized(msg=f"Invalid permissions")
     
+
 async def faceswap(source_uri: str, target_uri: str, user: User) -> Response:
     if data.has_permissions(user):
         url = "https://api.mymidjourney.ai/api/v1/midjourney/faceswap"
@@ -87,7 +90,8 @@ async def faceswap(source_uri: str, target_uri: str, user: User) -> Response:
         return response_data
     else:
         raise NotAutorized(msg=f"Invalid permissions")
-    
+
+
 async def action(message_id: str, button: str, user: User) -> Response:
     if data.has_permissions(user):
         url = "https://api.mymidjourney.ai/api/v1/midjourney/button"
@@ -115,7 +119,8 @@ async def action(message_id: str, button: str, user: User) -> Response:
         return response_data
     else:
         raise NotAutorized(msg=f"Invalid permissions")
-    
+
+
 async def cancel_job(message_id: str, user: User) -> Response:
     url = "https://api.mymidjourney.ai/api/v1/midjourney/button"
     headers = {
