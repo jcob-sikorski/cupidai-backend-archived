@@ -12,6 +12,10 @@ router = APIRouter(prefix = "/ai-verification")
 async def webhook(progress: Progress) -> None:
     return service.webhook(progress)
 
+@router.post("/imagine", status_code=201)
+async def imagine(prompt: Prompt, user: User = Depends(get_current_user)) -> Response:
+    return service.imagine(prompt, user)
+
 @router.post("/faceswap", status_code=201)
 async def faceswap(source_uri: str, target_uri: str, user: User = Depends(get_current_user)) -> Response:
     return service.faceswap(source_uri, target_uri, user)
@@ -25,25 +29,21 @@ async def action(button: str, user: User = Depends(get_current_user)) -> Respons
 #     pass
 
 @router.post("/cancel-job", status_code=201)
-async def cancel_job(, : User = Depends(get_current_user)) -> :
-    pass
+async def cancel_job(user: User = Depends(get_current_user)) -> Response:
+    return service.cancel_job(user)
 
-@router.post("/update-settings", status_code=201)
-async def update_settings(settings: Settings, user: User = Depends(get_current_user)) -> :
-    return service.update_settings(settings, user)
+# @router.post("/update-settings", status_code=201)
+# async def update_settings(settings: Settings, user: User = Depends(get_current_user)) -> :
+#     return service.update_settings(settings, user)
 
-@router.post("/text-to-image-webhook", status_code=201)
-async def text_to_image_webhook(progress: Progress) -> None:
-    return service.webhook(progress)
-
-@router.get("/get-progress")
-async def get_progress(, : User = Depends(get_current_user)) -> :
-    pass
-
-@router.get("/get-settings")
-async def get_settings(, : User = Depends(get_current_user)) -> :
-    pass
+# @router.get("/get-settings")
+# async def get_settings(user: User = Depends(get_current_user)) -> :
+#     pass
     
-@router.get("/download-settings")
-async def download_settings(, : User = Depends(get_current_user)) -> :
-    pass
+# @router.get("/download-settings")
+# async def download_settings(, : User = Depends(get_current_user)) -> :
+#     pass
+
+# @router.get("/get-progress")
+# async def get_progress(, : User = Depends(get_current_user)) -> :
+#     pass

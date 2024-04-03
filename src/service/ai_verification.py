@@ -115,6 +115,28 @@ async def action(message_id: str, button: str, user: User) -> Response:
         return response_data
     else:
         raise NotAutorized(msg=f"Invalid permissions")
+    
+async def cancel_job(message_id: str, user: User) -> Response:
+    url = "https://api.mymidjourney.ai/api/v1/midjourney/button"
+    headers = {
+        "Content-Type": "application/json",
+        "Authorization": f"Bearer {MIDJOURNEY_TOKEN}",
+    }
+    data = {
+        "message_id": message_id,
+        "button": "Cancel Job",
+        "ref": user.id,
+        "webhookOverride": "http://194.15.120.110/ai-verification/webhook"
+    }
 
-def update_settings(settings: Settings, user: User) -> :
-    data.update_settings(settings, user)
+    async with httpx.AsyncClient() as client:
+        resp = await client.post(url, headers=headers, json=data)
+        response_data = Response.parse_raw(resp.text)
+
+    if resp.status_code != 200 or response_data.error:
+        raise HTTPException(status_code=400, detail="Action failed")
+        
+    return response_data
+
+# def update_settings(settings: Settings, user: User) -> :
+#     data.update_settings(settings, user)
