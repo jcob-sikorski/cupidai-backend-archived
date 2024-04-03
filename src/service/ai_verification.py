@@ -1,9 +1,11 @@
+from fastapi import HTTPException
+
 import httpx
 import os
 
 import data.ai_verification as data
 
-from model.ai_verification import TextToImage, GeneratedImage
+from model.ai_verification import Prompt, Progress, ImagineResponse
 
 from model.user import User
 
@@ -11,7 +13,24 @@ from error import NotAutorized
 
 MIDJOURNEY_TOKEN = os.getenv("MIDJOURNEY_TOKEN")
 
-async def text_to_image(prompt: TextToImage, user: User) -> GeneratedImage:
+def text_to_image_webhook(progress: Progress) -> None:
+    # TODO figure out what are we doing with the data received from webhook
+    # we will use the:
+    # - messageId, 
+    # - uri - generated image uri, 
+    # - progress - task progress, out of 100, 
+    # - error - mdj error if any, 
+    # - buttons - buttons for follow up actions, 
+    # - originatingMessageId - the originating message ID, if the message is for a follow up button action, 
+    # - ref - the reference value you pass earlier
+    pass
+
+def create_prompt_string(prompt: Prompt) -> str:
+    attributes = ["prompt", "generation_speed", "engine_version", "style", "aspect_ratio", "step_stop", "stylize", "seed"]
+    prompt_string = " ".join([str(getattr(prompt, attr)) for attr in attributes if getattr(prompt, attr) is not None])
+    return prompt_string
+
+async def text_to_image(prompt: Prompt, user: User) -> ImagineResponse:
     if data.has_permissions(user):
         # docs: (https://docs.midjourney.com/docs/)
         #
@@ -25,28 +44,27 @@ async def text_to_image(prompt: TextToImage, user: User) -> GeneratedImage:
         # - stylize: --stylize x   ; default value is 100 and accepts integer values 0–1000
         # - seed: --seed x  ; accepts whole numbers 0–4294967295
 
-        # TODO call the api and provide with it a webhook url
-        # TODO set up the webhook which can receive the responses about the progress and update the db
-        # TODO on successful run update the usage
-        url = "https://api.mymidjourney.ai/api/v1/midjourney/imagine"
+        url = "https://api.mymidjourney.ai/api/v1/midjourney/imagine
         headers = {
             "Content-Type": "application/json",
             "Authorization": f"Bearer {MIDJOURNEY_TOKEN}",
         }
         data = {
-            "prompt": ,
-            "ref": ,
-            "webhookOverride": 
+            "prompt": create_prompt_string(prompt),
+            "ref": user.id,
+            "webhookOverride": "http://194.15.120.110/ai-verification/text-to-image-webhook"
         }
 
-        # TODO are waiting here for the response or what?
         async with httpx.AsyncClient() as client:
             resp = await client.post(url, headers=headers, json=data)
+            response_data = ImagineResponse.parse_raw(resp.text)
 
-        if resp.status_code != 200:
+        if response_data.success:
+            data.update_usage(user)
+
+        if resp.status_code != 200 or response_data.error:
             raise HTTPException(status_code=400, detail="Image generation failed")
-
-        # TODO what are we returning here?
-        return {"url": resp.json()["image_url"]}
+        
+        return response_data
     else:
         raise NotAutorized(msg=f"Invalid permissions")
