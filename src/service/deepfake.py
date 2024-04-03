@@ -4,7 +4,7 @@ import replicate
 
 import multiprocessing
 
-from model.deepfake import Status, Usage, Deepfake
+from model.deepfake import Deepfake
 
 from model.user import User
 

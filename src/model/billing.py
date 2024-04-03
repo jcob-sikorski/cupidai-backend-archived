@@ -1,15 +1,10 @@
 from pydantic import BaseModel
+from typing import List
 
 class Plan(BaseModel):
     name: str
-    deepfake_num: int
-
+    features: List[str]
 
 class UserPlan(BaseModel):
     user_id: str
     name: str
-
-
-class Usage(BaseModel):
-    user_id: str
-    generated_num: int

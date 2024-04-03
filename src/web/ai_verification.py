@@ -24,16 +24,16 @@ async def faceswap(source_uri: str, target_uri: str, user: User = Depends(get_cu
 
 
 @router.post("/action", status_code=201)
-async def action(button: str, user: User = Depends(get_current_user)) -> Response:
-    return service.action(button, user)
+async def action(message_id: str, button: str, user: User = Depends(get_current_user)) -> Response:
+    return service.action(message_id, button, user)
 
 # @router.post("/isolate", status_code=201)
 # async def webhook(,) -> :
 #     pass
 
 @router.post("/cancel-job", status_code=201)
-async def cancel_job(user: User = Depends(get_current_user)) -> Response:
-    return service.cancel_job(user)
+async def cancel_job(message_id: str, user: User = Depends(get_current_user)) -> Response:
+    return service.cancel_job(message_id, user)
 
 # @router.post("/update-settings", status_code=201)
 # async def update_settings(settings: Settings, user: User = Depends(get_current_user)) -> :

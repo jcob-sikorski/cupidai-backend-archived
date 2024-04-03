@@ -15,3 +15,10 @@ def get_current_plan(user: User) -> Optional[Plan]:
             return Plan(**result)
 
     return None
+
+def has_permissions(feature: str, user: User) -> bool:
+    current_plan = get_current_plan(user)
+
+    if feature in current_plan.features:
+        return False
+    return True
