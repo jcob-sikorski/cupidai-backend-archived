@@ -13,25 +13,16 @@ from error import NotAutorized
 
 MIDJOURNEY_TOKEN = os.getenv("MIDJOURNEY_TOKEN")
 
-def text_to_image_webhook(progress: Progress) -> None:
-    # TODO figure out what are we doing with the data received from webhook
-    # we will use the:
-    # - messageId, 
-    # - uri - generated image uri, 
-    # - progress - task progress, out of 100, 
-    # - error - mdj error if any, 
-    # - buttons - buttons for follow up actions, 
-    # - originatingMessageId - the originating message ID, if the message is for a follow up button action, 
-    # - ref - the reference value you pass earlier
-    pass
+def imagine_webhook(progress: Progress) -> None:
+    data.update_progress_imagine(progress)
 
 def create_prompt_string(prompt: Prompt) -> str:
     attributes = ["prompt", "generation_speed", "engine_version", "style", "aspect_ratio", "step_stop", "stylize", "seed"]
     prompt_string = " ".join([str(getattr(prompt, attr)) for attr in attributes if getattr(prompt, attr) is not None])
     return prompt_string
 
-async def text_to_image(prompt: Prompt, user: User) -> ImagineResponse:
-    if data.has_permissions(user):
+async def imagine(prompt: Prompt, user: User) -> ImagineResponse:
+    if data.has_permissions_imagine(user):
         # docs: (https://docs.midjourney.com/docs/)
         #
         # prompt: image_urls (optional) text_prompt parameters (--parameter1 --parameter2)
@@ -44,7 +35,7 @@ async def text_to_image(prompt: Prompt, user: User) -> ImagineResponse:
         # - stylize: --stylize x   ; default value is 100 and accepts integer values 0–1000
         # - seed: --seed x  ; accepts whole numbers 0–4294967295
 
-        url = "https://api.mymidjourney.ai/api/v1/midjourney/imagine
+        url = "https://api.mymidjourney.ai/api/v1/midjourney/imagine"
         headers = {
             "Content-Type": "application/json",
             "Authorization": f"Bearer {MIDJOURNEY_TOKEN}",
@@ -52,7 +43,7 @@ async def text_to_image(prompt: Prompt, user: User) -> ImagineResponse:
         data = {
             "prompt": create_prompt_string(prompt),
             "ref": user.id,
-            "webhookOverride": "http://194.15.120.110/ai-verification/text-to-image-webhook"
+            "webhookOverride": "http://194.15.120.110/ai-verification/imagine-webhook"
         }
 
         async with httpx.AsyncClient() as client:
@@ -60,7 +51,7 @@ async def text_to_image(prompt: Prompt, user: User) -> ImagineResponse:
             response_data = ImagineResponse.parse_raw(resp.text)
 
         if response_data.success:
-            data.update_usage(user)
+            data.update_usage_imagine(user)
 
         if resp.status_code != 200 or response_data.error:
             raise HTTPException(status_code=400, detail="Image generation failed")

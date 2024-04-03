@@ -1,16 +1,16 @@
 from fastapi import APIRouter, Depends
 
 from model.user import User
-from model.ai_verification import Prompt, Progress, GeneratedImage
+from model.ai_verification import Prompt, Progress, ImagineResponse
 from web.user import get_current_user
 
 from service import deepfake as service
 
 router = APIRouter(prefix = "/ai-verification")
 
-@router.post("/text-to-image", status_code=201)
-async def text_to_image(prompt: Prompt, user: User = Depends(get_current_user)) -> GeneratedImage:
-    return service.text_to_image(prompt, user)
+@router.post("/imagine", status_code=201)
+async def text_to_image(prompt: Prompt, user: User = Depends(get_current_user)) -> ImagineResponse:
+    return service.imagine(prompt, user)
 
 @router.post("/faceswap", status_code=201)
 async def faceswap(, : User = Depends(get_current_user)) -> :
