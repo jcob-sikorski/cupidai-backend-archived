@@ -10,5 +10,5 @@ from web.user import get_current_user
 router = APIRouter(prefix = "/bug")
 
 @router.post("/", status_code=201)  # Creates a bug report
-async def report_bug(description: str, user: User = Depends(get_current_user)) -> None:
-    return service.report_bug(description, user)
+async def create(description: str, user: User = Depends(get_current_user)) -> None:
+    return service.create(description, user)

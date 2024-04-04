@@ -14,10 +14,9 @@ data/deepfake TBD when it's clear how we track status/progress
 │   ├── history.py ✅
 │   ├── midjourney.py ✅
 │   ├── referral.py
-│   ├── social_account.py
+│   ├── social_account.py ✅
 │   ├── team.py
 │   ├── two_factor_auth.py
-│   ├── usage.py
 │   └── user.py
 ├── error.py ✅
 ├── main.py ✅
@@ -32,10 +31,9 @@ data/deepfake TBD when it's clear how we track status/progress
 │   ├── history.py ✅
 │   ├── midjourney.py ✅
 │   ├── referral.py
-│   ├── social_account.py
+│   ├── social_account.py ✅
 │   ├── team.py
 │   ├── two_factor_auth.py
-│   ├── usage.py
 │   └── user.py
 ├── requirements.txt
 ├── service
@@ -49,10 +47,9 @@ data/deepfake TBD when it's clear how we track status/progress
 │   ├── history.py ✅
 │   ├── midjourney.py ✅
 │   ├── referral.py
-│   ├── social_account.py
+│   ├── social_account.py ✅
 │   ├── team.py
 │   ├── two_factor_auth.py
-│   ├── usage.py
 │   └── user.py
 └── web
     ├── __init__.py
@@ -65,8 +62,7 @@ data/deepfake TBD when it's clear how we track status/progress
     ├── history.py ✅
     ├── midjourney.py ✅
     ├── referral.py
-    ├── social_account.py
+    ├── social_account.py ✅
     ├── team.py
     ├── two_factor_auth.py
-    ├── usage.py
     └── user.py
