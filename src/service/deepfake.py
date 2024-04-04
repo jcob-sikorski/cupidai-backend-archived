@@ -31,11 +31,9 @@ def run_inference(deepfake, deepfake_id: str, user: User) -> None:
         output_uri = item
 
     if output_uri:
-        # TODO: Implement usage update
-    
-        # TODO: Implement progress update
+        history_service.update('deepfake', user)
 
-        pass
+        data.update_status(deepfake_id)
 
 def generate(deepfake: Deepfake, user: User) -> None:
     if billing_service.has_permissions(user):
