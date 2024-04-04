@@ -8,7 +8,7 @@ data/deepfake TBD when it's clear how we track status/progress
 │   ├── account.py
 │   ├── ai_verification.py ✅
 │   ├── billing.py
-│   ├── bug.py
+│   ├── bug.py ✅
 │   ├── deepfake.py ✅
 │   ├── earnings.py
 │   ├── history.py ✅
@@ -26,7 +26,7 @@ data/deepfake TBD when it's clear how we track status/progress
 │   ├── account.py
 │   ├── ai_verification.py ✅
 │   ├── billing.py
-│   ├── bug.py
+│   ├── bug.py ✅
 │   ├── deepfake.py ✅
 │   ├── earnings.py
 │   ├── history.py ✅
@@ -43,7 +43,7 @@ data/deepfake TBD when it's clear how we track status/progress
 │   ├── account.py
 │   ├── ai_verification.py ✅
 │   ├── billing.py
-│   ├── bug.py
+│   ├── bug.py ✅
 │   ├── deepfake.py ✅
 │   ├── earnings.py
 │   ├── history.py ✅
@@ -59,7 +59,7 @@ data/deepfake TBD when it's clear how we track status/progress
     ├── account.py
     ├── ai_verification.py ✅
     ├── billing.py
-    ├── bug.py
+    ├── bug.py ✅
     ├── deepfake.py ✅
     ├── earnings.py
     ├── history.py ✅
