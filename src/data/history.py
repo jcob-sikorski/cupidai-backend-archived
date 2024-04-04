@@ -22,3 +22,10 @@ def update(domain: str, user: User) -> None:
         upsert=True,
         return_document=ReturnDocument.AFTER
     )
+
+def get(user: User) -> None:
+    result = history_col.find_one({"account_id": user.id})
+    if result is not None:
+        return User(**result)
+    else:
+        return None

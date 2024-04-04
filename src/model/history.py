@@ -2,6 +2,7 @@ from pydantic import BaseModel
 from typing import List
 
 class History(BaseModel):
+    account_id: str
     team_id: str
     images_generated: int
     deepfakes_generated: int
