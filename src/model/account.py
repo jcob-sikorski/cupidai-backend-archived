@@ -3,6 +3,7 @@ from typing import Optional
 
 class Account(BaseModel):
     id: str = Field(..., alias='_id')
+    user_id: str
     theme: str
     two_factor_auth_enabled: bool
     profile_uri: str

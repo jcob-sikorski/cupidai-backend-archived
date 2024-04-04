@@ -1,7 +1,3 @@
-import data.social_account as data
-
-from service import social_account as service
-
 from model.social_account import SocialAccount
 from model.user import User
 
