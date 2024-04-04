@@ -7,7 +7,7 @@ from model.deepfake import Deepfake
 from pymongo import ReturnDocument
 from .init import deepfake_status_col, deepfake_usage_col
 
-def get_status(deepfake_id: str) -> Optional[Deepfake]:
+def get_status(deepfake_id: str) -> None:
     result = deepfake_status_col.find_one({"_id": deepfake_id})
     if result is not None:
         return Status(**result)
@@ -15,7 +15,7 @@ def get_status(deepfake_id: str) -> Optional[Deepfake]:
         return None
 
 
-def create_status(deepfake_id: str) -> Optional[Status]:
+def create_status(deepfake_id: str) -> None:
     deepfake_status = Status(output_uri=None, status="in progress")
 
     result = deepfake_status_col.find_one_and_update(
@@ -31,7 +31,7 @@ def create_status(deepfake_id: str) -> Optional[Status]:
         return None
 
 
-def update_status(deepfake_id: str, output_uri: str) -> Optional[Status]:
+def update_status(deepfake_id: str, output_uri: str) -> None:
     result = deepfake_status_col.find_one_and_update(
         {"_id": deepfake_id},
         {"$set": {"output_uri": output_uri}},

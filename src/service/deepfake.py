@@ -1,24 +1,4 @@
-import data.deepfake as data
-
-import replicate
-
-import multiprocessing
-
-from model.deepfake import Deepfake
-
-from model.user import User
-
-from bson import ObjectId
-
 from error import NotAutorized
-
-def get_status(deepfake_id: str) -> Status:
-    return data.get_status(deepfake_id)
-    
-
-def get_usage(user: User) -> Usage:
-    return data.get_usage(user)
-
 
 def run_inference(deepfake, deepfake_id: str, user: User) -> None:
     output = replicate.run(
@@ -37,11 +17,15 @@ def run_inference(deepfake, deepfake_id: str, user: User) -> None:
         output_uri = item
 
     if output_uri:
-        data.update_usage(user)
-        data.update_status(deepfake_id, output_uri)
+        # TODO: Implement usage update
+        # data.update_usage(user)
+    
+        # TODO: Implement progress update
+        # data.update_progress(deepfake_id, output_uri)
 
 
-def generate(deepfake: Deepfake, user: User) -> str:
+
+def generate(deepfake: Deepfake, user: User) -> None:
     if data.has_permissions(user):
         deepfake_id = str(ObjectId())
         data.create_status(deepfake_id)
