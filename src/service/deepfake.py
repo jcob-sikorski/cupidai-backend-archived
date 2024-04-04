@@ -1,4 +1,18 @@
+import multiprocessing
+
+import replicate
+
+from model.deepfake import Deepfake
+from model.user import User
+
+import data.deepfake as data
+
+import service.billing as billing_service
+import service.history as history_service
+
 from error import NotAutorized
+
+from bson import ObjectId
 
 def run_inference(deepfake, deepfake_id: str, user: User) -> None:
     output = replicate.run(
@@ -18,17 +32,15 @@ def run_inference(deepfake, deepfake_id: str, user: User) -> None:
 
     if output_uri:
         # TODO: Implement usage update
-        # data.update_usage(user)
     
         # TODO: Implement progress update
-        # data.update_progress(deepfake_id, output_uri)
 
-
+        pass
 
 def generate(deepfake: Deepfake, user: User) -> None:
-    if data.has_permissions(user):
+    if billing_service.has_permissions(user):
         deepfake_id = str(ObjectId())
-        data.create_status(deepfake_id)
+        history_service.update('deepfake')
 
         # Create a detached process which monitors and updates the db
         p = multiprocessing.Process(target=run_inference, args=(deepfake, deepfake_id, user))
@@ -37,3 +49,6 @@ def generate(deepfake: Deepfake, user: User) -> None:
         return deepfake_id
     else:
         raise NotAutorized(msg=f"Invalid permissions")
+
+def get_history(user: User) -> None:
+    return data.get_history(user)

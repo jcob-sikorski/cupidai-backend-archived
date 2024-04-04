@@ -2,8 +2,6 @@ from fastapi import APIRouter, Depends
 
 router = APIRouter(prefix = "/ai-verification")
 
-@router.post("/webhook", status_code=201)  # Registers a new webhook
-
 @router.post("/faceswap", status_code=201)  # Initiates a face swap
 
 @router.post("/imagine", status_code=201)  # Initiates an imagination process

@@ -14,3 +14,5 @@ async def generate(deepfake: Deepfake, user: User = Depends(get_current_user)) -
     return service.generate(deepfake, user)
 
 @router.get("/history", status_code=200)  # Retrieves history
+async def get_history(user: User = Depends(get_current_user)) -> None:
+    return service.get_history(user)
