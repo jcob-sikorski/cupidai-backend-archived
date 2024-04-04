@@ -1,7 +1,7 @@
 from pydantic import BaseModel, Field
 from typing import List, Optional
 
-class Progress(BaseModel):
+class Message(BaseModel):
     messageId: str = Field(..., alias="messageId")
     prompt: str
     uri: Optional[str]
@@ -11,3 +11,9 @@ class Progress(BaseModel):
     buttons: Optional[List[str]]
     originatingMessageId: Optional[str] = Field(..., alias="originatingMessageId")
     ref: Optional[str]
+
+class Response(BaseModel):
+    success: bool
+    messageId: str
+    createdAt: str
+    error: Optional[str]

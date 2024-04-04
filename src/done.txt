@@ -13,7 +13,7 @@ data/deepfake TBD when it's clear how we track status/progress
 │   ├── earnings.py
 │   ├── file.py
 │   ├── history.py
-│   ├── mdj_progress.py
+│   ├── midjourney.py ✅
 │   ├── referral.py
 │   ├── social_account.py
 │   ├── team.py
@@ -32,7 +32,7 @@ data/deepfake TBD when it's clear how we track status/progress
 │   ├── earnings.py
 │   ├── file.py
 │   ├── history.py
-│   ├── mdj_progress.py
+│   ├── midjourney.py ✅
 │   ├── referral.py
 │   ├── social_account.py
 │   ├── team.py
@@ -50,7 +50,7 @@ data/deepfake TBD when it's clear how we track status/progress
 │   ├── earnings.py
 │   ├── file.py
 │   ├── history.py
-│   ├── mdj_progress.py
+│   ├── midjourney.py ✅
 │   ├── referral.py
 │   ├── social_account.py
 │   ├── team.py
@@ -60,14 +60,14 @@ data/deepfake TBD when it's clear how we track status/progress
 └── web
     ├── __init__.py
     ├── account.py
-    ├── ai_verification.py
+    ├── ai_verification.py ✅
     ├── billing.py
     ├── bug.py
     ├── deepfake.py ✅
     ├── earnings.py
     ├── file.py
     ├── history.py
-    ├── mdj_progress.py
+    ├── midjourney.py ✅
     ├── referral.py
     ├── social_account.py
     ├── team.py

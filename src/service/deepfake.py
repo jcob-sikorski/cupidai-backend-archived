@@ -2,6 +2,10 @@ import multiprocessing
 
 import replicate
 
+from error import NotAutorized
+
+from bson import ObjectId
+
 from model.deepfake import Deepfake
 from model.user import User
 
@@ -9,10 +13,6 @@ import data.deepfake as data
 
 import service.billing as billing_service
 import service.history as history_service
-
-from error import NotAutorized
-
-from bson import ObjectId
 
 def run_inference(deepfake, deepfake_id: str, user: User) -> None:
     output = replicate.run(
@@ -36,7 +36,7 @@ def run_inference(deepfake, deepfake_id: str, user: User) -> None:
         data.update_status(deepfake_id)
 
 def generate(deepfake: Deepfake, user: User) -> None:
-    if billing_service.has_permissions(user):
+    if billing_service.has_permissions('deepfake', user):
         deepfake_id = str(ObjectId())
         history_service.update('deepfake')
 
