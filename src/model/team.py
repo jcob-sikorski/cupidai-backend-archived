@@ -1,11 +1,11 @@
 from pydantic import BaseModel
-from typing import Optional, List
+from typing import List
 
 class Team(BaseModel):
     members: List[str]
     name: str
-    owner_user_id: str
+    owner: str
 
 class Member:
-    account_id: str
-    members: List[str]
+    user_id: str
+    permissions: List[str]
