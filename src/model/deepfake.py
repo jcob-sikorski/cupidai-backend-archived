@@ -9,5 +9,4 @@ class Deepfake(BaseModel):
     keep_fps: bool
     enhance_face: bool
     created_at: str
-    account_id: str
-    team_id: str
+    user_id: str

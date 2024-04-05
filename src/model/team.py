@@ -4,7 +4,7 @@ from typing import Optional, List
 class Team(BaseModel):
     members: List[str]
     name: str
-    owner_account_id: str
+    owner_user_id: str
 
 class Member:
     account_id: str

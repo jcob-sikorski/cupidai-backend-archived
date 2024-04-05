@@ -1,7 +1,6 @@
 from typing import List
 
 from model.midjourney import Message
-from model.user import User
 
 from pymongo import ReturnDocument
 from .init import midjourney_col
@@ -14,8 +13,8 @@ def update(message: Message) -> None:
         return_document=ReturnDocument.AFTER
     )
 
-def get_history(user: User) -> List[Message]:
-    results = midjourney_col.find({"account_id": user.id})
+def get_history(user_id: str) -> List[Message]:
+    results = midjourney_col.find({"account_id": user_id})
 
     messages = [Message(**result) for result in results]
 

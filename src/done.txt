@@ -5,7 +5,7 @@ data/deepfake TBD when it's clear how we track status/progress
 .
 ├── data
 │   ├── __init__.py
-│   ├── account.py ✅
+│   ├── account.py
 │   ├── ai_verification.py ✅
 │   ├── billing.py
 │   ├── bug.py ✅
@@ -22,7 +22,6 @@ data/deepfake TBD when it's clear how we track status/progress
 ├── main.py ✅
 ├── model
 │   ├── __init__.py
-│   ├── account.py ✅
 │   ├── ai_verification.py ✅
 │   ├── billing.py
 │   ├── bug.py ✅

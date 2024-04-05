@@ -1,6 +1,10 @@
 from fastapi import APIRouter, Depends
 
+from auth import VerifyToken
+
 router = APIRouter(prefix = "/team")
+
+auth = VerifyToken()
 
 @router.post("/members/invite", status_code=201)  # Invites a new member
 

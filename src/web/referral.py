@@ -1,6 +1,10 @@
 from fastapi import APIRouter, Depends
 
+from auth import VerifyToken
+
 router = APIRouter(prefix = "/referral")
+
+auth = VerifyToken()
 
 @router.post("/links/", status_code=201)  # Generates a new link
 

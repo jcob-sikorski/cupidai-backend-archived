@@ -5,5 +5,4 @@ class SocialAccount(BaseModel):
     name: str
     platform: str
     note: str
-    team_id: str
-    account_id: str
+    user_id: str

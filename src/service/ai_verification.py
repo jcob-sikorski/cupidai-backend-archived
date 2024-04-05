@@ -8,7 +8,6 @@ from error import NotAutorized
 
 from model.ai_verification import Prompt
 from model.midjourney import Response
-from model.user import User
 
 import service.billing as billing_service
 import service.history as history_service
@@ -23,8 +22,8 @@ def create_prompt_string(prompt: Prompt) -> str:
     prompt_string = " ".join([str(getattr(prompt, attr)) for attr in attributes if getattr(prompt, attr) is not None])
     return prompt_string
 
-async def faceswap(source_uri: str, target_uri: str, user: User) -> None:
-    if billing_service.has_permissions('ai_verification', user):
+async def faceswap(source_uri: str, target_uri: str, user_id: str) -> None:
+    if billing_service.has_permissions('ai_verification', user_id):
         url = "https://api.mymidjourney.ai/api/v1/midjourney/faceswap"
         headers = {
             "Content-Type": "application/json",
@@ -33,7 +32,7 @@ async def faceswap(source_uri: str, target_uri: str, user: User) -> None:
         data = {
             "source": source_uri,
             "target": target_uri,
-            "ref": user.id,
+            "ref": user_id,
             "webhookOverride": "http://194.15.120.110/ai-verification/webhook"
         }
 
@@ -42,7 +41,7 @@ async def faceswap(source_uri: str, target_uri: str, user: User) -> None:
             response_data = Response.parse_raw(resp.text)
 
         if response_data.success:
-            history_service.update('ai_verification', user)
+            history_service.update('ai_verification', user_id)
 
         if resp.status_code != 200 or response_data.error:
             raise HTTPException(status_code=400, detail="Faceswap failed")
@@ -51,8 +50,8 @@ async def faceswap(source_uri: str, target_uri: str, user: User) -> None:
     else:
         raise NotAutorized(msg=f"Invalid permissions")
 
-async def imagine(prompt: Prompt, user: User) -> None:
-    if billing_service.has_permissions('ai_verification', user):
+async def imagine(prompt: Prompt, user_id: str) -> None:
+    if billing_service.has_permissions('ai_verification', user_id):
         # docs: (https://docs.midjourney.com/docs/)
         #
         # prompt: image_urls (optional) text_prompt parameters (--parameter1 --parameter2)
@@ -72,7 +71,7 @@ async def imagine(prompt: Prompt, user: User) -> None:
         }
         data = {
             "prompt": create_prompt_string(prompt),
-            "ref": user.id,
+            "ref": user_id,
             "webhookOverride": "http://194.15.120.110/ai-verification/webhook"
         }
 
@@ -81,7 +80,7 @@ async def imagine(prompt: Prompt, user: User) -> None:
             response_data = Response.parse_raw(resp.text)
 
         if response_data.success:
-            data.update_usage(user)
+            data.update_usage(user_id)
 
         if resp.status_code != 200 or response_data.error:
             raise HTTPException(status_code=400, detail="Imagine failed")
@@ -90,11 +89,11 @@ async def imagine(prompt: Prompt, user: User) -> None:
     else:
         raise NotAutorized(msg=f"Invalid permissions")
 
-def get_history(user: User) -> None:
-    midjourney_service.get_history(user)
+def get_history(user_id: str) -> None:
+    midjourney_service.get_history(user_id)
 
-async def action(message_id: str, button: str, user: User) -> None:
-    if billing_service.has_permissions('ai_verification', user):
+async def action(message_id: str, button: str, user_id: str) -> None:
+    if billing_service.has_permissions('ai_verification', user_id):
         url = "https://api.mymidjourney.ai/api/v1/midjourney/button"
         headers = {
             "Content-Type": "application/json",
@@ -103,7 +102,7 @@ async def action(message_id: str, button: str, user: User) -> None:
         data = {
             "message_id": message_id,
             "button": button,
-            "ref": user.id,
+            "ref": user_id,
             "webhookOverride": "http://194.15.120.110/ai-verification/webhook"
         }
 
@@ -112,7 +111,7 @@ async def action(message_id: str, button: str, user: User) -> None:
             response_data = Response.parse_raw(resp.text)
 
         if response_data.success:
-            data.update_usage(user)
+            data.update_usage(user_id)
 
         if resp.status_code != 200 or response_data.error:
             raise HTTPException(status_code=400, detail="Action failed")
@@ -121,7 +120,7 @@ async def action(message_id: str, button: str, user: User) -> None:
     else:
         raise NotAutorized(msg=f"Invalid permissions")
 
-async def cancel_job(message_id: str, user: User) -> None:
+async def cancel_job(message_id: str, user_id: str) -> None:
     url = "https://api.mymidjourney.ai/api/v1/midjourney/button"
     headers = {
         "Content-Type": "application/json",
@@ -130,7 +129,7 @@ async def cancel_job(message_id: str, user: User) -> None:
     data = {
         "message_id": message_id,
         "button": "Cancel Job",
-        "ref": user.id,
+        "ref": user_id,
         "webhookOverride": "http://194.15.120.110/ai-verification/webhook"
     }
 

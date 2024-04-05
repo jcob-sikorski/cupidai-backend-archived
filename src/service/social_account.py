@@ -1,15 +1,12 @@
 import data.social_account as data
 
-from service import social_account as service
-
 from model.social_account import SocialAccount
-from model.user import User
 
-def create(social_account: SocialAccount, user: User) -> None:
-    return data.create(social_account, user)
+def create(social_account: SocialAccount, user_id: str) -> None:
+    return data.create(social_account, user_id)
 
-def update(social_account: SocialAccount, user: User) -> None:
-    return data.update(social_account, user)
+def update(social_account: SocialAccount, user_id: str) -> None:
+    return data.update(social_account, user_id)
 
-def get(user: User) -> None:
-    return data.get(user)
+def get(user_id: str) -> None:
+    return data.get(user_id)

@@ -1,6 +1,10 @@
 from fastapi import APIRouter, Depends
 
+from auth import VerifyToken
+
 router = APIRouter(prefix = "/billing")
+
+auth = VerifyToken()
 
 @router.get("/download-history", status_code=200)  # Downloads billing history
 
