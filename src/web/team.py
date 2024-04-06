@@ -10,6 +10,7 @@ router = APIRouter(prefix = "/team")
 
 auth = VerifyToken()
 
+# TODO: implement the logic also for the new user
 @router.post("/accept/{member_id}/{user_id}", status_code=201)  # Accepts the invite
 async def accept(member_id: str, user_id: str) -> None:
     return service.accept(member_id, user_id)

@@ -1,15 +1,14 @@
 from pydantic import BaseModel
-from typing import List
+from typing import List, Optional
 
-class TransactionHistory(BaseModel):
-    solo: bool
-    date: str
-    time: str
-    payment_id: str
-    plan: str
-    status: str
+class Item(BaseModel):
+    data: Optional[dict] = None
+    type: Optional[str] = None
 
-class Plan(BaseModel):
-    name: str
-    price: float
-    features: List[str]
+class StripeAccount(BaseModel):
+    user_id: str
+    customer_id: str
+
+class TermsOfService(BaseModel):
+    user_id: str
+    date_accepted: str

@@ -1,6 +1,6 @@
 from typing import List
 
-from model.team import Member
+from model.team import Team, Member
 
 from pymongo import ReturnDocument
 from .init import team_col, member_col
@@ -77,6 +77,13 @@ def get_members(user_id: str) -> None:
 def get_activity(user_id: str) -> None:
     # TODO: to be implemented
     pass
+
+def get_team_name(user_id: str) -> None:
+    result = team_col.find_one({"members": user_id})
+    if result is not None:
+        team = Team(**result)
+        return team.name
+    return None
 
 def disband(user_id: str) -> None:
     # Fetch the team that the user owns

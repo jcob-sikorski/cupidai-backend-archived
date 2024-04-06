@@ -1,11 +1,9 @@
 tree -I 'venv'
 
-data/deepfake TBD when it's clear how we track status/progress
-
 .
 ├── data
 │   ├── __init__.py
-│   ├── account.py
+│   ├── account.py ✅
 │   ├── ai_verification.py ✅
 │   ├── billing.py
 │   ├── bug.py ✅
@@ -15,9 +13,7 @@ data/deepfake TBD when it's clear how we track status/progress
 │   ├── midjourney.py ✅
 │   ├── referral.py
 │   ├── social_account.py ✅
-│   ├── team.py
-│   ├── two_factor_auth.py
-│   └── user.py
+│   └── team.py
 ├── error.py ✅
 ├── main.py ✅
 ├── model
@@ -31,9 +27,7 @@ data/deepfake TBD when it's clear how we track status/progress
 │   ├── midjourney.py ✅
 │   ├── referral.py
 │   ├── social_account.py ✅
-│   ├── team.py
-│   ├── two_factor_auth.py
-│   └── user.py
+│   └──team.py ✅
 ├── requirements.txt
 ├── service
 │   ├── __init__.py
@@ -47,14 +41,12 @@ data/deepfake TBD when it's clear how we track status/progress
 │   ├── midjourney.py ✅
 │   ├── referral.py
 │   ├── social_account.py ✅
-│   ├── team.py
-│   ├── two_factor_auth.py
-│   └── user.py
+│   └── team.py
 └── web
     ├── __init__.py
     ├── account.py ✅
     ├── ai_verification.py ✅
-    ├── billing.py
+    ├── billing.py ✅
     ├── bug.py ✅
     ├── deepfake.py ✅
     ├── earnings.py
@@ -62,6 +54,4 @@ data/deepfake TBD when it's clear how we track status/progress
     ├── midjourney.py ✅
     ├── referral.py
     ├── social_account.py ✅
-    ├── team.py
-    ├── two_factor_auth.py
-    └── user.py
+    └── team.py ✅
