@@ -1,5 +1,3 @@
-from model.user import User
-
 from pymongo import ReturnDocument
 from .init import history_col
 

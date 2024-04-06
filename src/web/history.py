@@ -1,13 +1,11 @@
 from fastapi import APIRouter, Depends
 
-from auth import VerifyToken
+from auth.dependencies import validate_token
 
 import data.history as data
 
 router = APIRouter(prefix = "/history")
 
-auth = VerifyToken()
-
 @router.get("/", status_code=200)  # Retrieves account details
-async def get(user_id: str = Depends(auth.verify)) -> None:
+async def get() -> None:
     return data.get(user_id)

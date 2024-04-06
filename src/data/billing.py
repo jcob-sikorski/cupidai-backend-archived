@@ -4,10 +4,10 @@ from typing import Optional
 
 from datetime import datetime
 
-from model.billing import Plan, StripeAccount, TermsOfService
+from model.billing import StripeAccount, TermsOfService
 from model.team import Team
 
-from .init import plan_col, stripe_account_col, team_col, tos_col
+from .init import stripe_account_col, team_col, tos_col
 
 def has_permissions(feature: str, user_id: str) -> bool:
     current_plan = get_current_plan(user_id)
@@ -57,7 +57,7 @@ def accept_tos(user_id: str) -> None:
     # Insert the new TermsOfService object into the tos_col collection
     tos_col.insert_one(tos.dict())
 
-def get_current_plan(user_id: str) -> Optional[Plan]:
+def get_current_plan(user_id: str) -> None:
     # Get the customer ID associated with the user ID
     customer_id = get_customer_id(user_id)
 
@@ -67,14 +67,10 @@ def get_current_plan(user_id: str) -> Optional[Plan]:
 
         # If the customer has at least one subscription
         if len(subscriptions.data) > 0:
-            # Get the plan ID of the first subscription
-            plan_id = subscriptions.data[0].plan.id
+            # Get the plan name of the first subscription
+            plan_name = subscriptions.data[0].plan.name
 
-            # Find the plan in the plan_col collection
-            result = plan_col.find_one({"id": plan_id})
-
-            if result is not None:
-                # Return the plan
-                return Plan(**result)
+            return plan_name
 
     return None
+
