@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends
 
-from auth.dependencies import validate_token
+
 
 router = APIRouter(prefix = "/referral")
 
