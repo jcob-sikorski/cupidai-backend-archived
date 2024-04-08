@@ -6,6 +6,6 @@ class Team(BaseModel):
     name: str
     owner: str
 
-class Member:
+class Member(BaseModel):
     user_id: str
     permissions: List[str]

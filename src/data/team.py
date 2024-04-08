@@ -26,45 +26,83 @@ def accept(member_id: str, user_id: str) -> None:
     member = Member(user_id=user_id, permissions=[])
     member_col.insert_one(member.dict())
 
+# TESTING DONE ✅
+def update_permissions(permissions: List[str], member_id: str, user_id: str) -> bool:
+    # Fetch the team that the user owns
+    team = team_col.find_one({"owner": user_id})
 
-def update_permissions(permissions: List[str], member_id: str, user_id: str) -> None:
-    member_col.find_one_and_update(
+    # If the user is not an owner of any team, return False
+    if not team:
+        return False
+
+    # Check if the member is in the same team
+    if member_id not in team["members"]:
+        return False
+
+    # Update the permissions of the member
+    result = member_col.find_one_and_update(
         {"user_id": member_id},
         {"$set": {"permissions": permissions}},
         upsert=True,
         return_document=ReturnDocument.AFTER
     )
 
-def delete(member_id: str, user_id: str) -> None:
-    # Fetch the team that the member belongs to
-    team = team_col.find_one({"members": member_id})
-    
-    if team:
-        # Remove the member_id from the team's members list
-        team["members"].remove(member_id)
-        
-        # Update the team document in the database
-        team_col.find_one_and_update(
-            {"_id": team["_id"]},
-            {"$set": {"members": team["members"]}}
-        )
-    
+    # Return True if the update was successful, False otherwise
+    return result is not None
+
+
+# TESTING DONE ✅
+def delete(member_id: str, user_id: str) -> bool:
+    # Fetch the team that the user owns
+    team = team_col.find_one({"owner": user_id})
+
+    # If the user is not an owner of any team, return False
+    if not team:
+        return False
+
+    # Check if the member is in the same team
+    if member_id not in team["members"]:
+        return False
+
+    # Remove the member_id from the team's members list
+    team["members"].remove(member_id)
+
+    # Update the team document in the database
+    team_col.find_one_and_update(
+        {"_id": team["_id"]},
+        {"$set": {"members": team["members"]}}
+    )
+
     # Delete the member model
     member_col.delete_one({"user_id": member_id})
 
-
-def transfer_ownership(member_id: str, user_id: str) -> None:
-    # Fetch the team that the member belongs to
-    team = team_col.find_one({"members": member_id})
-    
-    if team:
-        # Update the owner of the team
-        team_col.find_one_and_update(
-            {"_id": team["_id"]},
-            {"$set": {"owner": user_id}}
-        )
+    return True
 
 
+# TESTING DONE ✅
+def transfer_ownership(member_id: str, user_id: str) -> bool:
+    # Fetch the team that the user owns
+    team = team_col.find_one({"owner": user_id})
+
+    # If the user is not an owner of any team, return False
+    if not team:
+        return False
+
+    # Check if the member is in the same team
+    if member_id not in team["members"]:
+        return False
+
+    # Update the owner of the team
+    result = team_col.find_one_and_update(
+        {"_id": team["_id"]},
+        {"$set": {"owner": member_id}}
+    )
+
+    # Return True if the update was successful, False otherwise
+    return result is not None
+
+
+# TESTING DONE ✅
 def get_members(user_id: str) -> None:
     # Fetch the team that the user belongs to
     team = team_col.find_one({"owner": user_id})
@@ -85,7 +123,8 @@ def get_team_name(user_id: str) -> None:
         return team.name
     return None
 
-def disband(user_id: str) -> None:
+# TESTING DONE ✅
+def disband(user_id: str) -> bool:
     # Fetch the team that the user owns
     team = team_col.find_one({"owner": user_id})
     
@@ -97,23 +136,71 @@ def disband(user_id: str) -> None:
         for member_id in team["members"]:
             member_col.delete_one({"user_id": member_id})
 
-def leave(user_id: str) -> None:
+        return True
+
+    # If the user does not own a team, return False
+    return False
+
+
+# TESTING DONE ✅
+def create(team: Team, user_id: str) -> bool:
+    # Fetch the team that the user is a member of
+    existing_team = team_col.find_one({"members": user_id})
+    
+    # If the user is already in a team, return False
+    if existing_team:
+        return False
+
+    # If the user is not in a team, add them to the new team
+    if user_id not in team.members:
+        team.members.append(user_id)
+        # Create a new Member object with no permissions and add it to the member_col collection
+        new_member = Member(user_id=user_id, permissions=[])
+        member_col.insert_one(new_member.dict())
+
+    # For each member in the team, if they are not already in the member_col collection, add them
+    for member_id in team.members:
+        if member_col.find_one({"user_id": member_id}) is None:
+            new_member = Member(user_id=member_id, permissions=[])
+            member_col.insert_one(new_member.dict())
+    
+    # Insert the new team into the database
+    result = team_col.insert_one(team.dict())
+    
+    # Return True if the insert was successful, False otherwise
+    return result.inserted_id is not None
+
+
+# TESTING DONE ✅
+def leave(user_id: str) -> bool:
     # Fetch the team that the user is a member of
     team = team_col.find_one({"members": user_id})
     
     if team:
+        # If the user is the owner of the team, raise an exception
+        if team["owner"] == user_id:
+            raise Exception("The owner of the team cannot leave the team.")
+        
         # Remove the user_id from the team's members list
         team["members"].remove(user_id)
         
         # Update the team document in the database
-        team_col.find_one_and_update(
+        update_result = team_col.find_one_and_update(
             {"_id": team["_id"]},
             {"$set": {"members": team["members"]}}
         )
         
         # Remove the member model
-        member_col.delete_one({"user_id": user_id})
+        delete_result = member_col.delete_one({"user_id": user_id})
 
+        # Return True if both operations were successful, False otherwise
+        return update_result is not None and delete_result.deleted_count > 0
+
+    # If the user is not a member of any team, return False
+    return False
+
+
+# TESTING DONE ✅
 def owner(user_id: str) -> None:
     # Fetch the team that the user is a member of
     team = team_col.find_one({"members": user_id})

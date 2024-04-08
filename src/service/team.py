@@ -4,6 +4,8 @@ import requests
 
 import data.team as data
 
+from model.team import Team
+
 def accept(member_id: str, user_id: str) -> None:
     return data.accept(member_id, user_id)
 
@@ -35,26 +37,40 @@ def invite(email: str, user_id: str) -> None:
     else:
         print("User ID not found in Team collection.")
 
+# TESTING DONE ✅
 def update_permissions(permissions: List[str], member_id: str, user_id: str) -> None:
     return data.update_permissions(permissions, member_id, user_id)
 
+# TESTING DONE ✅
 def delete(member_id: str, user_id: str) -> None:
     return data.delete(member_id, user_id)
 
+# TESTING DONE ✅
 def transfer_ownership(member_id: str, user_id: str) -> None:
     return data.transfer_ownership(member_id, user_id)
 
+# TESTING DONE ✅
 def get_members(user_id: str) -> None:
     return data.get_members(user_id)
 
 def get_activity(user_id: str) -> None:
     return data.get_activity(user_id)
 
+# TESTING DONE ✅
 def disband(user_id: str) -> None:
     return data.disband(user_id)
 
-def leave(user_id: str) -> None:
-    return data.leave(user_id)
+# TESTING DONE ✅
+def create(team: Team, user_id: str) -> None:
+    return data.create(team, user_id)
 
+# TESTING DONE ✅
+def leave(user_id: str) -> None:
+    try:
+        return data.leave(user_id)
+    except Exception as e:
+        raise e
+
+# TESTING DONE ✅
 def owner(user_id: str) -> None:
     return data.owner(user_id)
