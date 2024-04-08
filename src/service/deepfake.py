@@ -2,7 +2,7 @@ import multiprocessing
 
 import replicate
 
-from error import NotAutorized
+from error import NotAuthorized
 
 from bson import ObjectId
 
@@ -45,7 +45,7 @@ def generate(deepfake: Deepfake, user_id: str) -> None:
         
         return deepfake_id
     else:
-        raise NotAutorized(msg=f"Invalid permissions")
+        raise NotAuthorized(msg=f"Invalid permissions")
 
 def get_history(user_id: str) -> None:
     return data.get_history(user_id)

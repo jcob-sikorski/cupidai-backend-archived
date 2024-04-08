@@ -8,10 +8,14 @@ import data.billing as data
 
 # The library needs to be configured with your account's secret key.
 # Ensure the key is kept out of any version control system you might be using.
-stripe.api_key = "sk_test_..."
+stripe.api_key = "sk_test_51P2KoI09MTVFbataUH3MvtXza4vM1XflPRcmj2tPfVcbPCTvkOaLqA2CuQQE2rREuBFppTnPsKWzAz8I9tO5Pi1g00Ea3qEZft"
 
 # This is your Stripe CLI webhook secret for testing your endpoint locally.
 endpoint_secret = 'whsec_ed116b6b56e5b4cf34a61e6d5b8aa2708976207e53a2a6957dcf2b51eba4db85'
+
+# TESTING DONE ✅
+def has_permissions(feature: str, user_id: str) -> bool:
+    return data.has_permissions(feature, user_id)
 
 async def webhook(item: Item, request: Request):
     event = None

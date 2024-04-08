@@ -4,6 +4,7 @@ import data.midjourney as data
 
 from data.midjourney import Message
 
+# TESTING DONE ✅
 def webhook(message: Message) -> None:
     data.update(message)
 

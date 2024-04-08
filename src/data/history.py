@@ -9,8 +9,9 @@ domain_to_index = {
     "referral": "people_referred" 
 }
 
-
+# TESTING DONE ✅
 def update(domain: str, user_id: str) -> None:
+    print("UPDATING USAGE HISTORY")
     history_col.find_one_and_update(
         {"user_id": user_id},
         {"$inc": {domain_to_index[domain]: 1}},

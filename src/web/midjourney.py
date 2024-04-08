@@ -8,4 +8,5 @@ router = APIRouter(prefix = "/midjourney")
 
 @router.post("/webhook", status_code=201)
 async def webhook(message: Message) -> None:
+    print("MIDJOURNEY WEBHOOK ACTIVATED")
     return service.webhook(message)

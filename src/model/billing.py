@@ -12,3 +12,7 @@ class StripeAccount(BaseModel):
 class TermsOfService(BaseModel):
     user_id: str
     date_accepted: str
+
+class Plan(BaseModel):
+    plan_id: str
+    features: List[str]

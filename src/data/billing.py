@@ -1,24 +1,30 @@
 import stripe
 
+import json
+
 from typing import Optional
 
 from datetime import datetime
 
-from model.billing import StripeAccount, TermsOfService
+from model.billing import StripeAccount, TermsOfService, Plan
 from model.team import Team
 
-from .init import stripe_account_col, team_col, tos_col
+from .init import stripe_account_col, team_col, tos_col, plan_col
 
+# TESTING DONE ✅
 def has_permissions(feature: str, user_id: str) -> bool:
+    print("CHECKING PERMISSIONS")
     current_plan = get_current_plan(user_id)
 
-    if feature in current_plan.features:
-        return False
-    return True
+    return current_plan and feature in current_plan.features
 
+# TESTING DONE ✅
 def get_customer_id(user_id: str) -> Optional[str]:
+    print("GETTING CUSTOMER ID FROM MONGODB")
+
     result = stripe_account_col.find_one({"user_id": user_id})
     if result is not None:
+        print("PARSING RESPONSE TO MODEL")
         stripe_account = StripeAccount(**result)
         return stripe_account.customer_id
     return None
@@ -57,20 +63,40 @@ def accept_tos(user_id: str) -> None:
     # Insert the new TermsOfService object into the tos_col collection
     tos_col.insert_one(tos.dict())
 
-def get_current_plan(user_id: str) -> None:
-    # Get the customer ID associated with the user ID
+# TESTING DONE ✅
+def get_current_plan(user_id: str) -> Optional[Plan]:
     customer_id = get_customer_id(user_id)
 
     if customer_id is not None:
+        print("RETRIEVING CUSTOMER'S SUBSCRIPTIONS FROM STRIPE")
+        # TODO: test when the customer_id is in the subcription list
         # Retrieve the customer's subscriptions from Stripe
         subscriptions = stripe.Subscription.list(customer=customer_id)
 
         # If the customer has at least one subscription
         if len(subscriptions.data) > 0:
-            # Get the plan name of the first subscription
-            plan_name = subscriptions.data[0].plan.name
+            print("GOT THE PLAN NAME OF THE FIRST SUBSCRIPTION IN THE LIST")
 
-            return plan_name
+            # Initialize variables to track the most recent subscription
+            most_recent_subscription_plan_id = None
+            most_recent_billing_cycle_anchor = 0
+
+            print("ITERATING THORUGH SUBSCRIPTIONS")
+            for subscription in subscriptions:
+                billing_cycle_anchor = subscription["billing_cycle_anchor"]
+                if billing_cycle_anchor > most_recent_billing_cycle_anchor:
+                    most_recent_billing_cycle_anchor = billing_cycle_anchor
+                    most_recent_subscription_plan_id = subscription["plan"]["id"]
+
+            # Search for the plan with the given plan_id
+            plan_doc = plan_col.find_one({"plan_id": most_recent_subscription_plan_id})
+            if plan_doc:
+                print("GOT THE PLAN DOC")
+                # If found, return the plan as a Plan object
+                return Plan(**plan_doc)
+            else:
+                # If not found, return None
+                return None
 
     return None
 

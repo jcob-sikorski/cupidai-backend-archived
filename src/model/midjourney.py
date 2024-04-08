@@ -2,18 +2,18 @@ from pydantic import BaseModel, Field
 from typing import List, Optional
 
 class Message(BaseModel):
-    messageId: str = Field(..., alias="messageId")
+    messageId: str
     prompt: str
-    uri: Optional[str]
-    progress: Optional[int]
-    createdAt: str = Field(..., alias="createdAt")
-    updatedAt: str = Field(..., alias="updatedAt")
-    buttons: Optional[List[str]]
-    originatingMessageId: Optional[str] = Field(..., alias="originatingMessageId")
-    ref: Optional[str]
+    uri: Optional[str] = None
+    progress: Optional[int] = None
+    createdAt: str
+    updatedAt: str
+    buttons: Optional[List[str]] = None
+    originatingMessageId: Optional[str] = None
+    ref: Optional[str] = None
 
 class Response(BaseModel):
     success: bool
-    messageId: str
-    createdAt: str
-    error: Optional[str]
+    messageId: Optional[str] = None
+    createdAt: Optional[str] = None
+    error: Optional[str] = None
