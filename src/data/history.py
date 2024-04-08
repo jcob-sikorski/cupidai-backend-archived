@@ -1,4 +1,7 @@
+from model.history import History
+
 from pymongo import ReturnDocument
+
 from .init import history_col
 
 domain_to_index = {
@@ -19,9 +22,10 @@ def update(domain: str, user_id: str) -> None:
         return_document=ReturnDocument.AFTER
     )
 
+# TESTING DONE ✅
 def get(user_id: str) -> None:
     result = history_col.find_one({"user_id": user_id})
     if result is not None:
-        return User(**result)
+        return History(**result)
     else:
         return None

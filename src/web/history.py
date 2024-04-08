@@ -6,6 +6,7 @@ import data.history as data
 
 router = APIRouter(prefix="/history")
 
+# TESTING DONE ✅
 # Protected endpoint
 @router.get("/", status_code=200)  # Retrieves account details
 async def get(user_id: str) -> None:

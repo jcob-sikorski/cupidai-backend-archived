@@ -55,11 +55,14 @@ def download_history(user_id: str) -> None:
 
     pass
 
+# TESTING DONE ✅
 def get_history(solo: bool, user_id: str) -> None:
     return data.get_history(solo, user_id)
 
+# TESTING DONE ✅
 def accept_tos(user_id: str) -> None:
     return data.accept_tos(user_id)
 
+# TESTING DONE ✅
 def get_current_plan(user_id: str) -> None:
     return data.get_current_plan(user_id)

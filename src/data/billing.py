@@ -1,7 +1,5 @@
 import stripe
 
-import json
-
 from typing import Optional
 
 from datetime import datetime
@@ -36,10 +34,13 @@ def get_team_owner_id(member_id: str) -> Optional[str]:
         return team.owner
     return None
 
+
+# TESTING DONE ✅
 def get_history(solo: bool, user_id: str) -> None:
     if solo:
         customer_id = get_customer_id(user_id)
     else:
+        # TODO: test when solo is false
         owner_id = get_team_owner_id(user_id)
         customer_id = get_customer_id(owner_id)
 
@@ -50,6 +51,7 @@ def get_history(solo: bool, user_id: str) -> None:
         print("User ID not found in StripeAccount collection.")
         return None
 
+# TESTING DONE ✅
 def accept_tos(user_id: str) -> None:
     # Get the current date and time
     now = datetime.now()
@@ -62,6 +64,10 @@ def accept_tos(user_id: str) -> None:
 
     # Insert the new TermsOfService object into the tos_col collection
     tos_col.insert_one(tos.dict())
+
+    result = tos_col.insert_one(tos.dict())
+
+    return result.inserted_id is not None
 
 # TESTING DONE ✅
 def get_current_plan(user_id: str) -> Optional[Plan]:

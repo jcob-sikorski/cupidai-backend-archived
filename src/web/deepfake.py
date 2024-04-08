@@ -13,6 +13,7 @@ router = APIRouter(prefix="/deepfake")
 async def generate(deepfake: Deepfake, user_id: str) -> None:
     return service.generate(deepfake, user_id)
 
+# TESTING DONE ✅
 # Protected endpoint
 @router.get("/history", status_code=200)  # Retrieves history
 async def get_history(user_id: str) -> None:

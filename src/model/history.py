@@ -1,10 +1,10 @@
 from pydantic import BaseModel
-from typing import List
+from typing import Optional
 
 class History(BaseModel):
     user_id: str
-    images_generated: int
-    deepfakes_generated: int
-    ai_verification_generated: int
-    content_utilities_uses: int
-    people_referred: int
+    images_generated: Optional[int] = None
+    deepfakes_generated: Optional[int] = None
+    ai_verification_generated: Optional[int] = None
+    content_utilities_uses: Optional[int] = None
+    people_referred: Optional[int] = None

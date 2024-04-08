@@ -8,5 +8,6 @@ from data.midjourney import Message
 def webhook(message: Message) -> None:
     data.update(message)
 
+# TESTING DONE ✅
 def get_history(user_id: str) -> List[Message]:
     return data.get_history(user_id)
