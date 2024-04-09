@@ -1,6 +1,3 @@
-# TODO: check the default connections in these components and ensure that assumptions 
-#       about connections in the config functions are correct - inspect every connection
-
 open_pose_dwp = {
   "208": {
     "inputs": {

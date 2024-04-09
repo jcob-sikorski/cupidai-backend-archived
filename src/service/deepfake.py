@@ -48,6 +48,7 @@ def run_inference(deepfake, deepfake_id: str, user_id: str) -> None:
         
         data.update(deepfake_id, status="completed")
 
+        # TODO: track the usage for the team and user himself
         history_service.update('deepfake', user_id)
     else:
         data.update(deepfake_id, status="failed")

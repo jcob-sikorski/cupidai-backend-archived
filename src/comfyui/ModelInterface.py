@@ -347,6 +347,11 @@ sample_settings = {
 }
 
 
+# TODO: generate image endpoint should now run this program and get the json to send to the comfyui server
+# TODO: get the list of predefined models from David and install them to the custom nodes.
+# TODO: check all the models and checkpoints and all the options for config for the user, preinstall them on the comfyui runpod server
+# TODO: config the comfyui server so it has the endpoint which listens to the requests and runs the websocket for each request with predefined json file
+#       and loads the images from CDN into the images path before sending a request to the comfyui - TODO: ensure that comfyui sees the images without a reload
 if __name__ == "__main__":
     model_interface = ModelInterface()
 
@@ -377,8 +382,7 @@ if __name__ == "__main__":
 
     final_json = model_interface.finalize()
 
+    # TODO: return this file instead to the generate endpoint
     # Write the final JSON to a file
     with open('final_json_output.json', 'w') as json_file:
         json.dump(final_json, json_file, indent=4)
-
-# TODO: ensure that default values from the connectable components are correct
