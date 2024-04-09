@@ -1,3 +1,6 @@
+# TODO: check the default connections in these components and ensure that assumptions 
+#       about connections in the config functions are correct - inspect every connection
+
 open_pose_dwp = {
   "208": {
     "inputs": {
@@ -547,10 +550,6 @@ efficient_loader = {
       "lora_name": "None",
       "lora_model_strength": 1.2,
       "lora_clip_strength": 1,
-      "positive": [
-        "222",
-        0
-      ],
       "negative": "earings, body rolls, holding phone, phone, phones, bokeh, (background blur:1.4), bokeh, (reflective skin:1.3), (glowing skin:1.5), nose piercing, (NSFW:1.5), (smooth skin:1.6), (disfigured iris:1.2), (bad eyes:1.4), phone, (holding phone:1.4),  cartoon, (3d:1.4), (disfigured), (bad art), (deformed), (poorly drawn), (extra limbs), (close up), strange colours, blurry, boring, sketch, lackluster, face portrait, signature, letters, watermark, grayscale\n",
       "token_normalization": "none",
       "weight_interpretation": "comfy",
@@ -562,11 +561,7 @@ efficient_loader = {
         "327",
         0
       ],
-      "batch_size": 4,
-      "lora_stack": [
-        "207",
-        0
-      ]
+      "batch_size": 4
     },
     "class_type": "Efficient Loader",
     "_meta": {
@@ -587,7 +582,7 @@ ksampler_efficient1 = {
       "preview_method": "auto",
       "vae_decode": "true",
       "model": [
-        "278",
+        "206",
         0
       ],
       "positive": [
@@ -641,7 +636,7 @@ ksampler_efficient2 = {
       "preview_method": "auto",
       "vae_decode": "true",
       "model": [
-        "284",
+        "229",
         0
       ],
       "positive": [

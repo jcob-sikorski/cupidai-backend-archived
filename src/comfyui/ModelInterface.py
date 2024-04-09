@@ -148,7 +148,7 @@ class ModelInterface():
         self.efficient_loader["206"]["inputs"]["lora_stack"] = ["207", 0]
         self.used_components.add("lora_stacker")
 
-    def connect_random_prompts(self, text: str):
+    def connect_random_prompts(self, positive_prompt: str):
         """
         ################# CONNECT RANDOM PROMPTS #################
         (Optional) Connect random prompts to the efficient loader
@@ -156,14 +156,13 @@ class ModelInterface():
         2. Connect random prompts to the efficient loader as positive
         """
         # Set the pos prompt
-        self.random_prompts["222"]["inputs"]["text"] = text
+        self.random_prompts["222"]["inputs"]["text"] = positive_prompt
         self.used_components.add("random_prompts")
 
         # Connect RandomPrompts to the efficient_loader
         self.efficient_loader["206"]["inputs"]["positive"] = ["222", 0]
 
-
-    def set_up_efficient_loader(self, ckpt_name: str, negative: str, ipa1_enabled: bool = True):
+    def set_up_efficient_loader(self, ckpt_name: str, negative_prompt: str):
         """
         ################# SET UP EFFICIENT LOADER #################
         (Default) Provide a configuration for the efficient loader
@@ -177,7 +176,7 @@ class ModelInterface():
         self.efficient_loader["206"]["inputs"]["ckpt_name"] = ckpt_name
 
         # Set the negative prompt in efficient loader
-        self.efficient_loader["206"]["inputs"]["negative"] = negative
+        self.efficient_loader["206"]["inputs"]["negative"] = negative_prompt
 
         self.used_components.add("efficient_loader")
 
@@ -241,6 +240,8 @@ class ModelInterface():
         if not ipa2_enabled:
             # (Default) connect model to the KSampler (Efficient) 1
             self.ksampler_efficient2["246"]["inputs"]["model"] = ["229", 0]
+        else:
+            self.ksampler_efficient2["246"]["inputs"]["model"] = ["284", 0]
 
     def connect_ip_adapter_2(self, image_path: str, weight: int = 1, noise: int = 0, weight_type: str = "original", start_at: int = 0, end_at: int = 1):
         """
@@ -262,9 +263,11 @@ class ModelInterface():
             # disconnect the second image loader from apply ip adapter and connect the first one
             self.ipa2["284"]["inputs"]["image"] = ["390", 0]
 
+
+        # TODO: can user customize this model from a list of predefined models?
         # set the model for load ipadapter model
         self.ipa2["285"]["inputs"]["ipadapter_file"] = "ip-adapter-plus-face_sd15.bin"
-
+        
         # set parameters
         self.ipa2["284"]["inputs"]["weight"] = weight
         self.ipa2["284"]["inputs"]["noise"] = noise
@@ -275,7 +278,7 @@ class ModelInterface():
         self.used_components.add("ipa2")
 
         # set the civitai model
-        self.ipa2["251"]["inputs"]["ckpt_air"] = "{model_id}@{model_version}"
+        # self.ipa2["251"]["inputs"]["ckpt_air"] = "{model_id}@{model_version}"
 
         # connect applyipadapter2 model to ksamplerefficient2 model
         self.ksampler_efficient2["246"]["inputs"]["model"] = ["284", 0]
@@ -346,13 +349,13 @@ sample_settings = {
 
 if __name__ == "__main__":
     model_interface = ModelInterface()
-    
+
     if sample_settings["controlnet_enabled"]:
         model_interface.connect_control_net(unit=sample_settings["controlnet_model"], image_path=sample_settings["controlnet_reference_image"], strength=sample_settings["controlnet_strength"], start_at=sample_settings["controlnet_start_at"], end_at=sample_settings["controlnet_end_at"])
     
     model_interface.choose_output_size(int1=sample_settings["basic_width"], int2=sample_settings["basic_height"])
     
-    model_interface.connect_lora(count=sample_settings["lora_count"], models=sample_settings["lora_models"], stengths=sample_settings["lora_strengths"], enabled=sample_settings["lora_enabled"]) # Optional
+    model_interface.connect_lora(count=sample_settings["lora_count"], models=sample_settings["lora_models"], stengths=sample_settings["lora_strengths"], enabled=sample_settings["lora_enabled"])
     
     if sample_settings["pos_prompt_enabled"]:
         model_interface.connect_random_prompts(text=sample_settings["basic_pos_text_prompt"]) # Optional
