@@ -36,10 +36,9 @@ def run_inference(deepfake, deepfake_id: str, user_id: str) -> None:
         return
 
     # The predict method returns an iterator, and you can iterate over that output.
-    # output_uri = None
-    # for item in output:
-    #     output_uri = item
-    output_uri = "TEST_OUTPUT_URI"
+    output_uri = None
+    for item in output:
+        output_uri = item
 
     if output_uri:
         print(f"GOT THE OUTPUT URI: {output_uri}")

@@ -1,8 +1,4 @@
-from fastapi import APIRouter
-
 from data import account as data
-
-router = APIRouter(prefix = "/account")
 
 def change_email(email: str, user_id: str) -> None:
     return data.change_email(email, user_id)

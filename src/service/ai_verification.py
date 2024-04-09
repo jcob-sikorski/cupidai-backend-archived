@@ -1,4 +1,4 @@
-from fastapi import APIRouter, HTTPException
+from fastapi import HTTPException
 
 from fastapi.encoders import jsonable_encoder
 
@@ -18,8 +18,6 @@ import service.history as history_service
 import service.midjourney as midjourney_service
 
 MIDJOURNEY_TOKEN = os.getenv("MIDJOURNEY_TOKEN")
-
-router = APIRouter(prefix = "/ai-verification")
 
 # TESTING DONE ✅
 async def faceswap(source_uri: str, target_uri: str, user_id: str) -> None:
