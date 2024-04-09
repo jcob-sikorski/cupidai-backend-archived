@@ -208,3 +208,11 @@ def owner(user_id: str) -> None:
     if team:
         # Return the owner of the team
         return team["owner"]
+    
+# TESTING DONE ✅
+def get_team(user_id: str) -> None:
+    result = team_col.find_one({"members": user_id})
+    if result is not None:
+        team = Team(**result)
+        return team
+    return None

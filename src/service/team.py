@@ -74,3 +74,7 @@ def leave(user_id: str) -> None:
 # TESTING DONE ✅
 def owner(user_id: str) -> None:
     return data.owner(user_id)
+
+# TESTING DONE ✅
+def get_team(user_id: str):
+    return get_team
