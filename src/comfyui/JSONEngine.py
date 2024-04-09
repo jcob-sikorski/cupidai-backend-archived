@@ -55,18 +55,6 @@ open_pose_dwp = {
       "title": "DWPose Estimator"
     }
   },
-  "238": {
-    "inputs": {
-      "images": [
-        "223",
-        0
-      ]
-    },
-    "class_type": "PreviewImage",
-    "_meta": {
-      "title": "Preview Image"
-    }
-  }
 }
 
 canny = {
@@ -122,18 +110,6 @@ canny = {
       "title": "Canny"
     }
   },
-  "242": {
-    "inputs": {
-      "images": [
-        "241",
-        0
-      ]
-    },
-    "class_type": "PreviewImage",
-    "_meta": {
-      "title": "Preview Image"
-    }
-  },
 }
 
 midas_depth_map = {
@@ -173,18 +149,6 @@ midas_depth_map = {
     "class_type": "LoadImage",
     "_meta": {
       "title": "Load Image"
-    }
-  },
-  "237": {
-    "inputs": {
-      "images": [
-        "321",
-        0
-      ]
-    },
-    "class_type": "PreviewImage",
-    "_meta": {
-      "title": "Preview Image"
     }
   },
   "321": {

@@ -346,35 +346,29 @@ sample_settings = {
 
 if __name__ == "__main__":
     model_interface = ModelInterface()
-    # ✅
+    
     if sample_settings["controlnet_enabled"]:
         model_interface.connect_control_net(unit=sample_settings["controlnet_model"], image_path=sample_settings["controlnet_reference_image"], strength=sample_settings["controlnet_strength"], start_at=sample_settings["controlnet_start_at"], end_at=sample_settings["controlnet_end_at"])
     
-    # ✅
     model_interface.choose_output_size(int1=sample_settings["basic_width"], int2=sample_settings["basic_height"])
     
-    # ✅
     model_interface.connect_lora(count=sample_settings["lora_count"], models=sample_settings["lora_models"], stengths=sample_settings["lora_strengths"], enabled=sample_settings["lora_enabled"]) # Optional
     
-    # ✅
     if sample_settings["pos_prompt_enabled"]:
         model_interface.connect_random_prompts(text=sample_settings["basic_pos_text_prompt"]) # Optional
 
-    # ✅
     model_interface.set_up_efficient_loader(negative=sample_settings["basic_neg_text_prompt"], ckpt_name=sample_settings["basic_model"], batch_size=sample_settings["basic_batch_size"])
 
-    # ✅
     model_interface.set_up_ksampler_efficient1(steps=sample_settings["basic_sampling_steps"], sampler_name=sample_settings["basic_sampler_method"], cfg_scale=sample_settings["basic_cfg_scale"], denoise=sample_settings["basic_denoise"])
 
-    # ✅
     if sample_settings["refinement_enabled"]:
         model_interface.connect_ksampler_efficient2(seed=sample_settings["refinement_seed"], steps=sample_settings["refinement_steps"], cfg_scale=sample_settings["refinement_cfg_scale"], denoise=sample_settings["refinement_denoise"], sampler_name=sample_settings["refinement_sampler"])
 
-    # ✅
+    model_interface.connect_preview_image(sample_settings["refinement_enabled"])
+
     if sample_settings["ipa_1_enabled"]:
         model_interface.connect_ip_adapter_1(image_path=sample_settings["ipa_1_reference_image"], model=sample_settings["ipa_1_model"], weight=sample_settings["ipa_1_weight"], noise=sample_settings["ipa_1_noise"], start_at=sample_settings["ipa_1_start_at"], end_at=sample_settings["ipa_1_end_at"])
 
-    # ✅
     if sample_settings["ipa_2_enabled"]:
         model_interface.connect_ip_adapter_2(image_path=sample_settings["ipa_2_reference_image"], model=sample_settings["ipa_2_model"], weight=sample_settings["ipa_2_weight"], noise=sample_settings["ipa_2_noise"], start_at=sample_settings["ipa_2_start_at"], end_at=sample_settings["ipa_2_end_at"])
 
@@ -383,8 +377,5 @@ if __name__ == "__main__":
     # Write the final JSON to a file
     with open('final_json_output.json', 'w') as json_file:
         json.dump(final_json, json_file, indent=4)
-
-# TODO: when KSampler Efficient is not enabled connect the first preview image
-#       else connect the second preview image
 
 # TODO: ensure that default values from the connectable components are correct
