@@ -46,7 +46,6 @@ async def faceswap(source_uri: str, target_uri: str, user_id: str) -> None:
             response_data = resp.json()
 
         if response_data["success"]:
-            # TODO: track the usage for the team and user himself
             history_service.update('ai_verification', user_id)
 
         if resp.status_code != 200 or "error" in response_data:
@@ -94,7 +93,6 @@ async def imagine(prompt: Prompt, user_id: str) -> None:
             response_data = Response.parse_raw(resp.text)
 
             if response_data.success:
-                # TODO: track the usage for the team and user himself
                 history_service.update('ai_verification', user_id)
 
             if resp.status_code != 200 or response_data.error:

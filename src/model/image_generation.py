@@ -2,6 +2,7 @@ from typing import List
 from pydantic import BaseModel
 
 class Settings(BaseModel):
+    settings_id: str
     # basic settings
     basic_preset: str
     basic_post_text_prompt: str
@@ -53,3 +54,11 @@ class Settings(BaseModel):
     controlnet_strength: float
     controlnet_start_at: float
     controlnet_end_at: float
+
+class Message(BaseModel):
+    message_id: str
+    user_id: str
+    status: str
+    image_uris: List[str]
+    created_at: str
+    settings_id: str
