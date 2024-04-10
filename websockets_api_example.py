@@ -16,8 +16,7 @@ from uuid import uuid4
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 
-from uploadcare.api import FilesApi
-from uploadcare.uploader import Uploader
+from pyuploadcare import Uploadcare, File
 
 server_address = "127.0.0.1:8188"
 client_id = str(uuid.uuid4())
@@ -70,6 +69,7 @@ app = FastAPI()
 class WorkflowRequest(BaseModel):
     workflow: Dict[str, Any]
     image_uris: List[str]
+    settings_id: str
     user_id: str
 
 class Message(BaseModel):
@@ -81,11 +81,11 @@ class Message(BaseModel):
     settings_id: str
 
 def upload_image_to_uploadcare(image_data):
-    uploader = Uploader(public_key='e6daeb69aa105a823395', secret_key='b230fca6ccfea3cccfa2')
+    uploadcare = Uploadcare(public_key='e6daeb69aa105a823395', secret_key='b230fca6ccfea3cccfa2')
     file_handle = io.BytesIO(image_data)
     file_handle.name = 'image.png'  # You can set a custom name if needed
-    file_info = uploader.upload(file_handle)
-    return file_info['uuid']
+    ucare_file = uploadcare.upload(file_handle)
+    return ucare_file.uuid
 
 # Define a POST endpoint to receive the JSON payload
 @app.post("/")
@@ -94,12 +94,19 @@ async def create_item(json_payload: WorkflowRequest):
         # Access the workflow and user_id from the JSON payload
         workflow = json_payload.workflow
         image_uris = json_payload.image_uris
+        # settings_id = json_payload.settings_id
         user_id = json_payload.user_id
         
         # Process the workflow data or perform any desired actions
         print("Received workflow:", workflow)
         print("Image URIs:", image_uris)
+        # print("Settings ID:", settings_id)
         print("User ID:", user_id)
+
+        # TODO: we get the uplaoded images fro uploadcare and put them into predefined paths as image_ids state
+
+        # TODO: then regardless of the execution of the get_images function 
+        #       we must remove the images from the syste,
         
         ws = websocket.WebSocket()
         ws.connect(f"ws://{server_address}/ws?clientId={client_id}")
@@ -114,23 +121,25 @@ async def create_item(json_payload: WorkflowRequest):
                 uploadcare_uuid = upload_image_to_uploadcare(image_data)
                 uploadcare_uuids.append(uploadcare_uuid)
 
+        # TODO: this object must be created on the fastapi side (so er can update status of the Message)
+        #       we must include mappings to the worfklow settings, user, status, image_uris, created_at, settings
         # Create a Message object
-        message = Message(
-            message_id=uuid4(),
-            user_id=user_id,
-            status="completed",
-            image_uris=image_uris,
-            created_at=datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-            settings_id=uuid4()
-        )
+        # message = Message(
+        #     message_id=uuid4(),
+        #     user_id=user_id,
+        #     status="completed",
+        #     image_uris=image_uris,
+        #     created_at=datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+        #     # settings_id=uuid4()
+        # )
 
         # Now you have a list of Uploadcare UUIDs which you can use in your webhook
         # Send these UUIDs and the Message object to your webhook endpoint
-        webhook_data = {'message': message.dict(), 'uuids': uploadcare_uuids}
-        response = requests.post('https://garfish-cute-typically.ngrok-free.app/image-generation/webhook', json=webhook_data)
+        # webhook_data = {'message': message.dict(), 'uuids': uploadcare_uuids}
+        # response = requests.post('https://garfish-cute-typically.ngrok-free.app/image-generation/webhook', json=webhook_data)
 
-        # Print the response
-        print(response.text)
+        # # Print the response
+        # print(response.text)
 
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))

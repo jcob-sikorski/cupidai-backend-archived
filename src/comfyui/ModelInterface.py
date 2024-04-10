@@ -305,9 +305,11 @@ def generate_workflow(settings: Settings, image_ids: Dict[str, str]) -> Optional
         print("INITIALIZING MODEL INTERFACE")
         model_interface = ModelInterface()
 
+        predefined_path = 'C:\\Users\\Shadow\\Desktop'
+
         if settings.controlnet_enabled:
             print("CONTROLNET ENABLED")
-            settings.controlnet_reference_image = image_ids["controlnet_reference_image"]
+            settings.controlnet_reference_image = predefined_path + "\\" + image_ids["controlnet_reference_image"]
             model_interface.connect_control_net(unit=settings.controlnet_model, image_path=settings.controlnet_reference_image, strength=settings.controlnet_strength, start_at=settings.controlnet_start_at, end_at=settings.controlnet_end_at)
 
         print("CHOOSING OUTPUT SIZE")
@@ -335,12 +337,12 @@ def generate_workflow(settings: Settings, image_ids: Dict[str, str]) -> Optional
 
         if settings.ipa_1_enabled:
             print("IPA 1 ENABLED")
-            settings.ipa_1_reference_image = image_ids["ipa_1_reference_image"]
+            settings.ipa_1_reference_image = predefined_path + "\\" + image_ids["ipa_1_reference_image"]
             model_interface.connect_ip_adapter_1(image_path=settings.ipa_1_reference_image, model=settings.ipa_1_model, weight=settings.ipa_1_weight, noise=settings.ipa_1_noise, start_at=settings.ipa_1_start_at, end_at=settings.ipa_1_end_at)
 
         if settings.ipa_2_enabled:
             print("IPA 2 ENABLED")
-            settings.ipa_2_reference_image = image_ids["ipa_2_reference_image"]
+            settings.ipa_2_reference_image = predefined_path + "\\" + image_ids["ipa_2_reference_image"]
             model_interface.connect_ip_adapter_2(image_path=settings.ipa_2_reference_image, model=settings.ipa_2_model, weight=settings.ipa_2_weight, noise=settings.ipa_2_noise, start_at=settings.ipa_2_start_at, end_at=settings.ipa_2_end_at)
 
         final_json = model_interface.finalize()

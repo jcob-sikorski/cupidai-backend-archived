@@ -63,3 +63,4 @@ class Message(BaseModel):
     image_uris: Dict[str, str]
     created_at: str
     settings_id: str
+    uploadcare_uuids: List[str]
