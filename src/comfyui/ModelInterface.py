@@ -137,14 +137,15 @@ class ModelInterface():
         (Optional) Connect lora to Efficient Loader
         1. Connect lora to lora_stack in Efficient Loader
         """
-        # Connect Lora to the lora_stack in efficient loader
-        self.lora_stacker["207"]["inputs"]["lora_count"] = count
+        if count:
+            # Connect Lora to the lora_stack in efficient loader
+            self.lora_stacker["207"]["inputs"]["lora_count"] = count
 
-        for i in range(count):  # Assuming 'enabled' has 4 elements.
-            if enabled[i]:
-                index = i + 1
-                self.lora_stacker["207"]["inputs"][f"lora_name_{index}"] = models[i]
-                self.lora_stacker["207"]["inputs"][f"model_str_{index}"] = strengths[i]
+            for i in range(count):  # Assuming 'enabled' has 4 elements.
+                if enabled[i]:
+                    index = i + 1
+                    self.lora_stacker["207"]["inputs"][f"lora_name_{index}"] = models[i]
+                    self.lora_stacker["207"]["inputs"][f"model_str_{index}"] = strengths[i]
 
         self.efficient_loader["206"]["inputs"]["lora_stack"] = ["207", 0]
         self.used_components.add("lora_stacker")
@@ -163,7 +164,7 @@ class ModelInterface():
         # Connect RandomPrompts to the efficient_loader
         self.efficient_loader["206"]["inputs"]["positive"] = ["222", 0]
 
-    def set_up_efficient_loader(self, ckpt_name: str, negative_prompt: str):
+    def set_up_efficient_loader(self, ckpt_name: str, negative_prompt: str, batch_size: int):
         """
         ################# SET UP EFFICIENT LOADER #################
         (Default) Provide a configuration for the efficient loader
@@ -179,13 +180,16 @@ class ModelInterface():
         # Set the negative prompt in efficient loader
         self.efficient_loader["206"]["inputs"]["negative"] = negative_prompt
 
+       # Set the batch size in efficient loader
+        self.efficient_loader["206"]["inputs"]["batch_size"] = batch_size
+
         self.used_components.add("efficient_loader")
 
-    def set_up_ksampler_efficient1(self, seed: int, steps: int, cfg_scale: float, denoise: float, sampler: str, ipa1_enabled: bool = False):
+    def set_up_ksampler_efficient1(self, steps: int, cfg_scale: float, denoise: float, sampler: str, ipa1_enabled: bool = False):
         """
         ################# CONNECT KSAMPLER EFFICENT 2 #################
         """
-        self.ksampler_efficient1["229"]["inputs"]["seed"] = seed
+        # self.ksampler_efficient1["229"]["inputs"]["seed"] = seed
         self.ksampler_efficient1["229"]["inputs"]["steps"] = steps
         self.ksampler_efficient1["229"]["inputs"]["cfg"] = cfg_scale
         self.ksampler_efficient1["229"]["inputs"]["denoise"] = denoise
@@ -294,7 +298,6 @@ class ModelInterface():
         else:
             self.used_components.add("preview_image2")
 
-# TODO: generate image endpoint should now run this program and get the json to send to the comfyui server
 # TODO: get the list of predefined models from David and install them to the custom nodes.
 # TODO: check all the models and checkpoints and all the options for config for the user, preinstall them on the comfyui runpod server
 # TODO: config the comfyui server so it has the endpoint which listens to the requests and runs the websocket for each request with predefined json file
@@ -315,18 +318,19 @@ def generate_workflow(settings: Settings, image_ids: Dict[str, str]) -> Optional
         print("CHOOSING OUTPUT SIZE")
         model_interface.choose_output_size(int1=settings.basic_width, int2=settings.basic_height)
 
-        print("CONNECTING LORA")
-        model_interface.connect_lora(count=settings.lora_count, models=settings.lora_models, strengths=settings.lora_strengths, enabled=settings.lora_enabled)
+        if any(settings.lora_enabled):
+            print("CONNECTING LORA")
+            model_interface.connect_lora(count=settings.lora_count, models=settings.lora_models, strengths=settings.lora_strengths, enabled=settings.lora_enabled)
 
         if settings.pos_prompt_enabled:
             print("POS PROMPT ENABLED")
-            model_interface.connect_random_prompts(text=settings.basic_pos_text_prompt)  # Optional
+            model_interface.connect_random_prompts(positive_prompt=settings.basic_pos_text_prompt)  # Optional
 
         print("SETTING UP EFFICIENT LOADER")
-        model_interface.set_up_efficient_loader(negative=settings.basic_neg_text_prompt, ckpt_name=settings.basic_model, batch_size=settings.basic_batch_size)
+        model_interface.set_up_efficient_loader(negative_prompt=settings.basic_neg_text_prompt, ckpt_name=settings.basic_model, batch_size=settings.basic_batch_size)
 
         print("KSAMPLER EFFICIENT 1")
-        model_interface.set_up_ksampler_efficient1(steps=settings.basic_sampling_steps, sampler_name=settings.basic_sampler_method, cfg_scale=settings.basic_cfg_scale, denoise=settings.basic_denoise)
+        model_interface.set_up_ksampler_efficient1(steps=settings.basic_sampling_steps, sampler=settings.basic_sampler_method, cfg_scale=settings.basic_cfg_scale, denoise=settings.basic_denoise)
 
         if settings.refinement_enabled:
             print("KSAMPLER EFFICIENT 2")
@@ -350,5 +354,5 @@ def generate_workflow(settings: Settings, image_ids: Dict[str, str]) -> Optional
         return final_json
 
     except Exception as e:
-        logging.error(f"An error occurred during workflow execution: {str(e)}")
+        print(f"AN ERROR OCCURRED DURING WORKFLOW EXECUTION: {str(e)}")
         return None

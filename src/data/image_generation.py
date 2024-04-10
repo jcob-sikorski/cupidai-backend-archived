@@ -13,7 +13,7 @@ def update_message(user_id: str, message_id: Optional[str] = None, status: Optio
         status=status,
         image_uris=image_uris,
         created_at=datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-        settings_id=settings_id
+        settings_id=settings_id,
         uploadcare_uuids=uploadcare_uuids
     )
 

@@ -1,4 +1,4 @@
-from typing import Dict
+from typing import Dict, List, Optional
 
 import re
 
@@ -23,8 +23,8 @@ def webhook(message: Message) -> None:
 def save_settings(settings: Settings):
     return data.save_settings(settings)
 
-def update_message(user_id: str, status: str, image_uris: Dict[str, str], settings_id: str):
-    return data.update_message(user_id, status, image_uris, settings_id)
+def update_message(user_id: str, message_id: Optional[str] = None, status: Optional[str] = None, image_uris: Optional[Dict[str, str]] = None, settings_id: Optional[str] = None, uploadcare_uuids: Optional[List[str]] = None):
+    return data.update_message(user_id, message_id, status, image_uris, settings_id, uploadcare_uuids)
 
 def extract_id_from_uri(uri):
     # Use regex to extract the UUID from the URI
@@ -40,7 +40,7 @@ async def generate(settings: Settings, image_uris: Dict[str, str], user_id: str)
 
         settings_id = save_settings(settings)
 
-        message_id = update_message(user_id, "started", image_uris, settings_id)
+        message_id = update_message(user_id, None, "started", image_uris, settings_id, None)
 
         workflow_json = generate_workflow(settings, image_ids)
 

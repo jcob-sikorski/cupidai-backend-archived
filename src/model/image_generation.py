@@ -47,7 +47,7 @@ class Settings(BaseModel):
     lora_count: Optional[int] = None
     lora_models: Optional[List[str]] = None
     lora_strengths: Optional[List[float]] = None
-    lora_enabled: bool = False
+    lora_enabled: List[bool] = [False, False, False, False]
 
     # ControlNet settings (optional)
     controlnet_enabled: bool = False

@@ -1,5 +1,7 @@
 from fastapi import APIRouter, Depends
 
+from typing import Dict
+
 from model.image_generation import Settings, Message
 
 import service.image_generation as service
@@ -12,5 +14,5 @@ async def webhook(message: Message) -> None:
     return service.webhook(message)
 
 @router.post("/", status_code=201)
-async def generate(settings: Settings, user_id: str) -> None:
-    return await service.generate(settings, user_id)
+async def generate(settings: Settings, image_uris: Dict[str, str], user_id: str) -> None:
+    return await service.generate(settings, image_uris, user_id)
