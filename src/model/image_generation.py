@@ -58,9 +58,9 @@ class Settings(BaseModel):
     controlnet_end_at: Optional[float] = None
 
 class Message(BaseModel):
-    user_id: str
-    status: str
-    image_uris: Dict[str, str]
-    created_at: str
-    settings_id: str
-    uploadcare_uuids: List[str]
+    user_id: Optional[str]
+    status: Optional[str]
+    image_uris: Optional[Dict[str, str]]
+    created_at: Optional[str]
+    settings_id: Optional[str]
+    uploadcare_uuids: Optional[List[str]]

@@ -4,19 +4,18 @@ import json
 import urllib.request
 import urllib.parse
 import io
+import os
 import requests
 import uvicorn
 
-from datetime import datetime
-
-from typing import List, Dict, Any
-
-from uuid import uuid4
+from typing import List, Dict, Any, Optional
 
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 
 from pyuploadcare import Uploadcare, File
+
+import httpx
 
 server_address = "127.0.0.1:8188"
 client_id = str(uuid.uuid4())
@@ -68,17 +67,55 @@ app = FastAPI()
 
 class WorkflowRequest(BaseModel):
     workflow: Dict[str, Any]
-    image_uris: List[str]
-    settings_id: str
+    image_uris: Dict[str, str]
+    image_ids: Dict[str, str]
+    message_id_id: str
     user_id: str
 
 class Message(BaseModel):
-    message_id: str
-    user_id: str
-    status: str
-    image_uris: List[str]
-    created_at: str
-    settings_id: str
+    user_id: Optional[str]
+    status: Optional[str]
+    image_uris: Optional[Dict[str, str]]
+    created_at: Optional[str]
+    settings_id: Optional[str]
+    uploadcare_uuids: Optional[List[str]]
+
+def download_and_save_images(image_uris: Dict[str, str], image_ids: Dict[str, str], predefined_path: str) -> None:
+    """
+    Downloads and saves images based on image URIs and image IDs.
+    Args:
+        image_uris (Dict[str, str]): Dictionary of image URIs.
+        image_ids (Dict[str, str]): Dictionary of image IDs.
+        predefined_path (str): Predefined path to save the images.
+    """
+    for key, uri in image_uris.items():
+        image_id = image_ids.get(key)
+        if image_id:
+            image_path = os.path.join(predefined_path, f"{image_id}.jpg")
+            response = requests.get(uri)
+            if response.status_code == 200:
+                with open(image_path, "wb") as f:
+                    f.write(response.content)
+                print(f"Image saved at {image_path}")
+            else:
+                print(f"Failed to download image from {uri}")
+        else:
+            print(f"No image ID found for key: {key}")
+
+def remove_images(image_ids: Dict[str, str], predefined_path: str) -> None:
+    """
+    Removes images based on image IDs.
+    Args:
+        image_ids (Dict[str, str]): Dictionary of image IDs.
+        predefined_path (str): Predefined path where the images are stored.
+    """
+    for key, image_id in image_ids.items():
+        image_path = os.path.join(predefined_path, f"{image_id}.jpg")
+        try:
+            os.remove(image_path)
+            print(f"Image removed: {image_path}")
+        except FileNotFoundError:
+            print(f"Image not found: {image_path}")
 
 def upload_image_to_uploadcare(image_data):
     uploadcare = Uploadcare(public_key='e6daeb69aa105a823395', secret_key='b230fca6ccfea3cccfa2')
@@ -94,19 +131,19 @@ async def create_item(json_payload: WorkflowRequest):
         # Access the workflow and user_id from the JSON payload
         workflow = json_payload.workflow
         image_uris = json_payload.image_uris
-        # settings_id = json_payload.settings_id
+        image_ids = json_payload.image_ids
+        message_id = json_payload.message_id
         user_id = json_payload.user_id
         
         # Process the workflow data or perform any desired actions
         print("Received workflow:", workflow)
         print("Image URIs:", image_uris)
-        # print("Settings ID:", settings_id)
+        print("Image IDs:", image_ids)
         print("User ID:", user_id)
 
-        # TODO: we get the uplaoded images fro uploadcare and put them into predefined paths as image_ids state
+        predefined_path = 'C:\\Users\\Shadow\\Desktop'
 
-        # TODO: then regardless of the execution of the get_images function 
-        #       we must remove the images from the syste,
+        download_and_save_images(image_uris, image_ids, predefined_path)
         
         ws = websocket.WebSocket()
         ws.connect(f"ws://{server_address}/ws?clientId={client_id}")
@@ -121,25 +158,22 @@ async def create_item(json_payload: WorkflowRequest):
                 uploadcare_uuid = upload_image_to_uploadcare(image_data)
                 uploadcare_uuids.append(uploadcare_uuid)
 
-        # TODO: this object must be created on the fastapi side (so er can update status of the Message)
-        #       we must include mappings to the worfklow settings, user, status, image_uris, created_at, settings
-        # Create a Message object
-        # message = Message(
-        #     message_id=uuid4(),
-        #     user_id=user_id,
-        #     status="completed",
-        #     image_uris=image_uris,
-        #     created_at=datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-        #     # settings_id=uuid4()
-        # )
+        remove_images(image_ids, predefined_path)
 
-        # Now you have a list of Uploadcare UUIDs which you can use in your webhook
-        # Send these UUIDs and the Message object to your webhook endpoint
-        # webhook_data = {'message': message.dict(), 'uuids': uploadcare_uuids}
-        # response = requests.post('https://garfish-cute-typically.ngrok-free.app/image-generation/webhook', json=webhook_data)
+        message = Message(
+            message_id=message_id,
+            status='completed',
+            uploadcare_uuids=uploadcare_uuids
+        )
 
-        # # Print the response
-        # print(response.text)
+        webhook_url = 'https://garfish-cute-typically.ngrok-free.app/image-generation/webhook'
+
+        async with httpx.AsyncClient() as client:
+            response = await client.post(webhook_url, json=message.__dict__)
+            if response.status_code == 200:
+                print("Webhook request successful!")
+            else:
+                print(f"Webhook request failed with status code {response.status_code}")
 
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
