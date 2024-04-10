@@ -1,4 +1,6 @@
-from fastapi import Depends
+from typing import Dict
+
+import re
 
 import httpx
 
@@ -19,16 +21,35 @@ def webhook(message: Message) -> None:
     data.update(message)
 
 def save_settings(settings: Settings):
-    data.save_settings(settings)
+    return data.save_settings(settings)
 
-async def generate(settings: Settings, user_id: str) -> None:
+def update_message(user_id: str, status: str, image_uris: Dict[str, str], settings_id: str):
+    return data.update_message(user_id, status, image_uris, settings_id)
+
+def extract_id_from_uri(uri):
+    # Use regex to extract the UUID from the URI
+    match = re.search(r"/([a-f0-9-]+)/-/", uri)
+    if match:
+        return match.group(1)
+    else:
+        return None
+
+async def generate(settings: Settings, image_uris: Dict[str, str], user_id: str) -> None:
     if billing_service.has_permissions('image_generation', user_id):
-        save_settings(settings)
+        image_ids = {key: extract_id_from_uri(uri) for key, uri in image_uris.items()}
 
-        workflow_json = generate_workflow(settings)
+        settings_id = save_settings(settings)
+
+        message_id = update_message(user_id, "in progress", image_uris, settings_id)
+
+        workflow_json = generate_workflow(settings, image_ids)
+
+        if workflow_json is None:
+            update_message(user_id, message_id, "failed")
+            return None
 
         # Define the URL of the server
-        url = "http://imaginaryserver.com/api/runpod"
+        url = "https://native-goat-saved.ngrok-free.app/"
 
         # Define the headers for the request
         headers = {
@@ -38,6 +59,8 @@ async def generate(settings: Settings, user_id: str) -> None:
         # Define the payload for the request
         payload = {
             'workflow': workflow_json,
+            'image_uris': image_uris,
+            'image_ids': image_ids,
             'user_id': user_id
         }
 
@@ -49,13 +72,12 @@ async def generate(settings: Settings, user_id: str) -> None:
         if response.status_code == 200:
             # TODO: use the functions to update statuses, usage etc.
             # like in the deepfake and image verification
-
+            print(response)
             pass
         else:
             print(f"Request failed with status code {response.status_code}")
     else:
         raise NotAuthorized(msg=f"Invalid permissions")
-    pass
     
 
 # we set up the fastapi server listening on some port and waiting for the generation request

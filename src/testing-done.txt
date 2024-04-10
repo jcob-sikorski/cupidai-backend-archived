@@ -9,7 +9,7 @@ tree -I 'venv'
 │   ├── bug.py ✅
 │   ├── deepfake.py ✅
 │   ├── history.py ✅
-│   ├── image-generation.py     entire logic TBD
+│   ├── image-generation.py     testing and fixiing TBD
 │   ├── midjourney.py ✅
 │   ├── social_account.py ✅
 │   └── team.py +/-     invitation + acceptance TBD
@@ -22,7 +22,7 @@ tree -I 'venv'
 │   ├── bug.py ✅
 │   ├── deepfake.py ✅
 │   ├── history.py ✅
-│   ├── image-generation.py     entire logic TBD
+│   ├── image-generation.py     testing and fixiing TBD
 │   ├── midjourney.py ✅
 │   ├── social_account.py ✅
 │   └──team.py +/-     invitation + acceptance TBD
@@ -35,7 +35,7 @@ tree -I 'venv'
 │   ├── bug.py ✅
 │   ├── deepfake.py +/- test generation after buyig a plan
 │   ├── history.py ✅
-│   ├── image-generation.py     entire logic TBD
+│   ├── image-generation.py     testing and fixiing TBD
 │   ├── midjourney.py ✅
 │   ├── social_account.py ✅
 │   └── team.py +/-     invitation + acceptance TBD
@@ -47,7 +47,7 @@ tree -I 'venv'
     ├── bug.py ✅
     ├── deepfake.py +/- test generation after buyig a plan
     ├── history.py ✅
-    ├── image-generation.py     entire logic TBD
+    ├── image-generation.py     testing and fixiing TBD
     ├── midjourney.py ✅
     ├── social_account.py ✅
     └── team.py +/-     invitation + acceptance TBD

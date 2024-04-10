@@ -1,13 +1,14 @@
-from typing import List
+from typing import List, Dict, Optional
 from pydantic import BaseModel
 
 class Settings(BaseModel):
-    settings_id: str
-    # basic settings
+    # Basic settings (mandatory)
     basic_preset: str
-    basic_post_text_prompt: str
+    pos_prompt_enabled: bool
+    basic_pos_text_prompt: str
     basic_neg_text_prompt: str
     basic_sampling_steps: int
+    basic_sampler_method: str
     basic_model: str
     basic_width: int
     basic_height: int
@@ -16,49 +17,49 @@ class Settings(BaseModel):
     basic_batch_count: int
     basic_denoise: float
 
-    # ipa 1 settings
-    ipa_1_enabled: bool
-    ipa_1_model: str
-    ipa_1_reference_image: str
-    ipa_1_weight: float
-    ipa_1_noise: float
-    ipa_1_start_at: float
-    ipa_1_end_at: float
+    # IPA 1 settings (optional)
+    ipa_1_enabled: bool = False
+    ipa_1_model: Optional[str] = None
+    ipa_1_reference_image: Optional[str] = None # TODO: map image_uris to the image path
+    ipa_1_weight: Optional[float] = None
+    ipa_1_noise: Optional[float] = None
+    ipa_1_start_at: Optional[float] = None
+    ipa_1_end_at: Optional[float] = None
 
-    # ipa 2 settings
-    ipa_2_enabled: bool
-    ipa_2_model: str
-    ipa_2_reference_image: str
-    ipa_2_weight: float
-    ipa_2_noise: float
-    ipa_2_start_at: float
-    ipa_2_end_at: float
+    # IPA 2 settings (optional)
+    ipa_2_enabled: bool = False
+    ipa_2_model: Optional[str] = None
+    ipa_2_reference_image: Optional[str] = None # TODO: map image_uris to the image path
+    ipa_2_weight: Optional[float] = None
+    ipa_2_noise: Optional[float] = None
+    ipa_2_start_at: Optional[float] = None
+    ipa_2_end_at: Optional[float] = None
 
-    # refinement settings
-    refinement_seed: int
-    refinement_steps: int
-    refinement_cfg_scale: float
-    refinement_denoise: float
-    refinement_sampler: str
-    refinement_checkpoint: str
+    # Refinement settings (optional)
+    refinement_enabled: bool = False
+    refinement_seed: Optional[int] = None
+    refinement_steps: Optional[int] = None
+    refinement_cfg_scale: Optional[float] = None
+    refinement_denoise: Optional[float] = None
+    refinement_sampler: Optional[str] = None
 
-    # lora settings
-    lora_count: int
-    lora_models: List[str]
-    lora_strengths: List[float]
-    lora_enabled: List[bool]
+    # Lora settings (optional)
+    lora_count: Optional[int] = None
+    lora_models: Optional[List[str]] = None
+    lora_strengths: Optional[List[float]] = None
+    lora_enabled: bool = False
 
-    # controlnet settings
-    controlnet_model: str
-    controlnet_reference_image: str
-    controlnet_strength: float
-    controlnet_start_at: float
-    controlnet_end_at: float
+    # ControlNet settings (optional)
+    controlnet_enabled: bool = False
+    controlnet_model: Optional[int] = None
+    controlnet_reference_image: Optional[str] = None # TODO: map image_uris to the image path
+    controlnet_strength: Optional[float] = None
+    controlnet_start_at: Optional[float] = None
+    controlnet_end_at: Optional[float] = None
 
 class Message(BaseModel):
-    message_id: str
     user_id: str
     status: str
-    image_uris: List[str]
+    image_uris: Dict[str, str]
     created_at: str
     settings_id: str

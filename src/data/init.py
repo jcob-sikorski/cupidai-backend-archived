@@ -24,12 +24,14 @@ def get_db():
     tos_col = db['TermsOfService']
     plan_col = db['Plan']
     history_col = db['History']
+    comfyui_col = db['ComfyUI']
+    settings_col = db['Settings']
     midjourney_col = db['Midjourney']
     bug_col = db['Bug']
     deepfake_col = db['Deepfake']
     social_account_col = db['SocialAccount']
     member_col = db['Member']
 
-    return user_col, stripe_account_col, team_col, tos_col, plan_col, history_col, midjourney_col, bug_col, deepfake_col, social_account_col, member_col
+    return user_col, stripe_account_col, team_col, tos_col, plan_col, history_col, comfyui_col, settings_col, midjourney_col, bug_col, deepfake_col, social_account_col, member_col
 
-user_col, stripe_account_col, team_col, tos_col, plan_col, history_col, midjourney_col, bug_col, deepfake_col, social_account_col, member_col = get_db()
+user_col, stripe_account_col, team_col, tos_col, plan_col, history_col, comfyui_col, settings_col, midjourney_col, bug_col, deepfake_col, social_account_col, member_col = get_db()

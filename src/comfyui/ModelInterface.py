@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Dict, Optional
 
 import importlib
 
@@ -26,7 +26,7 @@ class ModelInterface():
         # Import the JSON dictionary directly without decoding
         try:
             # Assuming all JSON data is stored in the JSONEngine module
-            module = importlib.import_module("JSONEngine")
+            module = importlib.import_module("comfyui.JSONEngine")
             json_dict = getattr(module, unit_name)
             # Directly return the dictionary without json.loads
             return json_dict
@@ -294,97 +294,59 @@ class ModelInterface():
         else:
             self.used_components.add("preview_image2")
 
-# sample_settings = {
-#     # basic settings are for the first efficient loader / ksampler
-#     "basic_preset": "preset_1",
-#     "pos_prompt_enabled": False, 
-#     "basic_pos_text_prompt": "Pos text prompt", 
-#     "basic_neg_text_prompt": "Negative text prompt", 
-#     "basic_sampling_steps": 10, 
-#     "basic_sampler_method": "euler_ancestral", 
-#     "basic_model": "model_1", 
-#     "basic_width": 800, 
-#     "basic_height": 600, 
-#     "basic_cfg_scale": 0.5, 
-#     "basic_batch_size": 32, 
-#     "basic_batch_count": 5,
-#     "basic_denoise": 0.3, 
-
-#     "ipa_1_enabled": True, 
-#     "ipa_1_model": "ipa_model_1", 
-#     "ipa_1_reference_image": "ipa_reference_image_1", 
-#     "ipa_1_weight": 0.7, 
-#     "ipa_1_noise": 0.2, 
-#     "ipa_1_start_at": 0.0, 
-#     "ipa_1_end_at": 1.0, 
-
-#     "ipa_2_enabled": False, 
-#     "ipa_2_model": "", 
-#     "ipa_2_reference_image": "", 
-#     "ipa_2_weight": 0.0, 
-#     "ipa_2_noise": 0.0, 
-#     "ipa_2_start_at": 0.0, 
-#     "ipa_2_end_at": 0.0, 
-
-#     "refinement_enabled": True, 
-#     "refinement_seed": 12345, 
-#     "refinement_steps": 20, 
-#     "refinement_cfg_scale": 0.7, 
-#     "refinement_denoise": 0.4, 
-#     "refinement_sampler": "sampler_1", 
-#     # "refinement_checkpoint": "checkpoint_1",
-
-#     "lora_count": 3, 
-#     "lora_models": ["lora_model_1", "lora_model_2", "lora_model_3"], 
-#     "lora_strengths": [0.5, 0.6, 0.7], 
-#     "lora_enabled": [True, False, True], 
-
-#     "controlnet_enabled": True, 
-#     "controlnet_model": 1, # maps to unit 
-#     "controlnet_reference_image": "controlnet_reference_image_1", 
-#     "controlnet_strength": 0.8, 
-#     "controlnet_start_at": 0.0, 
-#     "controlnet_end_at": 1.0, 
-# }
-
-
 # TODO: generate image endpoint should now run this program and get the json to send to the comfyui server
 # TODO: get the list of predefined models from David and install them to the custom nodes.
 # TODO: check all the models and checkpoints and all the options for config for the user, preinstall them on the comfyui runpod server
 # TODO: config the comfyui server so it has the endpoint which listens to the requests and runs the websocket for each request with predefined json file
 #       and loads the images from CDN into the images path before sending a request to the comfyui - TODO: ensure that comfyui sees the images without a reload
-def generate_workflow(settings: Settings):
-    model_interface = ModelInterface()
 
-    if settings["controlnet_enabled"]:
-        model_interface.connect_control_net(unit=settings["controlnet_model"], image_path=settings["controlnet_reference_image"], strength=settings["controlnet_strength"], start_at=settings["controlnet_start_at"], end_at=settings["controlnet_end_at"])
-    
-    model_interface.choose_output_size(int1=settings["basic_width"], int2=settings["basic_height"])
-    
-    model_interface.connect_lora(count=settings["lora_count"], models=settings["lora_models"], stengths=settings["lora_strengths"], enabled=settings["lora_enabled"])
-    
-    if settings["pos_prompt_enabled"]:
-        model_interface.connect_random_prompts(text=settings["basic_pos_text_prompt"]) # Optional
+def generate_workflow(settings: Settings, image_ids: Dict[str, str]) -> Optional[dict]:
+    try:
+        print("INITIALIZING MODEL INTERFACE")
+        model_interface = ModelInterface()
 
-    model_interface.set_up_efficient_loader(negative=settings["basic_neg_text_prompt"], ckpt_name=settings["basic_model"], batch_size=settings["basic_batch_size"])
+        if settings.controlnet_enabled:
+            print("CONTROLNET ENABLED")
+            settings.controlnet_reference_image = image_ids["controlnet_reference_image"]
+            model_interface.connect_control_net(unit=settings.controlnet_model, image_path=settings.controlnet_reference_image, strength=settings.controlnet_strength, start_at=settings.controlnet_start_at, end_at=settings.controlnet_end_at)
 
-    model_interface.set_up_ksampler_efficient1(steps=settings["basic_sampling_steps"], sampler_name=settings["basic_sampler_method"], cfg_scale=settings["basic_cfg_scale"], denoise=settings["basic_denoise"])
+        print("CHOOSING OUTPUT SIZE")
+        model_interface.choose_output_size(int1=settings.basic_width, int2=settings.basic_height)
 
-    if settings["refinement_enabled"]:
-        model_interface.connect_ksampler_efficient2(seed=settings["refinement_seed"], steps=settings["refinement_steps"], cfg_scale=settings["refinement_cfg_scale"], denoise=settings["refinement_denoise"], sampler_name=settings["refinement_sampler"])
+        print("CONNECTING LORA")
+        model_interface.connect_lora(count=settings.lora_count, models=settings.lora_models, strengths=settings.lora_strengths, enabled=settings.lora_enabled)
 
-    model_interface.connect_preview_image(settings["refinement_enabled"])
+        if settings.pos_prompt_enabled:
+            print("POS PROMPT ENABLED")
+            model_interface.connect_random_prompts(text=settings.basic_pos_text_prompt)  # Optional
 
-    if settings["ipa_1_enabled"]:
-        model_interface.connect_ip_adapter_1(image_path=settings["ipa_1_reference_image"], model=settings["ipa_1_model"], weight=settings["ipa_1_weight"], noise=settings["ipa_1_noise"], start_at=settings["ipa_1_start_at"], end_at=settings["ipa_1_end_at"])
+        print("SETTING UP EFFICIENT LOADER")
+        model_interface.set_up_efficient_loader(negative=settings.basic_neg_text_prompt, ckpt_name=settings.basic_model, batch_size=settings.basic_batch_size)
 
-    if settings["ipa_2_enabled"]:
-        model_interface.connect_ip_adapter_2(image_path=settings["ipa_2_reference_image"], model=settings["ipa_2_model"], weight=settings["ipa_2_weight"], noise=settings["ipa_2_noise"], start_at=settings["ipa_2_start_at"], end_at=settings["ipa_2_end_at"])
+        print("KSAMPLER EFFICIENT 1")
+        model_interface.set_up_ksampler_efficient1(steps=settings.basic_sampling_steps, sampler_name=settings.basic_sampler_method, cfg_scale=settings.basic_cfg_scale, denoise=settings.basic_denoise)
 
-    final_json = model_interface.finalize()
+        if settings.refinement_enabled:
+            print("KSAMPLER EFFICIENT 2")
+            model_interface.connect_ksampler_efficient2(seed=settings.refinement_seed, steps=settings.refinement_steps, cfg_scale=settings.refinement_cfg_scale, denoise=settings.refinement_denoise, sampler_name=settings.refinement_sampler)
 
-    return final_json
+        print("CONNECTING PREVIEW IMAGE")
+        model_interface.connect_preview_image(settings.refinement_enabled)
 
-    # # Write the final JSON to a file
-    # with open('final_json_output.json', 'w') as json_file:
-    #     json.dump(final_json, json_file, indent=4)
+        if settings.ipa_1_enabled:
+            print("IPA 1 ENABLED")
+            settings.ipa_1_reference_image = image_ids["ipa_1_reference_image"]
+            model_interface.connect_ip_adapter_1(image_path=settings.ipa_1_reference_image, model=settings.ipa_1_model, weight=settings.ipa_1_weight, noise=settings.ipa_1_noise, start_at=settings.ipa_1_start_at, end_at=settings.ipa_1_end_at)
+
+        if settings.ipa_2_enabled:
+            print("IPA 2 ENABLED")
+            settings.ipa_2_reference_image = image_ids["ipa_2_reference_image"]
+            model_interface.connect_ip_adapter_2(image_path=settings.ipa_2_reference_image, model=settings.ipa_2_model, weight=settings.ipa_2_weight, noise=settings.ipa_2_noise, start_at=settings.ipa_2_start_at, end_at=settings.ipa_2_end_at)
+
+        final_json = model_interface.finalize()
+
+        return final_json
+
+    except Exception as e:
+        logging.error(f"An error occurred during workflow execution: {str(e)}")
+        return None
