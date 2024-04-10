@@ -20,7 +20,7 @@ class Settings(BaseModel):
     # IPA 1 settings (optional)
     ipa_1_enabled: bool = False
     ipa_1_model: Optional[str] = None
-    ipa_1_reference_image: Optional[str] = None # TODO: map image_uris to the image path
+    ipa_1_reference_image: Optional[str] = None
     ipa_1_weight: Optional[float] = None
     ipa_1_noise: Optional[float] = None
     ipa_1_start_at: Optional[float] = None
@@ -29,7 +29,7 @@ class Settings(BaseModel):
     # IPA 2 settings (optional)
     ipa_2_enabled: bool = False
     ipa_2_model: Optional[str] = None
-    ipa_2_reference_image: Optional[str] = None # TODO: map image_uris to the image path
+    ipa_2_reference_image: Optional[str] = None
     ipa_2_weight: Optional[float] = None
     ipa_2_noise: Optional[float] = None
     ipa_2_start_at: Optional[float] = None
@@ -52,7 +52,7 @@ class Settings(BaseModel):
     # ControlNet settings (optional)
     controlnet_enabled: bool = False
     controlnet_model: Optional[int] = None
-    controlnet_reference_image: Optional[str] = None # TODO: map image_uris to the image path
+    controlnet_reference_image: Optional[str] = None
     controlnet_strength: Optional[float] = None
     controlnet_start_at: Optional[float] = None
     controlnet_end_at: Optional[float] = None

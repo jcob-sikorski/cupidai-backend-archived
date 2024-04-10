@@ -124,7 +124,7 @@ def upload_image_to_uploadcare(image_data):
     ucare_file = uploadcare.upload(file_handle)
     return ucare_file.uuid
 
-async def send_webhook_acknowledgment(message_id: str, status: str, webhook_url: str, uploadcare_uuids: Optional[List[str]] = None) -> None:
+async def send_webhook_acknowledgment(user_id: str, message_id: str, status: str, webhook_url: str, uploadcare_uuids: Optional[List[str]] = None) -> None:
     """
     Sends an acknowledgment message via webhook.
 
@@ -138,6 +138,7 @@ async def send_webhook_acknowledgment(message_id: str, status: str, webhook_url:
     try:
         # Create a dictionary to store the fields
         message_fields = {
+            'user_id': user_id,
             'message_id': message_id,
             'status': status
         }
@@ -171,7 +172,7 @@ async def create_item(json_payload: WorkflowRequest):
 
         webhook_url = 'https://garfish-cute-typically.ngrok-free.app/image-generation/webhook'
 
-        send_webhook_acknowledgment(message_id, 'in progress', webhook_url)
+        send_webhook_acknowledgment(user_id, message_id, 'in progress', webhook_url)
         
         # Process the workflow data or perform any desired actions
         print("Received workflow:", workflow)
@@ -196,7 +197,7 @@ async def create_item(json_payload: WorkflowRequest):
                 uploadcare_uuid = upload_image_to_uploadcare(image_data)
                 uploadcare_uuids.append(uploadcare_uuid)
 
-        send_webhook_acknowledgment(message_id, 'completed', webhook_url, uploadcare_uuids)
+        send_webhook_acknowledgment(user_id, message_id, 'completed', webhook_url, uploadcare_uuids)
 
         remove_images(image_ids, predefined_path)
     except Exception as e:

@@ -13,12 +13,12 @@ import data.image_generation as data
 from model.image_generation import Settings, Message
 
 import service.billing as billing_service
+import service.history as history_service
 
-# TODO: set up the comfyui on the rented PC and install entire server + git to simulate interacting with a fastapi server
-# TODO: maybe it's good idea to set the stauts (in progress) on runpod server?
-# TODO: set up the webhook which gets and saves the uris of generated images to the db
 def webhook(message: Message) -> None:
     data.update(message)
+
+    history_service.update('image_generation', message.user_id)
 
 def save_settings(settings: Settings):
     return data.save_settings(settings)
@@ -66,20 +66,7 @@ async def generate(settings: Settings, image_uris: Dict[str, str], user_id: str)
 
         # Send the POST request
         async with httpx.AsyncClient() as client:
-            response = await client.post(url, headers=headers, json=payload)
-
-
-        # TODO: this below will be in the webhook which accepts all the kinds of status updates
-        #       from the comfyui server
-
-        # Check if the request was successful
-        if response.status_code == 200:
-            # TODO: use the functions to update statuses, usage etc.
-            # like in the deepfake and image verification
-            print(response)
-            pass
-        else:
-            print(f"Request failed with status code {response.status_code}")
+            client.post(url, headers=headers, json=payload)
     else:
         raise NotAuthorized(msg=f"Invalid permissions")
     
