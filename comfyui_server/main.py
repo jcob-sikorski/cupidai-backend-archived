@@ -201,7 +201,7 @@ async def create_item(request: Request):
 
         print(f"GOT THE REQUEST: {json_payload}")
         # Access the workflow and user_id from the JSON payload
-        workflow = json_payload['workflow']
+        workflow = f"""{json_payload['workflow']}"""
 
         image_uris = json_payload['image_uris']
         image_ids = json_payload['image_ids']
@@ -214,9 +214,9 @@ async def create_item(request: Request):
         
         # Process the workflow data or perform any desired actions
         print("Received workflow:", workflow)
-        print("Image URIs:", image_uris)
-        print("Image IDs:", image_ids)
-        print("User ID:", user_id)
+        # print("Image URIs:", image_uris)
+        # print("Image IDs:", image_ids)
+        # print("User ID:", user_id)
 
         predefined_path = 'C:\\Users\\Shadow\\Desktop'
 

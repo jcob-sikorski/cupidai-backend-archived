@@ -44,7 +44,7 @@ async def generate(settings: Settings, image_uris: Dict[str, str], user_id: str)
 
         workflow_json = generate_workflow(settings, image_ids)
         
-        print(workflow_json)
+        print("WORKFLOW_JSON: ", workflow_json)
 
         if workflow_json is None:
             update_message(user_id, message_id, "failed")

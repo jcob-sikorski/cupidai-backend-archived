@@ -7,6 +7,8 @@ import json
 import urllib.request
 import urllib.parse
 
+import uvicorn
+
 server_address = "127.0.0.1:8188"
 client_id = str(uuid.uuid4())
 
@@ -59,14 +61,8 @@ app = FastAPI()
 
 @app.post("/")
 async def create_item(request: Request):
-    print(f"MAKING REQUEST TO JSON CONVERSION")
-    body = await request.body()
-    body_str = body.decode()
-    json_payload = json.loads(body_str)
-
-    print(f"GOT THE REQUEST: {json_payload}")
-    # Access the workflow and user_id from the JSON payload
-    workflow = json_payload['workflow']
+    payload = await request.json()
+    workflow = payload.get('workflow', {})
 
     ws = websocket.WebSocket()
     ws.connect("ws://{}/ws?clientId={}".format(server_address, client_id))
@@ -80,3 +76,7 @@ async def create_item(request: Request):
             import io
             image = Image.open(io.BytesIO(image_data))
             image.show()
+
+# Run the server
+if __name__ == "__main__":
+    uvicorn.run(app, host="0.0.0.0", port=8000)
