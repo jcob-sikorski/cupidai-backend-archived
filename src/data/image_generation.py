@@ -27,6 +27,7 @@ def update_message(user_id: str, message_id: Optional[str] = None, status: Optio
         )
     else:
         message_id = comfyui_col.insert_one(update_fields)
+        message_id = str(message_id.inserted_id)
     
     return message_id
 

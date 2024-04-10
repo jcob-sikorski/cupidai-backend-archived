@@ -19,6 +19,8 @@ class ModelInterface():
         self.efficient_loader = self.load_json("efficient_loader")
         self.ksampler_efficient1 = self.load_json("ksampler_efficient1")
         self.ksampler_efficient2 = self.load_json("ksampler_efficient2")
+        self.preview_image1 = self.load_json("preview_image1")
+        self.preview_image2 = self.load_json("preview_image2")
 
         self.used_components = set()
 
@@ -39,7 +41,9 @@ class ModelInterface():
         combined_json = {}
         # Iterate through each used component
         for component in self.used_components:
+            print(component)
             component_data = getattr(self, component, None)
+            print(component_data)
             if isinstance(component_data, dict):
                 # Merge the component's values into the combined_json
                 for key, value in component_data.items():
@@ -288,7 +292,7 @@ class ModelInterface():
         # connect applyipadapter2 model to ksamplerefficient2 model
         self.ksampler_efficient2["246"]["inputs"]["model"] = ["284", 0]
 
-    def connect_preview_image(self, refinement_enabled: bool = True):
+    def connect_preview_image(self, refinement_enabled: bool = False):
         """
         ################# CONNECT PREVIEW IMAGE #################
         """

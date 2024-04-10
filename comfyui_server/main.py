@@ -10,7 +10,7 @@ import uvicorn
 
 from typing import List, Dict, Any, Optional
 
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Request
 from pydantic import BaseModel
 
 from pyuploadcare import Uploadcare, File
@@ -18,7 +18,7 @@ from pyuploadcare import Uploadcare, File
 import httpx
 
 server_address = "127.0.0.1:8188"
-client_id = str(uuid.uuid4())
+client_id = None
 
 def queue_prompt(prompt):
     p = {"prompt": prompt, "client_id": client_id}
@@ -37,40 +37,48 @@ def get_history(prompt_id):
         return json.loads(response.read())
 
 def get_images(ws, prompt):
+    print("QUEUEING THE PROMPT")
     prompt_id = queue_prompt(prompt)['prompt_id']
+    print(f"PROMPT QUEUED: {prompt_id}")
     output_images = {}
     while True:
+        print("RECEIVING DATA")
         out = ws.recv()
         if isinstance(out, str):
+            print("DATA RECEIVED IS STRING")
             message = json.loads(out)
             if message['type'] == 'executing':
+                print("EXECUTING")
                 data = message['data']
                 if data['node'] is None and data['prompt_id'] == prompt_id:
+                    print("EXECUTION DONE")
                     break #Execution is done
         else:
+            print("DATA RECEIVED IS NOT STRING")
             continue #previews are binary data
 
+    print("GETTING HISTORY")
     history = get_history(prompt_id)[prompt_id]
+    print("HISTORY RETRIEVED")
     for o in history['outputs']:
         for node_id in history['outputs']:
+            print(f"PROCESSING NODE: {node_id}")
             node_output = history['outputs'][node_id]
             if 'images' in node_output:
+                print("IMAGES FOUND IN NODE OUTPUT")
                 images_output = []
                 for image in node_output['images']:
+                    print(f"GETTING IMAGE: {image['filename']}")
                     image_data = get_image(image['filename'], image['subfolder'], image['type'])
                     images_output.append(image_data)
             output_images[node_id] = images_output
+            print(f"IMAGES PROCESSED FOR NODE: {node_id}")
 
+    print("RETURNING OUTPUT IMAGES")
     return output_images
 
-app = FastAPI()
 
-class WorkflowRequest(BaseModel):
-    workflow: Dict[str, Any]
-    image_uris: Dict[str, str]
-    image_ids: Dict[str, str]
-    message_id_id: str
-    user_id: str
+app = FastAPI()
 
 class Message(BaseModel):
     user_id: Optional[str]
@@ -88,12 +96,18 @@ def download_and_save_images(image_uris: Dict[str, str], image_ids: Dict[str, st
         image_ids (Dict[str, str]): Dictionary of image IDs.
         predefined_path (str): Predefined path to save the images.
     """
+    print(f"DOWNLOADING AND SAVING IMAGES")
     for key, uri in image_uris.items():
+        print(f"GETTING IMAGE ID")
         image_id = image_ids.get(key)
+        
         if image_id:
+            print(f"SETTING THE UNIQUE FILEPATH OF THE IMAGE")
             image_path = os.path.join(predefined_path, f"{image_id}.jpg")
+            print(f"DOWNLOADING IMAGE")
             response = requests.get(uri)
             if response.status_code == 200:
+                print(f"WRITING IMAGE TO THE UNIQUE PATH")
                 with open(image_path, "wb") as f:
                     f.write(response.content)
                 print(f"Image saved at {image_path}")
@@ -109,19 +123,28 @@ def remove_images(image_ids: Dict[str, str], predefined_path: str) -> None:
         image_ids (Dict[str, str]): Dictionary of image IDs.
         predefined_path (str): Predefined path where the images are stored.
     """
+    print(f"REMOVING IMAGES")
     for key, image_id in image_ids.items():
+        print(f"SETTING THE UNIQUE FILEPATH OF THE IMAGE")
         image_path = os.path.join(predefined_path, f"{image_id}.jpg")
         try:
+            print(f"REMOVING AN IMAGE")
             os.remove(image_path)
             print(f"Image removed: {image_path}")
         except FileNotFoundError:
             print(f"Image not found: {image_path}")
 
-def upload_image_to_uploadcare(image_data):
+def upload_image_to_uploadcare(image_data, image_name):
+    print(f"INITIALIZING UPLOADCARE CLIENT")
     uploadcare = Uploadcare(public_key='e6daeb69aa105a823395', secret_key='b230fca6ccfea3cccfa2')
+
+    print(f"DECODING IMAGE TO BYTES")
     file_handle = io.BytesIO(image_data)
-    file_handle.name = 'image.png'  # You can set a custom name if needed
+
+    print(f"UPLOADING AN IMAGE TO UPLOADCARE")
     ucare_file = uploadcare.upload(file_handle)
+
+    print(f"RETURNING AN IMAGE UUID")
     return ucare_file.uuid
 
 async def send_webhook_acknowledgment(user_id: str, message_id: str, status: str, webhook_url: str, uploadcare_uuids: Optional[List[str]] = None) -> None:
@@ -135,7 +158,9 @@ async def send_webhook_acknowledgment(user_id: str, message_id: str, status: str
     Returns:
         None
     """
+    print("SENDING WEBHOOK ACKNOWLEDGMENT")
     try:
+        print("CREATING DICTIONARY TO STORE THE FIELDS")
         # Create a dictionary to store the fields
         message_fields = {
             'user_id': user_id,
@@ -145,11 +170,14 @@ async def send_webhook_acknowledgment(user_id: str, message_id: str, status: str
 
         # Only include the 'uploadcare_uuid' field if it is not None
         if uploadcare_uuids is not None:
+            print("ADDING UPLOADCARE_UUIDS FIELD TO MESSAGE MODEL")
             message_fields['uploadcare_uuids'] = uploadcare_uuids
 
+        print("CREATING MESSAGE MODEL")
         # Create the Message object
         message = Message(**message_fields)
 
+        print(f"MAKING POST REQUEST TO THE WEBHHOK {webhook_url}")
         async with httpx.AsyncClient() as client:
             response = await client.post(webhook_url, json=message.__dict__)
             if response.status_code == 200:
@@ -159,16 +187,26 @@ async def send_webhook_acknowledgment(user_id: str, message_id: str, status: str
     except Exception as e:
         print(f"Error sending acknowledgment: {str(e)}")
 
+
+
 # Define a POST endpoint to receive the JSON payload
+# async def create_item(json_payload: WorkflowRequest):
 @app.post("/")
-async def create_item(json_payload: WorkflowRequest):
+async def create_item(request: Request):
     try:
+        print(f"MAKING REQUEST TO JSON CONVERSION")
+        body = await request.body()
+        body_str = body.decode()
+        json_payload = json.loads(body_str)
+
+        print(f"GOT THE REQUEST: {json_payload}")
         # Access the workflow and user_id from the JSON payload
-        workflow = json_payload.workflow
-        image_uris = json_payload.image_uris
-        image_ids = json_payload.image_ids
-        message_id = json_payload.message_id
-        user_id = json_payload.user_id
+        workflow = json_payload['workflow']
+
+        image_uris = json_payload['image_uris']
+        image_ids = json_payload['image_ids']
+        message_id = json_payload['message_id']
+        user_id = json_payload['user_id']
 
         webhook_url = 'https://garfish-cute-typically.ngrok-free.app/image-generation/webhook'
 
@@ -183,9 +221,13 @@ async def create_item(json_payload: WorkflowRequest):
         predefined_path = 'C:\\Users\\Shadow\\Desktop'
 
         download_and_save_images(image_uris, image_ids, predefined_path)
-        
+
+        print(f"CONNECTING TO WEBSOCKET")
+        client_id = user_id
         ws = websocket.WebSocket()
         ws.connect(f"ws://{server_address}/ws?clientId={client_id}")
+
+
         images = get_images(ws, workflow)
 
         # List to store Uploadcare UUIDs
@@ -195,6 +237,7 @@ async def create_item(json_payload: WorkflowRequest):
             for image_data in images[node_id]:
                 # Upload image to Uploadcare
                 uploadcare_uuid = upload_image_to_uploadcare(image_data)
+                print("APPENDING UPLOADCARE UUID TO THE ARRAY")
                 uploadcare_uuids.append(uploadcare_uuid)
 
         send_webhook_acknowledgment(user_id, message_id, 'completed', webhook_url, uploadcare_uuids)
