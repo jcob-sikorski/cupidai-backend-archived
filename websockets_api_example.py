@@ -124,6 +124,40 @@ def upload_image_to_uploadcare(image_data):
     ucare_file = uploadcare.upload(file_handle)
     return ucare_file.uuid
 
+async def send_webhook_acknowledgment(message_id: str, status: str, webhook_url: str, uploadcare_uuids: Optional[List[str]] = None) -> None:
+    """
+    Sends an acknowledgment message via webhook.
+
+    Args:
+        message_id (str): The unique identifier for the message.
+        webhook_url (str): The URL of the webhook endpoint.
+
+    Returns:
+        None
+    """
+    try:
+        # Create a dictionary to store the fields
+        message_fields = {
+            'message_id': message_id,
+            'status': status
+        }
+
+        # Only include the 'uploadcare_uuid' field if it is not None
+        if uploadcare_uuids is not None:
+            message_fields['uploadcare_uuids'] = uploadcare_uuids
+
+        # Create the Message object
+        message = Message(**message_fields)
+
+        async with httpx.AsyncClient() as client:
+            response = await client.post(webhook_url, json=message.__dict__)
+            if response.status_code == 200:
+                print("Webhook request successful!")
+            else:
+                print(f"Webhook request failed with status code {response.status_code}")
+    except Exception as e:
+        print(f"Error sending acknowledgment: {str(e)}")
+
 # Define a POST endpoint to receive the JSON payload
 @app.post("/")
 async def create_item(json_payload: WorkflowRequest):
@@ -134,6 +168,10 @@ async def create_item(json_payload: WorkflowRequest):
         image_ids = json_payload.image_ids
         message_id = json_payload.message_id
         user_id = json_payload.user_id
+
+        webhook_url = 'https://garfish-cute-typically.ngrok-free.app/image-generation/webhook'
+
+        send_webhook_acknowledgment(message_id, 'in progress', webhook_url)
         
         # Process the workflow data or perform any desired actions
         print("Received workflow:", workflow)
@@ -158,26 +196,11 @@ async def create_item(json_payload: WorkflowRequest):
                 uploadcare_uuid = upload_image_to_uploadcare(image_data)
                 uploadcare_uuids.append(uploadcare_uuid)
 
+        send_webhook_acknowledgment(message_id, 'completed', webhook_url, uploadcare_uuids)
+
         remove_images(image_ids, predefined_path)
-
-        message = Message(
-            message_id=message_id,
-            status='completed',
-            uploadcare_uuids=uploadcare_uuids
-        )
-
-        webhook_url = 'https://garfish-cute-typically.ngrok-free.app/image-generation/webhook'
-
-        async with httpx.AsyncClient() as client:
-            response = await client.post(webhook_url, json=message.__dict__)
-            if response.status_code == 200:
-                print("Webhook request successful!")
-            else:
-                print(f"Webhook request failed with status code {response.status_code}")
-
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
-
 
 
 # Run the server

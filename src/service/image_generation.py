@@ -40,7 +40,7 @@ async def generate(settings: Settings, image_uris: Dict[str, str], user_id: str)
 
         settings_id = save_settings(settings)
 
-        message_id = update_message(user_id, "in progress", image_uris, settings_id)
+        message_id = update_message(user_id, "started", image_uris, settings_id)
 
         workflow_json = generate_workflow(settings, image_ids)
 
@@ -67,6 +67,10 @@ async def generate(settings: Settings, image_uris: Dict[str, str], user_id: str)
         # Send the POST request
         async with httpx.AsyncClient() as client:
             response = await client.post(url, headers=headers, json=payload)
+
+
+        # TODO: this below will be in the webhook which accepts all the kinds of status updates
+        #       from the comfyui server
 
         # Check if the request was successful
         if response.status_code == 200:
