@@ -81,7 +81,7 @@ def get_images(ws, prompt):
 def upload_images_to_s3(images):
     s3_client = boto3.client('s3')
 
-    image_uris = []
+    s3_uris = []
 
     for node_id in images:
         for image_data in images[node_id]:
@@ -94,20 +94,20 @@ def upload_images_to_s3(images):
                 Key=image_key
             )
 
-            image_uris.append(f's3://magicalcurie/{image_key}')
+            s3_uris.append(f's3://magicalcurie/{image_key}')
 
-    return image_uris
+    return s3_uris
 
-def download_and_save_images(image_uris: Dict[str, str], image_ids: Dict[str, str], predefined_path: str) -> None:
+def download_and_save_images(uploadcare_uris: Dict[str, str], image_ids: Dict[str, str], predefined_path: str) -> None:
     """
     Downloads and saves images based on image URIs and image IDs.
     Args:
-        image_uris (Dict[str, str]): Dictionary of image URIs.
+        uploadcare_uris (Dict[str, str]): Dictionary of image URIs.
         image_ids (Dict[str, str]): Dictionary of image IDs.
         predefined_path (str): Predefined path to save the images.
     """
     print(f"DOWNLOADING AND SAVING IMAGES")
-    for key, uri in image_uris.items():
+    for key, uri in uploadcare_uris.items():
         print(f"GETTING IMAGE ID")
         image_id = image_ids.get(key)
         
@@ -147,7 +147,7 @@ def remove_images(image_ids: Dict[str, str], predefined_path: str) -> None:
 class Message(BaseModel):
     user_id: Optional[str]
     status: Optional[str]
-    image_uris: Optional[Dict[str, str]] = None
+    uploadcare_uris: Optional[Dict[str, str]] = None
     created_at: Optional[str] = None
     settings_id: Optional[str] = None
     s3_uris: Optional[List[str]] = None
@@ -200,7 +200,7 @@ async def send_webhook_acknowledgment(user_id: str, settings_id: str, status: st
 async def create_item(request: Request):
     payload = await request.json() 
     workflow = payload.get('workflow', {})
-    image_uris = payload.get('image_uris', {})
+    uploadcare_uris = payload.get('uploadcare_uris', {})
     image_ids = payload.get('image_ids', {})
     settings_id = payload.get('settings_id', {})
     user_id = payload.get('user_id', {})
@@ -211,7 +211,7 @@ async def create_item(request: Request):
 
     predefined_path = 'C:\\Users\\Shadow\\Desktop'
 
-    download_and_save_images(image_uris, image_ids, predefined_path)
+    download_and_save_images(uploadcare_uris_uris, image_ids, predefined_path)
 
     ws = websocket.WebSocket()
     ws.connect("ws://{}/ws?clientId={}".format(server_address, client_id))

@@ -1,4 +1,4 @@
-from typing import List, Dict, Optional
+uploadcarefrom typing import List, Dict, Optional
 from pydantic import BaseModel
 
 class Settings(BaseModel):
@@ -60,7 +60,7 @@ class Settings(BaseModel):
 class Message(BaseModel):
     user_id: Optional[str]
     status: Optional[str]
-    image_uris: Optional[Dict[str, str]]
+    uploadcare_uris: Optional[Dict[str, str]]
     created_at: Optional[str]
     settings_id: Optional[str]
     s3_uris: Optional[List[str]]

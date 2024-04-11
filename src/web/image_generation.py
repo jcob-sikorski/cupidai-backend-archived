@@ -14,5 +14,5 @@ async def webhook(message: Message) -> None:
     return service.webhook(message)
 
 @router.post("/", status_code=201)
-async def generate(settings: Settings, image_uris: Dict[str, str], user_id: str) -> None:
-    return await service.generate(settings, image_uris, user_id)
+async def generate(settings: Settings, uploadcare_uris: Dict[str, str], user_id: str) -> None:
+    return await service.generate(settings, uploadcare_uris, user_id)

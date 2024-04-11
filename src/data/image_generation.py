@@ -7,11 +7,11 @@ from model.image_generation import Settings, Message
 from pymongo import ReturnDocument
 from .init import comfyui_col, settings_col
 
-def update_message(user_id: str, message_id: Optional[str] = None, status: Optional[str] = None, image_uris: Optional[Dict[str, str]] = None, settings_id: Optional[str] = None, s3_uris: Optional[List[str]] = None) -> None:
+def update_message(user_id: str, message_id: Optional[str] = None, status: Optional[str] = None, uploadcare_uris: Optional[Dict[str, str]] = None, settings_id: Optional[str] = None, s3_uris: Optional[List[str]] = None) -> None:
     message = Message(
         user_id=user_id,
         status=status,
-        image_uris=image_uris,
+        uploadcare_uris=uploadcare_uris,
         created_at=datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
         settings_id=settings_id,
         s3_uris=s3_uris

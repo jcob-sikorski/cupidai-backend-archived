@@ -23,8 +23,8 @@ def webhook(message: Message) -> None:
 def save_settings(settings: Settings):
     return data.save_settings(settings)
 
-def update_message(user_id: str, message_id: Optional[str] = None, status: Optional[str] = None, image_uris: Optional[Dict[str, str]] = None, settings_id: Optional[str] = None, s3_uris: Optional[List[str]] = None):
-    return data.update_message(user_id, message_id, status, image_uris, settings_id, s3_uris)
+def update_message(user_id: str, message_id: Optional[str] = None, status: Optional[str] = None, uploadcare_uris: Optional[Dict[str, str]] = None, settings_id: Optional[str] = None, s3_uris: Optional[List[str]] = None):
+    return data.update_message(user_id, message_id, status, uploadcare_uris, settings_id, s3_uris)
 
 def extract_id_from_uri(uri):
     # Use regex to extract the UUID from the URI
@@ -34,13 +34,13 @@ def extract_id_from_uri(uri):
     else:
         return None
 
-async def generate(settings: Settings, image_uris: Dict[str, str], user_id: str) -> None:
+async def generate(settings: Settings, uploadcare_uris: Dict[str, str], user_id: str) -> None:
     if billing_service.has_permissions('image_generation', user_id):
-        image_ids = {key: extract_id_from_uri(uri) for key, uri in image_uris.items()}
+        image_ids = {key: extract_id_from_uri(uri) for key, uri in uploadcare_uris.items()}
 
         settings_id = save_settings(settings)
 
-        message_id = update_message(user_id, None, "started", image_uris, settings_id, None)
+        message_id = update_message(user_id, None, "started", uploadcare_uris, settings_id, None)
 
         workflow_json = generate_workflow(settings, image_ids)
 
@@ -59,7 +59,7 @@ async def generate(settings: Settings, image_uris: Dict[str, str], user_id: str)
         # Define the payload for the request
         payload = {
             'workflow': workflow_json,
-            'image_uris': image_uris,
+            'uploadcare_uris': uploadcare_uris,
             'image_ids': image_ids,
             'settings_id': settings_id,
             'user_id': user_id
@@ -70,8 +70,3 @@ async def generate(settings: Settings, image_uris: Dict[str, str], user_id: str)
             await client.post(url, headers=headers, json=payload)
     else:
         raise NotAuthorized(msg=f"Invalid permissions")
-    
-
-# we set up the fastapi server listening on some port and waiting for the generation request
-# then it forwards the request to the fastapi and then uploads the generated images to the uploadcare and makes the post request to the
-# previous fastapi server with the images uris which that server saves to a collection which is monitored by frontend by polling
