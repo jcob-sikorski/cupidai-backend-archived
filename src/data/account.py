@@ -1,10 +1,10 @@
 import requests
 import json
 
-from model.account import Account
+from model.account import Account, Invite
 
 from pymongo import ReturnDocument
-from .init import account_col
+from .init import account_col, invite_col
 
 def create(email: str, user_id: str) -> None:
     # Check if account with the given user_id already exists
@@ -19,6 +19,9 @@ def create(email: str, user_id: str) -> None:
 
     # Optionally, return the newly created account
     return account
+
+def create_invite(invite: Invite):
+    result = invite_col.insert_one(invite.dict())
 
 def change_email(email: str, user_id: str) -> None:
     result = account_col.find_one_and_update(
@@ -112,3 +115,12 @@ def delete(user_id: str) -> None:
     # headers = {}
 
     # response = requests.request("DELETE", url, headers=headers, data=payload)
+
+def get_invite(invite_id: str) -> None:
+    print("GETTING INVITE DETAILS")
+    result = invite_col.find_one({"_id": invite_id})
+
+    if result is not None:
+        invite = Invite(**result)
+        return invite
+    return None

@@ -4,12 +4,15 @@ import requests
 
 import data.team as data
 
+from model.account import Invite
 from model.team import Team
 
 import service.account as account_service
 
-def accept(member_id: str, user_id: str) -> None:
-    return data.accept(member_id, user_id)
+import uuid
+
+def accept(invite_id: str) -> None:
+    return data.accept(invite_id)
 
 def invite(guest_email: str, host_id: str) -> None:
     host_as_member = get_member(host_id)
@@ -17,12 +20,18 @@ def invite(guest_email: str, host_id: str) -> None:
     if host_as_member and ('invite' in host_as_member.permissions):
         guest_account = account_service.get_by_email(guest_email)
 
-        # Get the team name based on the user_id
         team_name = data.get_team_name(host_id)
 
-        # TODO: what we pass for guest_id? we can't pass it because it might be null
-        #       email probably too we cant pass becuase the email might contain special characters
-        invite_link = f"https://cupidai.tech/team/accept/{guest_id}/{host_id}?signup={str(guest_account is None).lower()}"
+        invite_id = str(uuid.uuid4())
+
+        invite_model = Invite(
+            invite_id = invite_id,
+            guest_id = getattr(guest_account, 'user_id', None),
+            host_id = host_id,
+            signup_required = (guest_account is None)
+        )
+
+        account_service.create_invite(invite_model)
 
         response = requests.request(
             "POST", 
@@ -31,8 +40,7 @@ def invite(guest_email: str, host_id: str) -> None:
                 "transactionalId": "cltertje200k7zf04tzzdhmgx",
                 "email": guest_email,
                 "dataVariables": {
-                    # TODO: based on the development/prodcution update all the links
-                    "invite_link": invite_link,
+                    "invite_link": f"https://cupidai.tech/team/accept/{invite_id}",
                     "team_name": team_name,
                 }
             },

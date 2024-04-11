@@ -17,3 +17,6 @@ def change_profile_picture(profile_uri: str, user_id: str) -> None:
 
 def delete(user_id: str) -> None:
     return data.delete(user_id)
+
+def get_invite(invite_id: str) -> None:
+    return data.get_invite(invite_id)

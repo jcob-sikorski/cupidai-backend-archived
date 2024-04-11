@@ -1,25 +1,32 @@
 from typing import List
 
+import service.account as account_service
+
 from model.team import Team, Member
 
 from pymongo import ReturnDocument
 from .init import team_col, member_col
 
-def accept(member_id: str, user_id: str) -> None:
+def accept(invite_id: str) -> None:
+    invite = account_service.get_invite(invite_id)
+
+    # TODO: if user is a new one then also require him to signup 
+    #       and check in Kinde if he registered successfully
+
     # Check if the user is already in another team
-    existing_team = team_col.find_one({"members": user_id})
+    existing_team = team_col.find_one({"members": {"$in": [invite.guest_id]}})
     
     if existing_team:
-        print(f"User {user_id} is already in another team.")
+        print(f"User {invite.guest_id} is already in another team.")
         return
 
     # Add the user id to the member list
-    team = team_col.find_one({"owner": member_id})
-    if team:
-        team["members"].append(user_id)
+    host_team = team_col.find_one({"members": {"$in": [invite.host_id]}})
+    if host_team:
+        host_team["members"].append(invite.guest_id)
         team_col.find_one_and_update(
-            {"_id": team["_id"]},
-            {"$set": {"members": team["members"]}}
+            {"_id": host_team["_id"]},
+            {"$set": {"members": host_team["members"]}}
         )
 
     # Create the member model

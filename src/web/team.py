@@ -9,9 +9,9 @@ from service import team as service
 router = APIRouter(prefix="/team")
 
 # Protected endpoint
-@router.post("/accept/{member_id}/{user_id}", status_code=201)  # Accepts the invite
-async def accept(member_id: str, user_id: str) -> None:
-    return service.accept(member_id, user_id)
+@router.post("/accept/{invite_id}", status_code=201)  # Accepts the invite
+async def accept(invite_id: str) -> None:
+    return service.accept(invite_id)
 
 # Protected endpoint
 @router.post("/members/invite", status_code=201)  # Invites a new member
