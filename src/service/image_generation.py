@@ -43,8 +43,6 @@ async def generate(settings: Settings, image_uris: Dict[str, str], user_id: str)
         message_id = update_message(user_id, None, "started", image_uris, settings_id, None)
 
         workflow_json = generate_workflow(settings, image_ids)
-        
-        print("WORKFLOW_JSON: ", workflow_json)
 
         if workflow_json is None:
             update_message(user_id, message_id, "failed")
@@ -66,8 +64,6 @@ async def generate(settings: Settings, image_uris: Dict[str, str], user_id: str)
             'message_id': message_id,
             'user_id': user_id
         }
-
-        print(payload)
 
         # Send the POST request
         async with httpx.AsyncClient() as client:

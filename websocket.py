@@ -6,11 +6,29 @@ import uuid
 import json
 import urllib.request
 import urllib.parse
+import os
 
+from dotenv import load_dotenv
+
+from fastapi import FastAPI, Request
 import uvicorn
+
+import boto3
+
+load_dotenv()
 
 server_address = "127.0.0.1:8188"
 client_id = str(uuid.uuid4())
+
+app = FastAPI()
+
+# Load AWS S3 Access keys from environment variables
+S3_ACCESS_KEY = os.getenv('S3_ACCESS_KEY')
+S3_SECRET_ACCESS_KEY = os.getenv('S3_SECRET_ACCESS_KEY')
+
+boto3.setup_default_session(aws_access_key_id=S3_ACCESS_KEY,
+                            aws_secret_access_key=S3_SECRET_ACCESS_KEY,
+                            region_name='us-east-1')
 
 def queue_prompt(prompt):
     p = {"prompt": prompt, "client_id": client_id}
@@ -55,27 +73,41 @@ def get_images(ws, prompt):
 
     return output_images
 
-from fastapi import FastAPI, HTTPException, Request
+def upload_images_to_s3(images):
+    s3_client = boto3.client('s3')
 
-app = FastAPI()
+    image_keys = []
+
+    for node_id in images:
+        for image_data in images[node_id]:
+            image_key = str(uuid.uuid4())
+
+            
+            s3_client.put_object(
+                Body=image_data,
+                Bucket='magicalcurie',
+                Key=image_key
+            )
+
+            image_keys.append(image_key)
+
+    return image_keys
+
 
 @app.post("/")
 async def create_item(request: Request):
-    payload = await request.json()
+    payload = await request.json() 
     workflow = payload.get('workflow', {})
 
     ws = websocket.WebSocket()
     ws.connect("ws://{}/ws?clientId={}".format(server_address, client_id))
     images = get_images(ws, workflow)
 
-    #Commented out code to display the output images:
+    image_keys = upload_images_to_s3(images)
 
-    for node_id in images:
-        for image_data in images[node_id]:
-            from PIL import Image
-            import io
-            image = Image.open(io.BytesIO(image_data))
-            image.show()
+    print(image_keys)
+
+    return image_keys
 
 # Run the server
 if __name__ == "__main__":
