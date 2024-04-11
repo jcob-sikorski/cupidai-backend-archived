@@ -3,6 +3,9 @@ from data import account as data
 def create(email: str, user_id: str) -> None:
     return data.create(email, user_id)
 
+def create_ref(ref: str) -> None:
+    return data.create_ref(ref)
+
 def change_email(email: str, user_id: str) -> None:
     return data.change_email(email, user_id)
 

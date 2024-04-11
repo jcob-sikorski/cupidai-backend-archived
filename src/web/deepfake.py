@@ -1,7 +1,5 @@
 from fastapi import APIRouter, Depends
 
-
-
 from model.deepfake import Deepfake
 
 from service import deepfake as service

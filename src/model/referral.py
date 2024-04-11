@@ -17,5 +17,5 @@ class Statistics(BaseModel):
     stayed_at_checkout: int
     earned: float
     user_id: str
-    month: str
-    week: str
+    month: str  # TODO: probably we can merge this into a single date so we use mognodb filters for getting stats by week, month, etc.
+    week: str   # TODO: probably we can merge this into a single date so we use mognodb filters for getting stats by week, month, etc.

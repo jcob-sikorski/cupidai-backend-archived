@@ -10,7 +10,7 @@ from .init import team_col, member_col
 def accept(invite_id: str) -> None:
     invite = account_service.get_invite(invite_id)
 
-    # TODO: if user is a new one then also require him to signup 
+    # TODO: if user is a new one then also require him to signup (redirect him somehow)
     #       and check in Kinde if he registered successfully
 
     # Check if the user is already in another team
@@ -30,8 +30,10 @@ def accept(invite_id: str) -> None:
         )
 
     # Create the member model
-    member = Member(user_id=user_id, permissions=[])
+    member = Member(user_id=invite.guest_id, permissions=[])
     member_col.insert_one(member.dict())
+
+    invite_col.delete_one({"_id": invite_id})
 
 # TESTING DONE ✅
 def update_permissions(permissions: List[str], member_id: str, user_id: str) -> bool:
