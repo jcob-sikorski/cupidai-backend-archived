@@ -101,18 +101,21 @@ def upload_images_to_s3(images):
 class Message(BaseModel):
     user_id: Optional[str]
     status: Optional[str]
-    image_uris: Optional[Dict[str, str]]
-    created_at: Optional[str]
-    settings_id: Optional[str]
-    s3_uris: Optional[List[str]]
+    image_uris: Optional[Dict[str, str]] = None
+    created_at: Optional[str] = None
+    settings_id: Optional[str] = None
+    s3_uris: Optional[List[str]] = None
 
-async def send_webhook_acknowledgment(user_id: str, message_id: str, status: str, webhook_url: str, s3_uris: Optional[List[str]] = None) -> None:
+async def send_webhook_acknowledgment(user_id: str, settings_id: str, status: str, webhook_url: str, s3_uris: Optional[List[str]] = None) -> None:
     """
     Sends an acknowledgment message via webhook.
 
     Args:
+        user_id (str): The unique identifier for the user.
         message_id (str): The unique identifier for the message.
+        status (str): The status of the message.
         webhook_url (str): The URL of the webhook endpoint.
+        s3_uris (Optional[List[str]]): The S3 URIs associated with the message.
 
     Returns:
         None
@@ -123,7 +126,7 @@ async def send_webhook_acknowledgment(user_id: str, message_id: str, status: str
         # Create a dictionary to store the fields
         message_fields = {
             'user_id': user_id,
-            'message_id': message_id,
+            'settings_id': settings_id,
             'status': status
         }
 
@@ -146,16 +149,19 @@ async def send_webhook_acknowledgment(user_id: str, message_id: str, status: str
         print(f"Error sending acknowledgment: {str(e)}")
 
 
+
 @app.post("/")
 async def create_item(request: Request):
     payload = await request.json() 
     workflow = payload.get('workflow', {})
-    message_id = payload.get('message_id', {})
+    image_uris = payload.get('image_uris', {})
+    image_ids = payload.get('image_ids', {})
+    settings_id = payload.get('settings_id', {})
     user_id = payload.get('user_id', {})
 
     webhook_url = 'https://garfish-cute-typically.ngrok-free.app/image-generation/webhook'
 
-    await send_webhook_acknowledgment(user_id, message_id, 'in progress', webhook_url)
+    await send_webhook_acknowledgment(user_id, settings_id, 'in progress', webhook_url)
 
     ws = websocket.WebSocket()
     ws.connect("ws://{}/ws?clientId={}".format(server_address, client_id))
@@ -163,7 +169,7 @@ async def create_item(request: Request):
 
     s3_uris = upload_images_to_s3(images)
 
-    await send_webhook_acknowledgment(user_id, message_id, 'completed', webhook_url, s3_uris)
+    await send_webhook_acknowledgment(user_id, settings_id, 'completed', webhook_url, s3_uris)
 
     return s3_uris
 
