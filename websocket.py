@@ -98,6 +98,52 @@ def upload_images_to_s3(images):
 
     return image_uris
 
+def download_and_save_images(image_uris: Dict[str, str], image_ids: Dict[str, str], predefined_path: str) -> None:
+    """
+    Downloads and saves images based on image URIs and image IDs.
+    Args:
+        image_uris (Dict[str, str]): Dictionary of image URIs.
+        image_ids (Dict[str, str]): Dictionary of image IDs.
+        predefined_path (str): Predefined path to save the images.
+    """
+    print(f"DOWNLOADING AND SAVING IMAGES")
+    for key, uri in image_uris.items():
+        print(f"GETTING IMAGE ID")
+        image_id = image_ids.get(key)
+        
+        if image_id:
+            print(f"SETTING THE UNIQUE FILEPATH OF THE IMAGE")
+            image_path = os.path.join(predefined_path, f"{image_id}.jpg")
+            print(f"DOWNLOADING IMAGE")
+            response = requests.get(uri)
+            if response.status_code == 200:
+                print(f"WRITING IMAGE TO THE UNIQUE PATH")
+                with open(image_path, "wb") as f:
+                    f.write(response.content)
+                print(f"Image saved at {image_path}")
+            else:
+                print(f"Failed to download image from {uri}")
+        else:
+            print(f"No image ID found for key: {key}")
+
+def remove_images(image_ids: Dict[str, str], predefined_path: str) -> None:
+    """
+    Removes images based on image IDs.
+    Args:
+        image_ids (Dict[str, str]): Dictionary of image IDs.
+        predefined_path (str): Predefined path where the images are stored.
+    """
+    print(f"REMOVING IMAGES")
+    for key, image_id in image_ids.items():
+        print(f"SETTING THE UNIQUE FILEPATH OF THE IMAGE")
+        image_path = os.path.join(predefined_path, f"{image_id}.jpg")
+        try:
+            print(f"REMOVING AN IMAGE")
+            os.remove(image_path)
+            print(f"Image removed: {image_path}")
+        except FileNotFoundError:
+            print(f"Image not found: {image_path}")
+
 class Message(BaseModel):
     user_id: Optional[str]
     status: Optional[str]
@@ -163,6 +209,10 @@ async def create_item(request: Request):
 
     await send_webhook_acknowledgment(user_id, settings_id, 'in progress', webhook_url)
 
+    predefined_path = 'C:\\Users\\Shadow\\Desktop'
+
+    download_and_save_images(image_uris, image_ids, predefined_path)
+
     ws = websocket.WebSocket()
     ws.connect("ws://{}/ws?clientId={}".format(server_address, client_id))
     images = get_images(ws, workflow)
@@ -170,6 +220,8 @@ async def create_item(request: Request):
     s3_uris = upload_images_to_s3(images)
 
     await send_webhook_acknowledgment(user_id, settings_id, 'completed', webhook_url, s3_uris)
+
+    remove_images(image_ids, predefined_path)
 
     return s3_uris
 
