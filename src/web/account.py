@@ -5,6 +5,11 @@ from service import account as service
 router = APIRouter(prefix="/account")
 
 # Protected endpoint
+@router.post("/create", status_code=200)  # Creates new user account
+async def create(email: str, user_id: str) -> None:
+    return service.create(email, user_id)
+
+# Protected endpoint
 @router.patch("/email", status_code=200)  # Changes the account's email
 async def change_email(email: str, user_id: str) -> None:
     return service.change_email(email, user_id)

@@ -105,19 +105,18 @@ def transfer_ownership(member_id: str, user_id: str) -> bool:
 # TESTING DONE ✅
 def get_members(user_id: str) -> None:
     # Fetch the team that the user belongs to
-    team = team_col.find_one({"owner": user_id})
+    team = team_col.find_one({"members": {"$in": [user_id]}})
     
     if team:
         # Return the members of the team
         return team["members"]
-
 
 def get_activity(user_id: str) -> None:
     # TODO: to be implemented
     pass
 
 def get_team_name(user_id: str) -> None:
-    result = team_col.find_one({"members": user_id})
+    result = team_col.find_one({"members": {"$in": [user_id]}})
     if result is not None:
         team = Team(**result)
         return team.name
@@ -145,7 +144,7 @@ def disband(user_id: str) -> bool:
 # TESTING DONE ✅
 def create(team: Team, user_id: str) -> bool:
     # Fetch the team that the user is a member of
-    existing_team = team_col.find_one({"members": user_id})
+    existing_team = team_col.find_one({"members": {"$in": [user_id]}})
     
     # If the user is already in a team, return False
     if existing_team:
@@ -174,7 +173,7 @@ def create(team: Team, user_id: str) -> bool:
 # TESTING DONE ✅
 def leave(user_id: str) -> bool:
     # Fetch the team that the user is a member of
-    team = team_col.find_one({"members": user_id})
+    team = team_col.find_one({"members": {"$in": [user_id]}})
     
     if team:
         # If the user is the owner of the team, raise an exception
@@ -203,7 +202,7 @@ def leave(user_id: str) -> bool:
 # TESTING DONE ✅
 def owner(user_id: str) -> None:
     # Fetch the team that the user is a member of
-    team = team_col.find_one({"members": user_id})
+    team = team_col.find_one({"members": {"$in": [user_id]}})
     
     if team:
         # Return the owner of the team
@@ -211,8 +210,15 @@ def owner(user_id: str) -> None:
     
 # TESTING DONE ✅
 def get_team(user_id: str) -> None:
-    result = team_col.find_one({"members": user_id})
+    result = team_col.find_one({"members": {"$in": [user_id]}})
     if result is not None:
         team = Team(**result)
         return team
+    return None
+
+def get_member(user_id: str) -> None:
+    result = member_col.find_one({"user_id": user_id})
+    if result is not None:
+        member = Member(**result)
+        return member
     return None

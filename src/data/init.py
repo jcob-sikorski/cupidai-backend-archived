@@ -18,7 +18,7 @@ def get_db():
 
     db = mongoClient['cupidai']
 
-    user_col = db['User']
+    account_col = db['Account']
     stripe_account_col = db['StripeAccount']
     team_col = db['Team']
     tos_col = db['TermsOfService']
@@ -32,6 +32,6 @@ def get_db():
     social_account_col = db['SocialAccount']
     member_col = db['Member']
 
-    return user_col, stripe_account_col, team_col, tos_col, plan_col, history_col, comfyui_col, settings_col, midjourney_col, bug_col, deepfake_col, social_account_col, member_col
+    return account_col, stripe_account_col, team_col, tos_col, plan_col, history_col, comfyui_col, settings_col, midjourney_col, bug_col, deepfake_col, social_account_col, member_col
 
-user_col, stripe_account_col, team_col, tos_col, plan_col, history_col, comfyui_col, settings_col, midjourney_col, bug_col, deepfake_col, social_account_col, member_col = get_db()
+account_col, stripe_account_col, team_col, tos_col, plan_col, history_col, comfyui_col, settings_col, midjourney_col, bug_col, deepfake_col, social_account_col, member_col = get_db()

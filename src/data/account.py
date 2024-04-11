@@ -1,9 +1,33 @@
 import requests
 import json
 
+from model.account import Account
+
+from pymongo import ReturnDocument
+from .init import account_col
+
+def create(email: str, user_id: str) -> None:
+    # Check if account with the given user_id already exists
+    existing_account = account_col.find_one({"user_id": user_id})
+    if existing_account:
+        # Account already exists, return an error
+        raise ValueError("Account already exists for this user ID")
+
+    # Create a new account
+    account = Account(email=email, user_id=user_id)
+    account_col.insert_one(account.dict())
+
+    # Optionally, return the newly created account
+    return account
+
 def change_email(email: str, user_id: str) -> None:
+    result = account_col.find_one_and_update(
+        {"user_id": user_id},
+        {"$set": {"email": email}},
+        upsert=True,
+        return_document=ReturnDocument.AFTER
+    )
     # TODO:
-    return 200
     # url = f"https://login.auth0.com/api/v2/users/{user_id}"
 
     # payload = json.dumps({
@@ -18,9 +42,28 @@ def change_email(email: str, user_id: str) -> None:
 
     # response = requests.request("PATCH", url, headers=headers, data=payload)
 
+# TESTING DONE ✅
 def get(user_id: str) -> None:
+    print("GETTING USER DETAILS")
+    result = account_col.find_one({"user_id": user_id})
+
+    if result is not None:
+        account = Account(**result)
+        return account
+    return None
+
+def get_by_email(email: str) -> None:
+    print("GETTING USER DETAILS BY EMAIL")
+    result = account_col.find_one({"email": email})
+
+    if result is not None:
+        account = Account(**result)
+        return account
+    return None
+
+# def get(user_id: str) -> None:
     # TODO:
-    return 200
+    # return 200
 
     # TODO: is this really a user_id?
     # TODO: how to get access token which has the user_id?
