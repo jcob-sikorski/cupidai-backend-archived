@@ -77,4 +77,4 @@ def owner(user_id: str) -> None:
 
 # TESTING DONE ✅
 def get_team(user_id: str):
-    return get_team
+    return data.get_team(user_id)

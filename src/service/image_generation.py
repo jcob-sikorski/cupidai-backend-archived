@@ -16,15 +16,15 @@ import service.billing as billing_service
 import service.history as history_service
 
 def webhook(message: Message) -> None:
-    data.update(message)
+    data.update_message(user_id=message.user_id, message_id=None, status=message.status, s3_uris=message.s3_uris)
 
     history_service.update('image_generation', message.user_id)
 
 def save_settings(settings: Settings):
     return data.save_settings(settings)
 
-def update_message(user_id: str, message_id: Optional[str] = None, status: Optional[str] = None, image_uris: Optional[Dict[str, str]] = None, settings_id: Optional[str] = None, uploadcare_uuids: Optional[List[str]] = None):
-    return data.update_message(user_id, message_id, status, image_uris, settings_id, uploadcare_uuids)
+def update_message(user_id: str, message_id: Optional[str] = None, status: Optional[str] = None, image_uris: Optional[Dict[str, str]] = None, settings_id: Optional[str] = None, s3_uris: Optional[List[str]] = None):
+    return data.update_message(user_id, message_id, status, image_uris, settings_id, s3_uris)
 
 def extract_id_from_uri(uri):
     # Use regex to extract the UUID from the URI
@@ -61,7 +61,7 @@ async def generate(settings: Settings, image_uris: Dict[str, str], user_id: str)
             'workflow': workflow_json,
             'image_uris': image_uris,
             'image_ids': image_ids,
-            'message_id': message_id,
+            'settings_id': settings_id,
             'user_id': user_id
         }
 

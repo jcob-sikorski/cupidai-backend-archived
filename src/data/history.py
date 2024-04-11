@@ -7,7 +7,7 @@ from pymongo import ReturnDocument
 from .init import history_col
 
 domain_to_index = {
-    "": "images_generated" ,
+    "image_generation": "images_generated" ,
     "deepfake": "deepfakes_generated" ,
     "ai_verification": "ai_verification_generated" ,
     "content_utilities": "content_utilities_uses" ,
@@ -29,7 +29,7 @@ def update(domain: str, user_id: str) -> None:
     team = team_service.get_team(user_id)
     if team:
         history_col.find_one_and_update(
-            {"team_id": team.team_id},
+            {"owner": team.owner},
             {"$inc": {domain_to_index[domain]: 1}},
             upsert=True,
             return_document=ReturnDocument.AFTER

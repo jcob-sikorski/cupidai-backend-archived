@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends
 
-from typing import Dict
+from typing import Dict, List, Optional
 
 from model.image_generation import Settings, Message
 

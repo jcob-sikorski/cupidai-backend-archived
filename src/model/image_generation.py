@@ -63,4 +63,4 @@ class Message(BaseModel):
     image_uris: Optional[Dict[str, str]]
     created_at: Optional[str]
     settings_id: Optional[str]
-    uploadcare_uuids: Optional[List[str]]
+    s3_uris: Optional[List[str]]

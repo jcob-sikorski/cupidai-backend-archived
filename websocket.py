@@ -7,13 +7,18 @@ import json
 import urllib.request
 import urllib.parse
 import os
+import httpx
 
 from dotenv import load_dotenv
 
-from fastapi import FastAPI, Request
+from fastapi import FastAPI, HTTPException, Request
 import uvicorn
 
 import boto3
+
+from pydantic import BaseModel
+
+from typing import List, Dict, Any, Optional
 
 load_dotenv()
 
@@ -76,7 +81,7 @@ def get_images(ws, prompt):
 def upload_images_to_s3(images):
     s3_client = boto3.client('s3')
 
-    image_keys = []
+    image_uris = []
 
     for node_id in images:
         for image_data in images[node_id]:
@@ -89,25 +94,78 @@ def upload_images_to_s3(images):
                 Key=image_key
             )
 
-            image_keys.append(image_key)
+            image_uris.append(f's3://magicalcurie/{image_key}')
 
-    return image_keys
+    return image_uris
+
+class Message(BaseModel):
+    user_id: Optional[str]
+    status: Optional[str]
+    image_uris: Optional[Dict[str, str]]
+    created_at: Optional[str]
+    settings_id: Optional[str]
+    s3_uris: Optional[List[str]]
+
+async def send_webhook_acknowledgment(user_id: str, message_id: str, status: str, webhook_url: str, s3_uris: Optional[List[str]] = None) -> None:
+    """
+    Sends an acknowledgment message via webhook.
+
+    Args:
+        message_id (str): The unique identifier for the message.
+        webhook_url (str): The URL of the webhook endpoint.
+
+    Returns:
+        None
+    """
+    print("SENDING WEBHOOK ACKNOWLEDGMENT")
+    try:
+        print("CREATING DICTIONARY TO STORE THE FIELDS")
+        # Create a dictionary to store the fields
+        message_fields = {
+            'user_id': user_id,
+            'message_id': message_id,
+            'status': status
+        }
+
+        if s3_uris is not None:
+            print("ADDING UPLOADCARE_UUIDS FIELD TO MESSAGE MODEL")
+            message_fields['s3_uris'] = s3_uris
+
+        print("CREATING MESSAGE MODEL")
+        # Create the Message object
+        message = Message(**message_fields)
+
+        print(f"MAKING POST REQUEST TO THE WEBHHOK {webhook_url}")
+        async with httpx.AsyncClient() as client:
+            response = await client.post(webhook_url, json=message.__dict__)
+            if response.status_code == 200:
+                print("Webhook request successful!")
+            else:
+                print(f"Webhook request failed with status code {response.status_code}")
+    except Exception as e:
+        print(f"Error sending acknowledgment: {str(e)}")
 
 
 @app.post("/")
 async def create_item(request: Request):
     payload = await request.json() 
     workflow = payload.get('workflow', {})
+    message_id = payload.get('message_id', {})
+    user_id = payload.get('user_id', {})
+
+    webhook_url = 'https://garfish-cute-typically.ngrok-free.app/image-generation/webhook'
+
+    await send_webhook_acknowledgment(user_id, message_id, 'in progress', webhook_url)
 
     ws = websocket.WebSocket()
     ws.connect("ws://{}/ws?clientId={}".format(server_address, client_id))
     images = get_images(ws, workflow)
 
-    image_keys = upload_images_to_s3(images)
+    s3_uris = upload_images_to_s3(images)
 
-    print(image_keys)
+    await send_webhook_acknowledgment(user_id, message_id, 'completed', webhook_url, s3_uris)
 
-    return image_keys
+    return s3_uris
 
 # Run the server
 if __name__ == "__main__":

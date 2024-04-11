@@ -86,7 +86,7 @@ class Message(BaseModel):
     image_uris: Optional[Dict[str, str]]
     created_at: Optional[str]
     settings_id: Optional[str]
-    uploadcare_uuids: Optional[List[str]]
+    s3_uris: Optional[List[str]]
 
 def download_and_save_images(image_uris: Dict[str, str], image_ids: Dict[str, str], predefined_path: str) -> None:
     """
@@ -147,7 +147,7 @@ def upload_image_to_uploadcare(image_data, image_name):
     print(f"RETURNING AN IMAGE UUID")
     return ucare_file.uuid
 
-async def send_webhook_acknowledgment(user_id: str, message_id: str, status: str, webhook_url: str, uploadcare_uuids: Optional[List[str]] = None) -> None:
+async def send_webhook_acknowledgment(user_id: str, message_id: str, status: str, webhook_url: str, s3_uris: Optional[List[str]] = None) -> None:
     """
     Sends an acknowledgment message via webhook.
 
@@ -169,9 +169,9 @@ async def send_webhook_acknowledgment(user_id: str, message_id: str, status: str
         }
 
         # Only include the 'uploadcare_uuid' field if it is not None
-        if uploadcare_uuids is not None:
-            print("ADDING UPLOADCARE_UUIDS FIELD TO MESSAGE MODEL")
-            message_fields['uploadcare_uuids'] = uploadcare_uuids
+        if s3_uris is not None:
+            print("ADDING s3_uris FIELD TO MESSAGE MODEL")
+            message_fields['s3_uris'] = s3_uris
 
         print("CREATING MESSAGE MODEL")
         # Create the Message object
@@ -214,9 +214,9 @@ async def create_item(request: Request):
         
         # Process the workflow data or perform any desired actions
         print("Received workflow:", workflow)
-        # print("Image URIs:", image_uris)
-        # print("Image IDs:", image_ids)
-        # print("User ID:", user_id)
+        print("Image URIs:", image_uris)
+        print("Image IDs:", image_ids)
+        print("User ID:", user_id)
 
         predefined_path = 'C:\\Users\\Shadow\\Desktop'
 
@@ -231,16 +231,16 @@ async def create_item(request: Request):
         images = get_images(ws, workflow)
 
         # List to store Uploadcare UUIDs
-        uploadcare_uuids = []
+        s3_uris = []
 
         for node_id in images:
             for image_data in images[node_id]:
                 # Upload image to Uploadcare
                 uploadcare_uuid = upload_image_to_uploadcare(image_data)
                 print("APPENDING UPLOADCARE UUID TO THE ARRAY")
-                uploadcare_uuids.append(uploadcare_uuid)
+                s3_uris.append(uploadcare_uuid)
 
-        send_webhook_acknowledgment(user_id, message_id, 'completed', webhook_url, uploadcare_uuids)
+        send_webhook_acknowledgment(user_id, message_id, 'completed', webhook_url, s3_uris)
 
         remove_images(image_ids, predefined_path)
     except Exception as e:
