@@ -24,9 +24,8 @@ class Earnings(BaseModel):
 class Statistics(BaseModel):
     period: str  # This can be 'weekly', 'monthly', or 'yearly'
     period_value: int  # This can be week number, month number, or year
-    referral_link_clicks: int
+    # referral_link_clicks: int
     purchases_made: int
-    stayed_at_checkout: int # TODO: this is probably not necessary ?????
     earned: float
     user_id: str
 

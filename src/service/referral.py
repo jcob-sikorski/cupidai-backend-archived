@@ -2,10 +2,8 @@ from data import referral as data
 
 from model.referral import PayoutRequest
 
-from uuid import uuid4
-
-def update_statistics(user_id: str):
-    pass
+def update_statistics(user_id: str, amount_bought: float):
+    return data.update_statistics(user_id, amount_bought)
 
 def generate_link(user_id: str) -> None:
     return generate_link(user_id)

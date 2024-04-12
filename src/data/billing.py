@@ -27,6 +27,7 @@ def get_customer_id(user_id: str) -> Optional[str]:
         return stripe_account.customer_id
     return None
 
+# TODO: why this is here - we already have similar function in a team
 def get_team_owner_id(member_id: str) -> Optional[str]:
     result = team_col.find_one({"members": member_id})
     if result is not None:

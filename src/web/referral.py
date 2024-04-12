@@ -32,6 +32,6 @@ async def get_statistics(user_id: str) -> None:
     return service.get_statistics(user_id)
 
 # Protected endpoint
-@router.get("/payouts/history", status_code=200)  # Retrieves payout history # TODO: learn in what format there should be the payout
+@router.get("/payouts/history", status_code=200)  # Retrieves payout history
 async def get_payout_history(user_id: str) -> None:
     return service.get_payout_history(user_id)
