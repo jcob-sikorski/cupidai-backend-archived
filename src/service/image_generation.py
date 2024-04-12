@@ -20,6 +20,10 @@ def webhook(message: Message) -> None:
 
     history_service.update('image_generation', message.user_id)
 
+def check_settings(settings: Settings):
+    # TODO: here we must verify all the setting's fields
+    pass
+
 def save_settings(settings: Settings):
     return data.save_settings(settings)
 
