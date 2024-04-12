@@ -21,7 +21,10 @@ def create(email: str, user_id: str) -> None:
     return account
 
 def create_ref(ref: str) -> None:
-    # TODO: make this the same as the team invite.
+    # TODO: make this work the same as team invite
+    # although we need the email of the user signing up
+
+    pass
 
 def create_invite(invite: Invite):
     result = invite_col.insert_one(invite.dict())

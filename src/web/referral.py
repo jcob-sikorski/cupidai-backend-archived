@@ -1,11 +1,15 @@
 from fastapi import APIRouter, Depends
 
+from model.referral import PayoutRequest
+
 from service import referral as service
 
-# TODO: check the figma and once again design the entire flow for referrals
-
-
 router = APIRouter(prefix = "/referral")
+
+# TODO: we must track refs in sign up endpoint
+#       referrals meaning which plan was bought
+#       number of clicks on the link
+#       how many purchases were made with this link
 
 # Protected endpoint
 @router.post("/link/generate", status_code=201)  # Generates a new link
@@ -14,12 +18,12 @@ async def generate_link(user_id: str) -> None:
 
 # Protected endpoint
 @router.post("/payout/request", status_code=201)  # Requests a payout
-async def request_payout(user_id: str) -> None:
-    return service.request_payout(user_id)
+async def request_payout(payout_request: PayoutRequest) -> None:
+    return service.request_payout(payout_request)
 
 # Protected endpoint
 @router.get("/unpaid/", status_code=200)  # Retrieves unpaid earnings
-async def get_unpaid_earnings(user_id: str) -> None:
+async def get_unpaid_earnings(user_id: str) -> float:
     return service.get_unpaid_earnings(user_id)
 
 # Protected endpoint

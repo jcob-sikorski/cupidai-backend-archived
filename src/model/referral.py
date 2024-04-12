@@ -1,21 +1,37 @@
 from pydantic import BaseModel
 from typing import List
 
-class PaymentHistory(BaseModel):
-    solo: bool
+class PayoutRequest(BaseModel):
+    user_id: str
+    withdrawal_method: str
+    paypal_email: List[str]
+    amount: List[float]
+    scheduled_time: str
+    team_notes: str
     date: str
-    time: str
+
+class PayoutHistory(BaseModel):
+    date: str
     payment_id: str
     user_id: str
     amount: float
     status: str
 
+class Earnings(BaseModel):
+    user_id: str
+    amount: float
+
 class Statistics(BaseModel):
-    solo: bool
+    period: str  # This can be 'weekly', 'monthly', or 'yearly'
+    period_value: int  # This can be week number, month number, or year
     referral_link_clicks: int
     purchases_made: int
-    stayed_at_checkout: int
+    stayed_at_checkout: int # TODO: this is probably not necessary ?????
     earned: float
     user_id: str
-    month: str  # TODO: probably we can merge this into a single date so we use mognodb filters for getting stats by week, month, etc.
-    week: str   # TODO: probably we can merge this into a single date so we use mognodb filters for getting stats by week, month, etc.
+
+# this is for a single generated link
+# its idea is to securely map a link to the user_id
+class Referral(BaseModel):
+    referral_id: str
+    user_id: str
