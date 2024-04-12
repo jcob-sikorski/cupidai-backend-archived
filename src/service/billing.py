@@ -8,7 +8,7 @@ from model.billing import Item, StripeAccount
 
 import service.referral as referral_service
 
-from .init import stripe_account_col
+from .init import stripe_account_col, referral_col
 
 # The library needs to be configured with your account's secret key.
 # Ensure the key is kept out of any version control system you might be using.
@@ -22,48 +22,6 @@ def has_permissions(feature: str, user_id: str) -> bool:
     return data.has_permissions(feature, user_id)
 
 async def webhook(item: Item, request: Request):
-    event = None
-    payload = await request.body()
-    sig_header = request.headers.get('STRIPE_SIGNATURE')
-
-    try:
-        event = stripe.Webhook.construct_event(
-            payload, sig_header, endpoint_secret
-        )
-    except ValueError as e:
-        # Invalid payload
-        raise HTTPException(status_code=400, detail="Invalid payload")
-    except stripe.error.SignatureVerificationError as e:
-        # Invalid signature
-        raise HTTPException(status_code=400, detail="Invalid signature")
-
-    # TODO: figure out how the event structure looks like
-
-    # Handle the event
-    # TODO: for each event add or delete the StripeAccount model in stripe_acconut_col
-    if event['type'] == 'checkout.session.completed':
-        session = event['data']['object']
-        # TODO: if stripe account does not exist then add it to the collection
-        # TODO: update the Plan the user bought
-        # TODO: get the user+id by getting StripeAccount and check if user got here thanks to referral
-        # TODO: update the statistics for the user who made the referral link
-
-        # then remove this specific referral so user 
-        #       of the specific link - if yes then update statistics for the user who generated the link
-    elif event['type'] == 'customer.subscription.deleted':
-        subscription = event['data']['object']
-        # TODO: remove this plan from bought plans of this customer
-    elif event['type'] == 'customer.subscription.updated':
-        subscription = event['data']['object']
-
-        # TODO: depending on the situation - if user bought, delted, upgraded, or downgraded
-        # TODO: what to do?       
-    else:
-        print('Unhandled event type {}'.format(event['type']))
-
-    return {"success": True}
-
-async def webhook_proposal(item: Item, request: Request):
     event = None
     payload = await request.body()
     sig_header = request.headers.get('STRIPE_SIGNATURE')
@@ -100,21 +58,19 @@ async def webhook_proposal(item: Item, request: Request):
         if referral:
             referral_service.update_statistics(user_id, session["amount_total"] / 100)
 
-            # Then remove this specific referral so user can't use it again
-            referral_col.delete_one({"referral_id": session["client_reference_id"]})
+            referral_service.remove_link(session["client_reference_id"])
 
     elif event['type'] == 'customer.subscription.deleted':
         subscription = event['data']['object']
 
-        # Remove this plan from bought plans of this customer
-        plan_col.delete_one({"user_id": subscription["customer"], "plan_id": subscription["items"]["data"][0]["plan"]["id"]})
+        # TODO: are we doing something here?
 
     elif event['type'] == 'customer.subscription.updated':
         subscription = event['data']['object']
 
         # Depending on the situation - if user bought, deleted, upgraded, or downgraded
         # Update the plan details for this customer
-        plan_col.update_one({"user_id": subscription["customer"]}, {"$set": {"plan_id": subscription["items"]["data"][0]["plan"]["id"]}})
+        # TODO: are we doing something here?
 
     else:
         print('Unhandled event type {}'.format(event['type']))

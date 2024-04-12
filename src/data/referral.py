@@ -59,6 +59,8 @@ def generate_link(user_id: str) -> None:
 
     return referral_id
 
+def remove_link(referral_id: str) -> None:
+    referral_col.delete_one({"referral_id": referral_id})
 
 def request_payout(payout_request: PayoutRequest) -> None:
     payout_request_col.insert_one(payout_request.dict())
