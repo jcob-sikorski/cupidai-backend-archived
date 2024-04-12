@@ -9,32 +9,45 @@ from model.team import Team
 
 import service.account as account_service
 import service.email as email_service
+import service.team as team_service
 
 import uuid
 
+# TODO: we have to get recipient name from Kinde
+
 def accept(invite_id: str) -> None:
-    return data.accept(invite_id)
+    invite = account_service.get_invite(invite_id)
+    if data.accept(invite_id):
+        host = account_service.get(invite.host_id)
+        guest = account_service.get(invite.guest_id)
+
+        team_name = team_service.get_team_name(invite.host_id)
+
+        email_service.send(email=host.email, transactional_id="cltev2j2v02nbofl1p13dz5sk", recipient_name=, event=, guest_email=guest.email, team_name=team_name)
 
 def invite(guest_email: str, host_id: str) -> None:
     host_as_member = get_member(host_id)
 
     if host_as_member and ('invite' in host_as_member.permissions):
-        guest_account = account_service.get_by_email(guest_email)
+        guest = account_service.get_by_email(guest_email)
+        host = account_service.get(host_id)
 
         team_name = data.get_team_name(host_id)
 
         invite_id = str(uuid.uuid4())
 
+        invite_link = f"https://cupidai.tech/team/accept/{invite_id}"
+
         invite_model = Invite(
             invite_id = invite_id,
-            guest_id = getattr(guest_account, 'user_id', None),
+            guest_id = getattr(guest, 'user_id', None),
             host_id = host_id,
-            signup_required = (guest_account is None)
+            signup_required = (guest is None)
         )
 
         account_service.create_invite(invite_model)
 
-        email_service.send_request(guest_email, invite_link=f"https://cupidai.tech/team/accept/{invite_id}", team_name=team_name)
+        email_service.send(email=host.email, transactional_id="cluwp8qn000xw4hezrgsxau36", recipient_name=, host_email=host.email, team_name=team_name, invite_link=invite_link)
 
         # TODO: billing permission and team permission are not the same thing
         #       the billing permissions are the max the team can have
@@ -53,7 +66,15 @@ def delete(member_id: str, user_id: str) -> None:
 
 # TESTING DONE ✅
 def transfer_ownership(member_id: str, user_id: str) -> None:
-    return data.transfer_ownership(member_id, user_id)
+    if data.transfer_ownership(member_id, user_id):
+        team_name = team_service.get_team_name(user_id)
+
+        new_owner = account_service.get(member_id)
+        old_owner = account_service.get(user_id)
+
+        email_service.send(email=new_owner.email, transactional_id="cluwpfxvd0a0nh991vscb3y0b", recipient_name=, old_owner=old_owner.email, team_name=team_name)
+
+        email_service.send(email=old_owner.email, transactional_id="cluwpvrgx03u3k2unkpll3vnp", recipient_name=, new_owner=new_owner.email, team_name=team_name)
 
 # TESTING DONE ✅
 def get_members(user_id: str) -> None:
@@ -61,10 +82,18 @@ def get_members(user_id: str) -> None:
 
 def get_activity(user_id: str) -> None:
     return data.get_activity(user_id)
+    
+def get_team_name(user_id: str) -> None:
+    return data.get_team_name(user_id)
 
 # TESTING DONE ✅
 def disband(user_id: str) -> None:
-    return data.disband(user_id)
+    team_name = team_service.get_team_name(user_id)
+
+    if data.disband(user_id):
+        account = account_service.get(user_id)
+
+        email_service.send(account.email, team_name=team_name)
 
 # TESTING DONE ✅
 def create(team: Team, user_id: str) -> None:
@@ -72,10 +101,14 @@ def create(team: Team, user_id: str) -> None:
 
 # TESTING DONE ✅
 def leave(user_id: str) -> None:
-    try:
-        return data.leave(user_id)
-    except Exception as e:
-        raise e
+    team = team_service.get_team(user_id)
+    
+    if data.leave(user_id):
+        owner_account = account_service.get(team.owner_id)
+
+        leaver_account = account_service.get(user_id)
+
+        email_service.send(email=owner_account.email, transactional_id="cluwq6js302cgkqeo2awjl6fh", recipient_name=, leaver_email=leaver_account.email, team_name=team.name)
 
 # TESTING DONE ✅
 def owner(user_id: str) -> None:

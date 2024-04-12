@@ -1,6 +1,8 @@
 import requests
 
-def send_request(email: str, **data_variables):
+# TODO: we must also probably set the transactionalId 
+#       so that we can send specific email
+def send(email: str, transactional_id: str, **data_variables):
     response = requests.request(
         "POST", 
         "https://app.loops.so/api/v1/transactional", 

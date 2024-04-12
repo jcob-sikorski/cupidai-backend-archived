@@ -2,10 +2,10 @@ from typing import List
 
 import service.account as account_service
 
-from model.team import Team, Member
+from model.team import Team, Member, Invite
 
 from pymongo import ReturnDocument
-from .init import team_col, member_col
+from .init import invite_col, team_col, member_col
 
 def accept(invite_id: str) -> None:
     invite = account_service.get_invite(invite_id)
@@ -18,7 +18,7 @@ def accept(invite_id: str) -> None:
     
     if existing_team:
         print(f"User {invite.guest_id} is already in another team.")
-        return
+        return False
 
     # Add the user id to the member list
     host_team = team_col.find_one({"members": {"$in": [invite.host_id]}})
@@ -34,6 +34,8 @@ def accept(invite_id: str) -> None:
     member_col.insert_one(member.dict())
 
     invite_col.delete_one({"_id": invite_id})
+
+    return True
 
 # TESTING DONE ✅
 def update_permissions(permissions: List[str], member_id: str, user_id: str) -> bool:
