@@ -7,9 +7,7 @@ from service import referral as service
 router = APIRouter(prefix = "/referral")
 
 # TODO: we must track refs in sign up endpoint
-#       referrals meaning which plan was bought
 #       number of clicks on the link
-#       how many purchases were made with this link
 
 # Protected endpoint
 @router.post("/link/generate", status_code=201)  # Generates a new link

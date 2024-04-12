@@ -58,7 +58,7 @@ async def webhook(item: Item, request: Request):
         if referral:
             referral_service.update_statistics(user_id, session["amount_total"] / 100)
 
-            referral_service.remove_link(session["client_reference_id"])
+            # referral_service.remove_link(session["client_reference_id"])
 
     elif event['type'] == 'customer.subscription.deleted':
         subscription = event['data']['object']

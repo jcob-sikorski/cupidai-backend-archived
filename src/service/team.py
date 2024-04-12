@@ -8,6 +8,7 @@ from model.account import Invite
 from model.team import Team
 
 import service.account as account_service
+import service.email as email_service
 
 import uuid
 
@@ -33,22 +34,7 @@ def invite(guest_email: str, host_id: str) -> None:
 
         account_service.create_invite(invite_model)
 
-        response = requests.request(
-            "POST", 
-            "https://app.loops.so/api/v1/transactional", 
-            json={
-                "transactionalId": "cltertje200k7zf04tzzdhmgx",
-                "email": guest_email,
-                "dataVariables": {
-                    "invite_link": f"https://cupidai.tech/team/accept/{invite_id}",
-                    "team_name": team_name,
-                }
-            },
-            headers={
-                "Authorization": "Bearer 1dd67db210159eeff8910667b5db9b91",
-                "Content-Type": "application/json"
-            }
-        )
+        email_service.send_request(guest_email, invite_link=f"https://cupidai.tech/team/accept/{invite_id}", team_name=team_name)
 
         # TODO: billing permission and team permission are not the same thing
         #       the billing permissions are the max the team can have

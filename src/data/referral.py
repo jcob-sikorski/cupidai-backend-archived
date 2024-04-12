@@ -1,6 +1,6 @@
 from data import referral as data
 
-from model.referral import Referral, Earnings, Statistics, PayoutRequest
+from model.referral import Referral, Earnings, Statistics, PayoutRequest, PayoutHistory
 
 from .init import referral_col, payout_request_col, earnings_col, statistics_col, payout_history_col
 
@@ -30,7 +30,7 @@ def update_statistics(user_id: str, amount_bought: float):
             {
                 "$inc": {
                     "purchases_made": 1,
-                    "earned": amount_bought
+                    "earned": amount_bought * 0.4
                 }
             }
         )
@@ -43,7 +43,7 @@ def update_statistics(user_id: str, amount_bought: float):
                     "period": period["period"],
                     "period_value": period["period_value"],
                     "purchases_made": 1,
-                    "earned": amount_bought
+                    "earned": amount_bought * 0.4
                 }
             )
 
@@ -85,6 +85,6 @@ def get_payout_history(user_id: str) -> None:
     payout_history = payout_history_col.find_one({"user_id": user_id})
 
     if payout_history:
-        return Statistics(**payout_history)
+        return PayoutHistory(**payout_history)
 
     return None
