@@ -7,7 +7,7 @@ def send(email: str, transactional_id: str, **data_variables):
         "POST", 
         "https://app.loops.so/api/v1/transactional", 
         json={
-            "transactionalId": "cltertje200k7zf04tzzdhmgx",
+            "transactionalId": transactional_id,
             "email": email,
             "dataVariables": data_variables
         },

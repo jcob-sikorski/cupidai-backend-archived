@@ -21,7 +21,7 @@ def get_db():
     account_col = db['Account']
     invite_col = db['Invite']
     stripe_account_col = db['StripeAccount']
-    team_col = db['Team']
+    # team_col = db['Team']
     tos_col = db['TermsOfService']
     plan_col = db['Plan']
     history_col = db['History']
@@ -31,7 +31,7 @@ def get_db():
     bug_col = db['Bug']
     deepfake_col = db['Deepfake']
     social_account_col = db['SocialAccount']
-    member_col = db['Member']
+    # member_col = db['Member']
 
     return account_col, invite_col, stripe_account_col, team_col, tos_col, plan_col, history_col, comfyui_col, settings_col, midjourney_col, bug_col, deepfake_col, social_account_col, member_col
 

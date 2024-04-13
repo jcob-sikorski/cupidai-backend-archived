@@ -36,7 +36,7 @@ def change_email(email: str, user_id: str) -> None:
         upsert=True,
         return_document=ReturnDocument.AFTER
     )
-    # TODO:
+    # TODO: we shuold also update the email for the auth provider
     # url = f"https://login.auth0.com/api/v2/users/{user_id}"
 
     # payload = json.dumps({

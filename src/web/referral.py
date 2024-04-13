@@ -6,8 +6,6 @@ from service import referral as service
 
 router = APIRouter(prefix = "/referral")
 
-# TODO: we must track refs in sign up endpoint
-#       number of clicks on the link
 
 # Protected endpoint
 @router.post("/link/generate", status_code=201)  # Generates a new link

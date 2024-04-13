@@ -211,7 +211,7 @@ async def create_item(request: Request):
 
     predefined_path = 'C:\\Users\\Shadow\\Desktop'
 
-    download_and_save_images(uploadcare_uris_uris, image_ids, predefined_path)
+    download_and_save_images(uploadcare_uris, image_ids, predefined_path)
 
     ws = websocket.WebSocket()
     ws.connect("ws://{}/ws?clientId={}".format(server_address, client_id))

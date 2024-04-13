@@ -25,25 +25,26 @@ def update(domain: str, user_id: str) -> None:
         return_document=ReturnDocument.AFTER
     )
 
-    # Update history for the team if the user is in a team
-    team = team_service.get_team(user_id)
-    if team:
-        history_col.find_one_and_update(
-            {"owner": team.owner},
-            {"$inc": {domain_to_index[domain]: 1}},
-            upsert=True,
-            return_document=ReturnDocument.AFTER
-        )
+    # # Update history for the team if the user is in a team
+    # team = team_service.get_team(user_id)
+    # if team:
+    #     history_col.find_one_and_update(
+    #         {"owner": team.owner},
+    #         {"$inc": {domain_to_index[domain]: 1}},
+    #         upsert=True,
+    #         return_document=ReturnDocument.AFTER
+    #     )
 
 
 # TESTING DONE ✅
 def get(user_id: str) -> None:
-    team = team_service.get_team(user_id)
+    # team = team_service.get_team(user_id)
 
-    if team and user_id in team.members:
-        result = history_col.find_one({"team_id": team.team_id})
-    else:
-        result = history_col.find_one({"user_id": user_id})
+    # if team and user_id in team.members:
+    #     result = history_col.find_one({"team_id": team.team_id})
+    # else:
+        # result = history_col.find_one({"user_id": user_id})
+    result = history_col.find_one({"user_id": user_id})
 
     if result is not None:
         return History(**result)

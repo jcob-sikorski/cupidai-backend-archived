@@ -1,0 +1,29 @@
+tree -I 'venv'
+
+comment out teams functionality
+
+webhook: map the user_id and customer_id smh in the billing
+
+faceswap: run faceswap on the same runpon as comfyui.
+          the fastapi serer would be the same communciating with both comfy and faceufusion
+
+host image generation on runpod, install all the models
+
+midjourney action for testing after buying a plan
+
+email should be sent when
+- referral buys plan
+- forgot password
+
+do hard tests on image generation - full workflow, connect disconnect 
+components etc., testing must be uncomfortable for you
+
+test stripe billing - paying for the product, and checking which permissions 
+users have for things they’ve piad for
+
+make endpoints secure with Kinde/something simpler to implement
+
+implement all the account functionality once we intagrate with auth provider
+
+
+invitation + acceptance

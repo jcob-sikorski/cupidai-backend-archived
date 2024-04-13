@@ -8,6 +8,7 @@ from service import ai_verification as service
 
 router = APIRouter(prefix="/ai-verification")
 
+# TODO: this should make request to our custo facefusion server
 # Protected endpoint
 @router.post("/faceswap", status_code=201)  # Initiates a face swap
 async def faceswap(source_uri: str, target_uri: str, user_id: str) -> None:
@@ -27,6 +28,7 @@ async def get_history(user_id: str) -> List[Message]:
         raise HTTPException(status_code=404, detail="History not found")
     return history
 
+# TODO: we should test this out once we buy a plan
 # Protected endpoint
 @router.post("/action", status_code=201)  # Initiates a specific action
 async def action(message_id: str, button: str, user_id: str) -> None:

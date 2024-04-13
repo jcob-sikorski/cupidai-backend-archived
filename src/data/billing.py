@@ -27,23 +27,24 @@ def get_customer_id(user_id: str) -> Optional[str]:
         return stripe_account.customer_id
     return None
 
-# TODO: why this is here - we already have similar function in a team
-def get_team_owner_id(member_id: str) -> Optional[str]:
-    result = team_col.find_one({"members": member_id})
-    if result is not None:
-        team = Team(**result)
-        return team.owner
-    return None
+# # TODO: why this is here - we already have similar function in a team
+# def get_team_owner_id(member_id: str) -> Optional[str]:
+#     result = team_col.find_one({"members": member_id})
+#     if result is not None:
+#         team = Team(**result)
+#         return team.owner
+#     return None
 
 
 # TESTING DONE ✅
 def get_history(solo: bool, user_id: str) -> None:
-    if solo:
-        customer_id = get_customer_id(user_id)
-    else:
-        # TODO: test when solo is false
-        owner_id = get_team_owner_id(user_id)
-        customer_id = get_customer_id(owner_id)
+    # if solo:
+    #     customer_id = get_customer_id(user_id)
+    # else:
+    #     # TODO: test when solo is false
+    #     owner_id = get_team_owner_id(user_id)
+    #     customer_id = get_customer_id(owner_id)
+    customer_id = get_customer_id(user_id)
 
     if customer_id is not None:
         invoices = stripe.Invoice.list(customer=customer_id)

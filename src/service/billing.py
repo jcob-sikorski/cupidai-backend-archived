@@ -1,5 +1,7 @@
 from fastapi import Request, HTTPException
 
+import csv
+
 import stripe
 
 import data.billing as data
@@ -78,14 +80,33 @@ async def webhook(item: Item, request: Request):
     return {"success": True}
 
 
-def download_history(user_id: str) -> None:
-    # TODO: implement fetching hisotry from stripe and getting this to user in the form of csv
+def download_history(user_id: str):
+    # Fetch purchase history from Stripe
+    invoices = get_history(solo=True, user_id=user_id)
 
-    pass
+    if invoices:
+        # Prepare CSV data
+        csv_data = []
+        for invoice in invoices.auto_paging_iter():
+            for line_item in invoice.lines.auto_paging_iter():
+                csv_data.append([invoice.created, invoice.id, line_item.type, line_item.description])
+
+        # Write CSV data to file
+        file_name = f"{user_id}_purchase_history.csv"
+        with open(file_name, mode='w', newline='') as file:
+            writer = csv.writer(file)
+            writer.writerow(['Date', 'Invoice ID', 'Purchase Method', 'Plan Name'])
+            writer.writerows(csv_data)
+
+        print(f"Purchase history downloaded and saved to {file_name}")
+    else:
+        print("No purchase history found.")
 
 # TESTING DONE ✅
-def get_history(solo: bool, user_id: str) -> None:
-    return data.get_history(solo, user_id)
+def get_history(user_id: str) -> None:
+    return data.get_history(user_id)
+# def get_history(solo: bool, user_id: str) -> None:
+#     return data.get_history(solo, user_id)
 
 # TESTING DONE ✅
 def accept_tos(user_id: str) -> None:

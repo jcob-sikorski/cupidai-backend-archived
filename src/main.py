@@ -2,7 +2,7 @@ from fastapi import FastAPI
 import uvicorn
 
 from web import (
-    account, ai_verification, billing, bug, deepfake, earnings,
+    account, ai_verification, billing, bug, deepfake,
     history, image_generation, midjourney, referral, social_account, 
     team
 )
@@ -14,7 +14,6 @@ app.include_router(ai_verification.router)
 app.include_router(billing.router)
 app.include_router(bug.router)
 app.include_router(deepfake.router)
-app.include_router(earnings.router)
 app.include_router(history.router)
 app.include_router(image_generation.router)
 app.include_router(midjourney.router)
