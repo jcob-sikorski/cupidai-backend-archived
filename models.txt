@@ -3,7 +3,7 @@ Checkpoint Models
 2. analogMadness_v60
 3. chilloutmix_NiPrunedFp32Fix
 4. consistentFactor_euclidV61
-5. devlishphotorealism_v40
+5. devlishphotorealism_v40 ########## DOWNLOAD TBD ##########
 6. edgeOfRealism_eorV20Fp16BakedVAE
 7. epicphotogasm_lastUnicorn
 8. epicrealism_naturalSinRC1VAE

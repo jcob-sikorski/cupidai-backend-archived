@@ -41,9 +41,9 @@ class ModelInterface():
         combined_json = {}
         # Iterate through each used component
         for component in self.used_components:
-            print(component)
+            # print(component)
             component_data = getattr(self, component, None)
-            print(component_data)
+            # print(component_data)
             if isinstance(component_data, dict):
                 # Merge the component's values into the combined_json
                 for key, value in component_data.items():

@@ -12,8 +12,7 @@ tests:
 - generating images based on the workflow
 - removing images
 
-Note: before running any tests preinstall all the models and 
-      then test 5-6 different workflows
+Note: test 5-6 different workflows
 
 
 MIDJOURNEY/FACEFUSION

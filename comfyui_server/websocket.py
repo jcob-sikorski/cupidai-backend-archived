@@ -8,6 +8,9 @@ import urllib.request
 import urllib.parse
 import os
 import httpx
+import requests
+import cv2
+import numpy as np
 
 from dotenv import load_dotenv
 
@@ -85,16 +88,20 @@ def upload_images_to_s3(images):
 
     for node_id in images:
         for image_data in images[node_id]:
-            image_key = str(uuid.uuid4())
+            image_key = str(uuid.uuid4()) + '.png'
 
-            
-            s3_client.put_object(
-                Body=image_data,
-                Bucket='magicalcurie',
-                Key=image_key
-            )
+            image_array = cv2.imdecode(np.frombuffer(image_data, np.uint8), cv2.IMREAD_UNCHANGED)
+
+            # Save the image as a PNG file
+            cv2.imwrite(image_key, image_array)
+
+            with open(image_key, 'rb') as data:
+                s3_client.upload_fileobj(data, 'magicalcurie', image_key)
 
             s3_uris.append(f's3://magicalcurie/{image_key}')
+
+            # Remove the local image file
+            os.remove(image_key)
 
     return s3_uris
 
@@ -177,7 +184,7 @@ async def send_webhook_acknowledgment(user_id: str, settings_id: str, status: st
         }
 
         if s3_uris is not None:
-            print("ADDING UPLOADCARE_UUIDS FIELD TO MESSAGE MODEL")
+            print("ADDING S3_URIS FIELD TO MESSAGE MODEL")
             message_fields['s3_uris'] = s3_uris
 
         print("CREATING MESSAGE MODEL")

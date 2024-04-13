@@ -16,8 +16,10 @@ import service.billing as billing_service
 import service.history as history_service
 
 def webhook(message: Message) -> None:
+    print(message)
     data.update_message(user_id=message.user_id, message_id=None, status=message.status, s3_uris=message.s3_uris)
 
+    # TODO: this should only run once when the image generation completed successfully
     history_service.update('image_generation', message.user_id)
 
 def check_settings(settings: Settings):
@@ -47,20 +49,22 @@ def check_settings(settings: Settings):
     ]
 
     checkpoint_models = [
-        "amIReal_V41",
-        "analogMadness_v60",
-        "chilloutmix_NiPrunedFp32Fix",
-        "consistentFactor_euclidV61",
-        "devlishphotorealism_v40",
-        "edgeOfRealism_eorV20Fp16BakedVAE",
-        "epicphotogasm_lastUnicorn",
-        "epicrealism_naturalSinRC1VAE",
-        "epicrealism_newCentury",
-        "metagodRealRealism_v10",
-        "realismEngineSDXL_v10",
-        "realisticVisionV51_v51VAE",
-        "stablegramUSEuropean_v21",
-        "realisticVisionV60B1_v60B1VAE"
+        'amIReal_V44.safetensors', 
+        'analogMadness_v60.safetensors', 
+        'chilloutmix_NiPrunedFp32Fix.safetensors', 
+        'consistentFactor_euclidV61.safetensors', 
+        'devlishphotorealism_v40.safetensors', 
+        'edgeOfRealism_eorV20Fp16BakedVAE.safetensors', 
+        'epicphotogasm_lastUnicorn.safetensors', 
+        'epicrealism_naturalSinRC1.safetensors', 
+        'epicrealism_newCentury.safetensors', 
+        'juggernaut_reborn.safetensors', 
+        'metagodRealRealism_v10.safetensors', 
+        'realismEngineSDXL_v10.safetensors', 
+        'realisticVisionV51_v51VAE.safetensors', 
+        'stablegramUSEuropean_v21.safetensors', 
+        'uberRealisticPornMerge_urpmv13.safetensors', 
+        'v1-5-pruned-emaonly.ckpt'
     ]
 
     lora_models = [
