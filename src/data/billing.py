@@ -5,9 +5,10 @@ from typing import Optional
 from datetime import datetime
 
 from model.billing import StripeAccount, TermsOfService, Plan
-from model.team import Team
+# from model.team import Team
 
-from .init import stripe_account_col, team_col, tos_col, plan_col
+# from .init import stripe_account_col, team_col, tos_col, plan_col
+from .init import stripe_account_col, tos_col, plan_col
 
 # TESTING DONE ✅
 def has_permissions(feature: str, user_id: str) -> bool:

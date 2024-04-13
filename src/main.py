@@ -1,6 +1,11 @@
 from fastapi import FastAPI
 import uvicorn
 
+# from web import (
+#     account, ai_verification, billing, bug, deepfake,
+#     history, image_generation, midjourney, referral, social_account, 
+#     team
+# )
 from web import (
     account, ai_verification, billing, bug, deepfake,
     history, image_generation, midjourney, referral, social_account, 
@@ -19,7 +24,7 @@ app.include_router(image_generation.router)
 app.include_router(midjourney.router)
 app.include_router(referral.router)
 app.include_router(social_account.router)
-app.include_router(team.router)
+# app.include_router(team.router)
 
 if __name__ == "__main__":
     uvicorn.run("main:app", reload=True)

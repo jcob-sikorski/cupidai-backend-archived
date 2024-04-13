@@ -12,6 +12,9 @@ tests:
 - generating images based on the workflow
 - removing images
 
+Note: before running any tests preinstall all the models and 
+      then test 5-6 different workflows
+
 
 MIDJOURNEY/FACEFUSION
 
@@ -20,6 +23,8 @@ tests:
 - doing imagine with custom settings
 - performing various actions on the image
 - cancelling job while it's doing
+
+Note: before running any tests buy a plan to do this
 
 
 BILLING

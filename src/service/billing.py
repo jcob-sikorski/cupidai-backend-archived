@@ -10,7 +10,7 @@ from model.billing import Item, StripeAccount
 
 import service.referral as referral_service
 
-from .init import stripe_account_col, referral_col
+from data.init import stripe_account_col, referral_col
 
 # The library needs to be configured with your account's secret key.
 # Ensure the key is kept out of any version control system you might be using.
