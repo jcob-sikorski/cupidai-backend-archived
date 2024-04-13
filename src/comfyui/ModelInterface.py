@@ -317,7 +317,7 @@ def generate_workflow(settings: Settings, image_ids: Dict[str, str]) -> Optional
         if settings.controlnet_enabled:
             print("CONTROLNET ENABLED")
             settings.controlnet_reference_image = predefined_path + "\\" + image_ids["controlnet_reference_image"]
-            model_interface.connect_control_net(unit=settings.controlnet_model, image_path=settings.controlnet_reference_image, strength=settings.controlnet_strength, start_at=settings.controlnet_start_at, end_at=settings.controlnet_end_at)
+            model_interface.connect_control_net(unit=settings.controlnet_model, image_path=settings.controlnet_reference_image, strength=settings.controlnet_strength, start_percent=settings.controlnet_start_percent, end_percent=settings.controlnet_end_percent)
 
         print("CHOOSING OUTPUT SIZE")
         model_interface.choose_output_size(int1=settings.basic_width, int2=settings.basic_height)

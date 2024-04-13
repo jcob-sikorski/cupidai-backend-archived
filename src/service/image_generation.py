@@ -21,8 +21,131 @@ def webhook(message: Message) -> None:
     history_service.update('image_generation', message.user_id)
 
 def check_settings(settings: Settings):
-    # TODO: here we must verify all the setting's fields
-    pass
+    samplers = [
+        "euler",
+        "euler_ancestral",
+        "heun",
+        "heunpp2",
+        "dpm_2",
+        "dpm_2_ancestral",
+        "Ims",
+        "dpm_fast",
+        "dpm_adaptive",
+        "dpmpp_2s_ancestral",
+        "dpmpp_sde",
+        "dpmpp_sde_gpu",
+        "dpmpp_2m",
+        "dpmpp_2m_sde",
+        "dpmpp_2m_sde_gpu",
+        "dpmpp_3m_sde",
+        "dpmpp_3m_sde_gpu",
+        "ddpm",
+        "1cm",
+        "ddim",
+        "uni_pc",
+        "uni_pc_bh2"
+    ]
+
+    checkpoint_models = [
+        "amIReal_V41",
+        "analogMadness_v60",
+        "chilloutmix_NiPrunedFp32Fix",
+        "consistentFactor_euclidV61",
+        "devlishphotorealism_v40",
+        "edgeOfRealism_eorV20Fp16BakedVAE",
+        "epicphotogasm_lastUnicorn",
+        "epicrealism_naturalSinRC1VAE",
+        "epicrealism_newCentury",
+        "metagodRealRealism_v10",
+        "realismEngineSDXL_v10",
+        "realisticVisionV51_v51VAE",
+        "stablegramUSEuropean_v21",
+        "realisticVisionV60B1_v60B1VAE"
+    ]
+
+    lora_models = [
+        "add_detail",
+        "age_slider_v20",
+        "analogFilmPhotography_10",
+        "beard_slider_v10",
+        "breasts_slider_v10",
+        "clothing_slider_v19_000000030",
+        "contrast_slider_v10",
+        "curly_hair_slider_v1",
+        "DarkLighting",
+        "depth_of_field_slider_v1",
+        "detail_slider_v4",
+        "emotion_happy_slider_v1",
+        "epiNoiseoffset_v2",
+        "eyebrows_slider_v2",
+        "filmgrain_slider_v1",
+        "fisheye_slider_v10",
+        "gender_slider_v1",
+        "lora_perfecteyes_v1_from_v1_160",
+        "muscle_slider_v1",
+        "people_count_slider_v1",
+        "skin_tone_slider_v1",
+        "time_slider_v1",
+        "Transparent_Clothes_V2",
+        "weight_slider_v2"
+    ]
+    
+    if settings.basic_sampling_steps is not None and settings.basic_sampling_steps > 120:
+        return
+    if settings.basic_sampler_method is not None and settings.basic_sampler_method not in samplers:
+        return
+    if settings.basic_model is not None and settings.basic_model not in checkpoint_models:
+        return
+    if settings.basic_cfg_scale is not None and settings.basic_cfg_scale > 100.0:
+        return
+    if settings.basic_batch_size is not None and not (1 <= settings.basic_batch_size <= 8):
+        return
+    if settings.basic_batch_count is not None and not (1 <= settings.basic_batch_count <= 4):
+        return
+    if settings.basic_denoise is not None and settings.basic_denoise > 1.0:
+        return
+    if settings.ipa_1_model is not None and settings.ipa_1_model not in checkpoint_models:
+        return
+    if settings.ipa_1_weight is not None and settings.ipa_1_weight < 1.0:
+        return
+    if settings.ipa_1_noise is not None and settings.ipa_1_noise > 1.0:
+        return
+    if settings.ipa_1_start_at is not None and settings.basic_sampling_steps and not (settings.basic_sampling_steps > settings.ipa_1_start_at):
+        return
+    if settings.ipa_1_end_at is not None and settings.basic_sampling_steps and not (settings.basic_sampling_steps >= settings.ipa_1_end_at):
+        return
+    if settings.ipa_2_model is not None and settings.ipa_2_model not in checkpoint_models:
+        return
+    if settings.ipa_2_weight is not None and settings.ipa_2_weight > 1.0:
+        return
+    if settings.ipa_2_noise is not None and settings.ipa_2_noise > 1.0:
+        return
+    if settings.ipa_2_start_at is not None and settings.basic_sampling_steps and not (settings.basic_sampling_steps > settings.ipa_2_start_at):
+        return
+    if settings.ipa_2_end_at is not None and settings.basic_sampling_steps and not (settings.basic_sampling_steps >= settings.ipa_2_end_at):
+        return
+    if settings.refinement_steps is not None and settings.refinement_steps > 120:
+        return
+    if settings.refinement_cfg_scale is not None and settings.refinement_cfg_scale > 100.0:
+        return
+    if settings.refinement_denoise is not None and settings.refinement_denoise > 1.0:
+        return
+    if settings.refinement_sampler is not None and settings.refinement_sampler not in samplers:
+        return
+    if settings.lora_count is not None and not (1 <= settings.lora_count <= 4):
+        return
+    if settings.lora_model is not None and settings.lora_model not in lora_models:
+        return
+    if settings.lora_strengths is not None and all(map(lambda x: x <= 10.0, settings.lora_strengths)):
+        return
+    if settings.controlnet_model is not None and settings.controlnet_model not in checkpoint_models:
+        return
+    if settings.controlnet_strength is not None and settings.controlnet_strength > 10.0:
+        return
+    if settings.controlnet_start_percent is not None and not (settings.controlnet_start_percent < 100.0):
+        return
+    if settings.controlnet_end_percent is not None and not (settings.controlnet_end_percent <= 100.0):
+        return
 
 def save_settings(settings: Settings):
     return data.save_settings(settings)
