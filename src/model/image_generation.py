@@ -59,9 +59,10 @@ class Settings(BaseModel):
     controlnet_end_percent: Optional[float] = None
 
 class Message(BaseModel):
-    user_id: Optional[str]
-    status: Optional[str]
-    uploadcare_uris: Optional[Dict[str, str]]
-    created_at: Optional[str]
-    settings_id: Optional[str]
-    s3_uris: Optional[List[str]]
+    user_id: Optional[str] = None
+    status: Optional[str] = None
+    uploadcare_uris: Optional[Dict[str, str]] = None
+    created_at: Optional[str] = None
+    message_id: Optional[str] = None
+    settings_id: Optional[str] = None
+    s3_uris: Optional[List[str]] = None

@@ -152,14 +152,15 @@ def remove_images(image_ids: Dict[str, str], predefined_path: str) -> None:
             print(f"Image not found: {image_path}")
 
 class Message(BaseModel):
-    user_id: Optional[str]
-    status: Optional[str]
+    user_id: Optional[str] = None
+    status: Optional[str] = None
     uploadcare_uris: Optional[Dict[str, str]] = None
     created_at: Optional[str] = None
+    message_id: Optional[str] = None
     settings_id: Optional[str] = None
     s3_uris: Optional[List[str]] = None
 
-async def send_webhook_acknowledgment(user_id: str, settings_id: str, status: str, webhook_url: str, s3_uris: Optional[List[str]] = None) -> None:
+async def send_webhook_acknowledgment(user_id: str, message_id: str, settings_id: str, status: str, webhook_url: str, s3_uris: Optional[List[str]] = None) -> None:
     """
     Sends an acknowledgment message via webhook.
 
@@ -179,6 +180,7 @@ async def send_webhook_acknowledgment(user_id: str, settings_id: str, status: st
         # Create a dictionary to store the fields
         message_fields = {
             'user_id': user_id,
+            'message_id': message_id,
             'settings_id': settings_id,
             'status': status
         }
@@ -209,12 +211,13 @@ async def create_item(request: Request):
     workflow = payload.get('workflow', {})
     uploadcare_uris = payload.get('uploadcare_uris', {})
     image_ids = payload.get('image_ids', {})
+    message_id = payload.get('message_id', {})
     settings_id = payload.get('settings_id', {})
     user_id = payload.get('user_id', {})
 
     webhook_url = 'https://garfish-cute-typically.ngrok-free.app/image-generation/webhook'
 
-    await send_webhook_acknowledgment(user_id, settings_id, 'in progress', webhook_url)
+    await send_webhook_acknowledgment(user_id, message_id, settings_id, 'in progress', webhook_url)
 
     predefined_path = 'C:\\Users\\Shadow\\Desktop'
 
@@ -226,7 +229,7 @@ async def create_item(request: Request):
 
     s3_uris = upload_images_to_s3(images)
 
-    await send_webhook_acknowledgment(user_id, settings_id, 'completed', webhook_url, s3_uris)
+    await send_webhook_acknowledgment(user_id, message_id, settings_id, 'completed', webhook_url, s3_uris)
 
     remove_images(image_ids, predefined_path)
 

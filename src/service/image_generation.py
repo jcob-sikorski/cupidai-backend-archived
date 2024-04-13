@@ -17,7 +17,7 @@ import service.history as history_service
 
 def webhook(message: Message) -> None:
     print(message)
-    data.update_message(user_id=message.user_id, message_id=None, status=message.status, s3_uris=message.s3_uris)
+    update_message(user_id=message.user_id, message_id=message.message_id, status=message.status, s3_uris=message.s3_uris)
 
     # TODO: this should only run once when the image generation completed successfully
     history_service.update('image_generation', message.user_id)
@@ -154,8 +154,8 @@ def check_settings(settings: Settings):
 def save_settings(settings: Settings):
     return data.save_settings(settings)
 
-def update_message(user_id: str, message_id: Optional[str] = None, status: Optional[str] = None, uploadcare_uris: Optional[Dict[str, str]] = None, settings_id: Optional[str] = None, s3_uris: Optional[List[str]] = None):
-    return data.update_message(user_id, message_id, status, uploadcare_uris, settings_id, s3_uris)
+def update_message(user_id: str, status: Optional[str] = None, uploadcare_uris: Optional[Dict[str, str]] = None, message_id: Optional[str] = None, settings_id: Optional[str] = None, s3_uris: Optional[List[str]] = None):
+    return data.update_message(user_id, status, uploadcare_uris, message_id, settings_id, s3_uris)
 
 def extract_id_from_uri(uri):
     # Use regex to extract the UUID from the URI
@@ -171,7 +171,7 @@ async def generate(settings: Settings, uploadcare_uris: Dict[str, str], user_id:
 
         settings_id = save_settings(settings)
 
-        message_id = update_message(user_id, None, "started", uploadcare_uris, settings_id, None)
+        message_id = update_message(user_id, "started", uploadcare_uris, None, settings_id, None)
 
         workflow_json = generate_workflow(settings, image_ids)
 
@@ -192,6 +192,7 @@ async def generate(settings: Settings, uploadcare_uris: Dict[str, str], user_id:
             'workflow': workflow_json,
             'uploadcare_uris': uploadcare_uris,
             'image_ids': image_ids,
+            'message_id': message_id,
             'settings_id': settings_id,
             'user_id': user_id
         }
