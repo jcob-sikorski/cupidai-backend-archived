@@ -6,10 +6,10 @@ def update_statistics(user_id: str, amount_bought: float):
     return data.update_statistics(user_id, amount_bought)
 
 def generate_link(user_id: str) -> None:
-    return generate_link(user_id)
+    return data.generate_link(user_id)
 
 def remove_link(user_id: str) -> None:
-    return remove_link(user_id)
+    return data.remove_link(user_id)
 
 def request_payout(payout_request: PayoutRequest) -> None:
     return data.request_payout(payout_request)

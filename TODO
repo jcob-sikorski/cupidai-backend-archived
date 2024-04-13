@@ -1,6 +1,16 @@
 tree -I 'venv'
 
-comment out teams functionality
+############### MAKE THESE THINGS IN THIS ORDER. ###############
+
+do hard tests on image generation - full workflow, connect disconnect 
+components etc, testing must be uncomfortable for you
+
+test stripe billing - paying for the product, and checking which permissions 
+users have for things they’ve piad for
+
+email should be sent when
+- referral buys plan
+- forgot password
 
 webhook: map the user_id and customer_id smh in the billing
 
@@ -11,19 +21,13 @@ host image generation on runpod, install all the models
 
 midjourney action for testing after buying a plan
 
-email should be sent when
-- referral buys plan
-- forgot password
-
-do hard tests on image generation - full workflow, connect disconnect 
-components etc., testing must be uncomfortable for you
-
-test stripe billing - paying for the product, and checking which permissions 
-users have for things they’ve piad for
-
 make endpoints secure with Kinde/something simpler to implement
 
 implement all the account functionality once we intagrate with auth provider
+
+figure out what should be returned type of each endpoint + what's the structure of responses for frontend
+
+
 
 
 invitation + acceptance

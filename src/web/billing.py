@@ -1,7 +1,5 @@
 from fastapi import APIRouter, Depends, Request
 
-
-
 from model.billing import Item
 
 import service.billing as service

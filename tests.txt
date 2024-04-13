@@ -1,0 +1,37 @@
+planning thorough tests
+
+IMAGE GENERATION
+
+tests:
+- getting all params from request
+- sending webhook acknowledgement
+- webhook ack received
+- updating status of the message
+- downloading and saving images from uploadcare uris
+- parsing the generated workflow
+- generating images based on the workflow
+- removing images
+
+
+BILLING
+
+tests:
+- checking if user paid thanks to the referral
+- downloading invoice history in a well formatted csv file
+
+
+EMAIL
+
+tests:
+- receiving correct email on the specific event
+
+
+REFERRALS
+
+tests:
+- generating valid link
+- removing a link
+- requesting a payout
+- getting unpaid earnings
+- getting statistics
+- getting payout history
