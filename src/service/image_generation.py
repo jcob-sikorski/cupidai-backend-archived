@@ -19,8 +19,8 @@ def webhook(message: Message) -> None:
     print(message)
     update_message(user_id=message.user_id, message_id=message.message_id, status=message.status, s3_uris=message.s3_uris)
 
-    # TODO: this should only run once when the image generation completed successfully
-    history_service.update('image_generation', message.user_id)
+    if message.status == 'in progress':
+        history_service.update('image_generation', message.user_id)
 
 def check_settings(settings: Settings):
     samplers = [
@@ -67,6 +67,15 @@ def check_settings(settings: Settings):
         'v1-5-pruned-emaonly.ckpt'
     ]
 
+    ipa_models = [
+        'ip-adapter-plus-face_sd15.bin', 
+        'ip-adapter-plus_sd15.bin', 
+        'ip-adapter-plus_sdxl_vit-h.bin', 
+        'ip-adapter_sd15_light.bin', 
+        'ip-adapter_sdxl.bin', 
+        'ip-adapter_sdxl_vit-h.bin'
+    ]
+
     lora_models = [
         "add_detail",
         "age_slider_v20",
@@ -108,25 +117,25 @@ def check_settings(settings: Settings):
         return
     if settings.basic_denoise is not None and settings.basic_denoise > 1.0:
         return
-    if settings.ipa_1_model is not None and settings.ipa_1_model not in checkpoint_models:
+    if settings.ipa_1_model is not None and settings.ipa_1_model not in ipa_models:
         return
     if settings.ipa_1_weight is not None and settings.ipa_1_weight < 1.0:
         return
     if settings.ipa_1_noise is not None and settings.ipa_1_noise > 1.0:
         return
-    if settings.ipa_1_start_at is not None and settings.basic_sampling_steps and not (settings.basic_sampling_steps > settings.ipa_1_start_at):
+    if settings.ipa_1_start_at is not None and settings.basic_sampling_steps and (settings.ipa_1_start_at > 1.0 or settings.ipa_1_start_at >= settings.ipa_1_end_at):
         return
-    if settings.ipa_1_end_at is not None and settings.basic_sampling_steps and not (settings.basic_sampling_steps >= settings.ipa_1_end_at):
+    if settings.ipa_1_end_at is not None and settings.basic_sampling_steps and settings.ipa_1_end_at > 1.0:
         return
-    if settings.ipa_2_model is not None and settings.ipa_2_model not in checkpoint_models:
+    if settings.ipa_2_model is not None and settings.ipa_2_model not in ipa_models:
         return
     if settings.ipa_2_weight is not None and settings.ipa_2_weight > 1.0:
         return
     if settings.ipa_2_noise is not None and settings.ipa_2_noise > 1.0:
         return
-    if settings.ipa_2_start_at is not None and settings.basic_sampling_steps and not (settings.basic_sampling_steps > settings.ipa_2_start_at):
+    if settings.ipa_2_start_at is not None and settings.basic_sampling_steps and (settings.ipa_2_start_at > 1.0 or settings.ipa_2_start_at >= settings.ipa_2_end_at):
         return
-    if settings.ipa_2_end_at is not None and settings.basic_sampling_steps and not (settings.basic_sampling_steps >= settings.ipa_2_end_at):
+    if settings.ipa_2_end_at is not None and settings.basic_sampling_steps and settings.ipa_2_end_at > 1.0:
         return
     if settings.refinement_steps is not None and settings.refinement_steps > 120:
         return

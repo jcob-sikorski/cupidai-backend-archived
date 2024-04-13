@@ -252,7 +252,7 @@ class ModelInterface():
         else:
             self.ksampler_efficient2["246"]["inputs"]["model"] = ["284", 0]
 
-    def connect_ip_adapter_2(self, image_path: str, weight: int = 1, noise: int = 0, weight_type: str = "original", start_at: int = 0, end_at: int = 1):
+    def connect_ip_adapter_2(self, image_path: str, model: str, weight: int = 1, noise: int = 0, weight_type: str = "original", start_at: int = 0, end_at: int = 1):
         """
         ################# CONNECT IP ADAPTER 2 #################
         (Optional) Provide configuration for ip adapter 2, connect it to the KSamplerEfficient
@@ -275,7 +275,7 @@ class ModelInterface():
 
         # TODO: can user customize this model from a list of predefined models?
         # set the model for load ipadapter model
-        self.ipa2["285"]["inputs"]["ipadapter_file"] = "ip-adapter-plus-face_sd15.bin"
+        self.ipa2["285"]["inputs"]["ipadapter_file"] = model
         
         # set parameters
         self.ipa2["284"]["inputs"]["weight"] = weight
@@ -340,12 +340,12 @@ def generate_workflow(settings: Settings, image_ids: Dict[str, str]) -> Optional
 
         if settings.ipa_1_enabled:
             print("IPA 1 ENABLED")
-            settings.ipa_1_reference_image = predefined_path + "\\" + image_ids["ipa_1_reference_image"]
+            settings.ipa_1_reference_image = predefined_path + "\\" + image_ids["ipa_1_reference_image"] + ".jpg"
             model_interface.connect_ip_adapter_1(image_path=settings.ipa_1_reference_image, model=settings.ipa_1_model, weight=settings.ipa_1_weight, noise=settings.ipa_1_noise, start_at=settings.ipa_1_start_at, end_at=settings.ipa_1_end_at)
 
         if settings.ipa_2_enabled:
             print("IPA 2 ENABLED")
-            settings.ipa_2_reference_image = predefined_path + "\\" + image_ids["ipa_2_reference_image"]
+            settings.ipa_2_reference_image = predefined_path + "\\" + image_ids["ipa_2_reference_image"] + ".jpg"
             model_interface.connect_ip_adapter_2(image_path=settings.ipa_2_reference_image, model=settings.ipa_2_model, weight=settings.ipa_2_weight, noise=settings.ipa_2_noise, start_at=settings.ipa_2_start_at, end_at=settings.ipa_2_end_at)
 
         final_json = model_interface.finalize()
