@@ -77,30 +77,37 @@ def check_settings(settings: Settings):
     ]
 
     lora_models = [
-        "add_detail",
-        "age_slider_v20",
-        "analogFilmPhotography_10",
-        "beard_slider_v10",
-        "breasts_slider_v10",
-        "clothing_slider_v19_000000030",
-        "contrast_slider_v10",
-        "curly_hair_slider_v1",
-        "DarkLighting",
-        "depth_of_field_slider_v1",
-        "detail_slider_v4",
-        "emotion_happy_slider_v1",
-        "epiNoiseoffset_v2",
-        "eyebrows_slider_v2",
-        "filmgrain_slider_v1",
-        "fisheye_slider_v10",
-        "gender_slider_v1",
-        "lora_perfecteyes_v1_from_v1_160",
-        "muscle_slider_v1",
-        "people_count_slider_v1",
-        "skin_tone_slider_v1",
-        "time_slider_v1",
-        "Transparent_Clothes_V2",
-        "weight_slider_v2"
+        "add_detail.safetensors",
+        "age_slider_v20.safetensors",
+        "analogFilmPhotography_10.safetensors",
+        "beard_slider_v10.safetensors",
+        "breasts_slider_v10.safetensors",
+        "clothing_slider_v19_000000030.safetensors",
+        "contrast_slider_v10.safetensors",
+        "curly_hair_slider_v1.safetensors",
+        "DarkLighting.safetensors",
+        "depth_of_field_slider_v1.safetensors",
+        "detail_slider_v4.safetensors",
+        "emotion_happy_slider_v1.safetensors",
+        "epiNoiseoffset_v2.safetensors",
+        "eyebrows_slider_v2.safetensors",
+        "filmgrain_slider_v1.safetensors",
+        "fisheye_slider_v10.safetensors",
+        "gender_slider_v1.safetensors",
+        "lora_perfecteyes_v1_from_v1_160.safetensors",
+        "muscle_slider_v1.safetensors",
+        "people_count_slider_v1.safetensors",
+        "skin_tone_slider_v1.safetensors",
+        "time_slider_v1.safetensors",
+        "Transparent_Clothes_V2.safetensors",
+        "weight_slider_v2.safetensors"
+    ]
+
+    controlnet_model = [
+        "open_pose_dwp",
+        "midas_depth_map",
+        "canny",
+        "ip2p"
     ]
     
     if settings.basic_sampling_steps is not None and settings.basic_sampling_steps > 120:

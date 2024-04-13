@@ -20,7 +20,7 @@ class Settings(BaseModel):
 
     # IPA 1 settings (optional)
     ipa_1_enabled: bool = False
-    ipa_1_model: Optional[str] = None # in checkpoint models
+    ipa_1_model: Optional[str] = None # in sampler models
     ipa_1_reference_image: Optional[str] = None
     ipa_1_weight: Optional[float] = None # max is 1.0
     ipa_1_noise: Optional[float] = None  # max is 1.0
@@ -29,7 +29,7 @@ class Settings(BaseModel):
 
     # IPA 2 settings (optional)
     ipa_2_enabled: bool = False
-    ipa_2_model: Optional[str] = None # in checkpoint models
+    ipa_2_model: Optional[str] = None # in sampler models
     ipa_2_reference_image: Optional[str] = None
     ipa_2_weight: Optional[float] = None # max is 1.0
     ipa_2_noise: Optional[float] = None  # max is 1.0
@@ -41,8 +41,8 @@ class Settings(BaseModel):
     refinement_seed: Optional[int] = None
     refinement_steps: Optional[int] = None # max is 120
     refinement_cfg_scale: Optional[float] = None # max is 100
-    refinement_denoise: Optional[float] = None # check in comfy
-    refinement_sampler: Optional[str] = None # check in comfy
+    refinement_denoise: Optional[float] = None # max is 1.0
+    refinement_sampler: Optional[str] = None # in checkpoint models
 
     # Lora settings (optional)
     lora_count: Optional[int] = None # range is 1-4
@@ -52,7 +52,7 @@ class Settings(BaseModel):
 
     # ControlNet settings (optional)
     controlnet_enabled: bool = False
-    controlnet_model: Optional[int] = None # in checkpoint models
+    controlnet_model: Optional[str] = None # in checkpoint models
     controlnet_reference_image: Optional[str] = None
     controlnet_strength: Optional[float] = None # max is 10.0
     controlnet_start_percent: Optional[float] = None # in the range of smapling steps
