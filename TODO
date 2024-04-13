@@ -2,11 +2,7 @@ tree -I 'venv'
 
 ############### MAKE THESE THINGS IN THIS ORDER. ###############
 
-do hard tests on image generation - full workflow, connect disconnect 
-components etc, testing must be uncomfortable for you
-
-test stripe billing - paying for the product, and checking which permissions 
-users have for things they’ve piad for
+run tests for image generation conmfyui + imdj/facefusion
 
 email should be sent when
 - referral buys plan

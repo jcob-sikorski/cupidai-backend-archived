@@ -1,6 +1,6 @@
 planning thorough tests
 
-IMAGE GENERATION
+COMFYUI
 
 tests:
 - getting all params from request
@@ -11,6 +11,15 @@ tests:
 - parsing the generated workflow
 - generating images based on the workflow
 - removing images
+
+
+MIDJOURNEY/FACEFUSION
+
+tests:
+- doing faceswap on uplaoded images to uploadcare
+- doing imagine with custom settings
+- performing various actions on the image
+- cancelling job while it's doing
 
 
 BILLING
@@ -35,3 +44,5 @@ tests:
 - getting unpaid earnings
 - getting statistics
 - getting payout history
+- tracking number of signups thanks to the referral
+- updating user's earnings when someone paid

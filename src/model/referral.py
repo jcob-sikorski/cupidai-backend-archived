@@ -24,7 +24,7 @@ class Earnings(BaseModel):
 class Statistics(BaseModel):
     period: str  # This can be 'weekly', 'monthly', or 'yearly'
     period_value: int  # This can be week number, month number, or year
-    # referral_link_clicks: int TODO: update this when calling the singup/ref endpoint
+    referral_link_clicks: int
     purchases_made: int
     earned: float
     user_id: str

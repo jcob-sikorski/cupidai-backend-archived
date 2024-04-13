@@ -1,7 +1,7 @@
 from typing import List, Dict, Optional
 from pydantic import BaseModel
 
-# TODO: check limits for X_at to which sampling steps are they mapped
+
 class Settings(BaseModel):
     # Basic settings (mandatory)
     basic_preset: str

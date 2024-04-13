@@ -9,9 +9,6 @@ router = APIRouter(prefix="/account")
 async def create(email: str, user_id: str) -> None:
     return service.create(email, user_id)
 
-# TODO: we must track refs in sign up endpoint
-#       number of clicks on the link
-
 # TODO: this should be run to map the referral id to the new user_id
 #       then in the webhook we update the referral model
 # Protected endpoint

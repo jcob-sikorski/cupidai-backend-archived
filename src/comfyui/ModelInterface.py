@@ -302,11 +302,6 @@ class ModelInterface():
         else:
             self.used_components.add("preview_image2")
 
-# TODO: get the list of predefined models from David and install them to the custom nodes.
-# TODO: check all the models and checkpoints and all the options for config for the user, preinstall them on the comfyui runpod server
-# TODO: config the comfyui server so it has the endpoint which listens to the requests and runs the websocket for each request with predefined json file
-#       and loads the images from CDN into the images path before sending a request to the comfyui - TODO: ensure that comfyui sees the images without a reload
-
 def generate_workflow(settings: Settings, image_ids: Dict[str, str]) -> Optional[dict]:
     try:
         print("INITIALIZING MODEL INTERFACE")
