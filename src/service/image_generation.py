@@ -1,3 +1,5 @@
+from fastapi import BackgroundTasks
+
 from typing import Dict, List, Optional
 
 import re
@@ -180,8 +182,12 @@ def extract_id_from_uri(uri):
         return match.group(1)
     else:
         return None
+    
+async def send_post_request(url: str, headers: dict, payload: dict) -> None:
+    async with httpx.AsyncClient() as client:
+        await client.post(url, headers=headers, json=payload)
 
-async def generate(settings: Settings, uploadcare_uris: Dict[str, str], user_id: str) -> None:
+async def generate(settings: Settings, uploadcare_uris: Dict[str, str], user_id: str, background_tasks: BackgroundTasks) -> None:
     if billing_service.has_permissions('image_generation', user_id):
         image_ids = {key: extract_id_from_uri(uri) for key, uri in uploadcare_uris.items()}
 
@@ -213,8 +219,8 @@ async def generate(settings: Settings, uploadcare_uris: Dict[str, str], user_id:
             'user_id': user_id
         }
 
-        # Send the POST request
-        async with httpx.AsyncClient() as client:
-            await client.post(url, headers=headers, json=payload)
+        background_tasks.add_task(send_post_request, url, headers, payload)
+        
+        return {"message": "POST request sent in the background"}
     else:
         raise NotAuthorized(msg=f"Invalid permissions")

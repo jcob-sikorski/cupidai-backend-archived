@@ -1,4 +1,4 @@
-import multiprocessing
+from fastapi import BackgroundTasks
 
 import replicate
 from replicate.exceptions import ReplicateError
@@ -51,15 +51,13 @@ def run_inference(deepfake, deepfake_id: str, user_id: str) -> None:
     else:
         data.update(deepfake_id, status="failed")
 
-# TESTING DONE ✅
-def generate(deepfake: Deepfake, user_id: str) -> None:
+
+def generate(deepfake: Deepfake, user_id: str, background_tasks: BackgroundTasks) -> None:
     if billing_service.has_permissions('deepfake', user_id):
         data.create(deepfake)
 
-        print("CREATING A DETACHED PROCESS WHICH MONITORS AND UPDATES THE DB")
-        p = multiprocessing.Process(target=run_inference, args=(deepfake, deepfake.deepfake_id, user_id))
-        print("STARTING A PROCESS")
-        p.start()
+        print("CREATING A BACKGROUND TASK WHICH MONITORS AND UPDATES THE DB")
+        background_tasks.add_task(run_inference, deepfake, deepfake.deepfake_id, user_id)
         
         return deepfake.deepfake_id
     else:

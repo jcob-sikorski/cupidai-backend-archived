@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, BackgroundTasks
 
 from model.deepfake import Deepfake
 
@@ -10,8 +10,8 @@ router = APIRouter(prefix="/deepfake")
 #       because users must be able to pass necessary params for the model
 # Protected endpoint
 @router.post("/generate", status_code=201)  # Generates a new resource
-async def generate(deepfake: Deepfake, user_id: str) -> None:
-    return service.generate(deepfake, user_id)
+async def generate(deepfake: Deepfake, user_id: str, background_tasks: BackgroundTasks) -> None:
+    return service.generate(deepfake, user_id, background_tasks)
 
 # TESTING DONE ✅
 # Protected endpoint
