@@ -2,10 +2,24 @@ from pydantic import BaseModel
 
 class Account(BaseModel):
     user_id: str
-    email: str
+    username: str
+    email: str | None = None
+    full_name: str | None = None
+    profile_uri: str | None = None
+    disabled: bool | None = None
 
 class Invite(BaseModel):
     invite_id: str
     guest_id: str
     host_id: str
     signup_required: bool
+
+class Token(BaseModel):
+    access_token: str
+    token_type: str
+
+class TokenData(BaseModel):
+    # username: str | None = None
+    # TODO: wht do we want to transport back to the user?
+
+    pass

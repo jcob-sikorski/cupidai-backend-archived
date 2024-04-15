@@ -1,65 +1,56 @@
-import requests
-import json
+from bson.objectid import ObjectId
 
 from model.account import Account, Invite
+
+from service.account import get_password_hash
 
 from pymongo import ReturnDocument
 from .init import account_col, invite_col
 
-def create(email: str, user_id: str) -> None:
+def signup(username: str, password: str) -> None:
     # Check if account with the given user_id already exists
-    existing_account = account_col.find_one({"user_id": user_id})
+    existing_account = account_col.find_one({"username": username})
     if existing_account:
         # Account already exists, return an error
         raise ValueError("Account already exists for this user ID")
 
     # Create a new account
-    account = Account(email=email, user_id=user_id)
+    account = Account(user_id=str(ObjectId()), username=username, password=get_password_hash(password))
     account_col.insert_one(account.dict())
 
     # Optionally, return the newly created account
     return account
 
-def create_ref(ref: str) -> None:
+
+def signup_ref(ref: str) -> None:
     # TODO: make this work the same as team invite
     # although we need the email of the user signing up
 
     pass
 
+
 def create_invite(invite: Invite):
     result = invite_col.insert_one(invite.dict())
 
-def change_email(email: str, user_id: str) -> None:
+
+def change_email(email: str, user: Account) -> None:
     result = account_col.find_one_and_update(
-        {"user_id": user_id},
+        {"user_id": user.user_id},
         {"$set": {"email": email}},
         upsert=True,
         return_document=ReturnDocument.AFTER
     )
-    # TODO: we shuold also update the email for the auth provider
-    # url = f"https://login.auth0.com/api/v2/users/{user_id}"
 
-    # payload = json.dumps({
-    #   "email": email,
-    #   "connection": "passwordless"
-    # })
 
-    # headers = {
-    #   'Content-Type': 'application/json',
-    #   'Accept': 'application/json'
-    # }
-
-    # response = requests.request("PATCH", url, headers=headers, data=payload)
-
-# TESTING DONE ✅
-def get(user_id: str) -> None:
+def get_user(username: str) -> None:
     print("GETTING USER DETAILS")
-    result = account_col.find_one({"user_id": user_id})
+    result = account_col.find_one({"username": username})
 
     if result is not None:
         account = Account(**result)
         return account
     return None
+
 
 def get_by_email(email: str) -> None:
     print("GETTING USER DETAILS BY EMAIL")
@@ -70,57 +61,25 @@ def get_by_email(email: str) -> None:
         return account
     return None
 
-# def get(user_id: str) -> None:
-    # TODO:
-    # return 200
 
-    # TODO: is this really a user_id?
-    # TODO: how to get access token which has the user_id?
-    # TODO: is this user authenticated?
-    # TODO: how to authenticate a user?
-    # TODO: what is the setuo to use my fastapi endpoint as a usser and
-    #       manage this user?
+def change_profile_picture(profile_uri: str, user: Account) -> None:
+    result = account_col.find_one_and_update(
+        {"user_id": user.user.user_id},
+        {"$set": {"profile_uri": profile_uri}},
+        upsert=True,
+        return_document=ReturnDocument.AFTER
+    )
 
-    # TODO: how to interact with this api? what is the user_id? what is the bearer token?
-    # url = f"https://login.auth0.com/api/v2/users/{user_id}"
+def delete(user: Account) -> None:
+    # Find and delete the account with the given user_id
+    result = account_col.delete_one({"user_id": user.user_id})
 
-    # payload = {}
+    # Check if an account was actually deleted
+    if result.deleted_count == 0:
+        raise ValueError("No account found with this user ID")
 
-    # headers = {
-    #   'Accept': 'application/json',
-    #   'Authorization': f'Bearer '
-    # }
+    return {"message": "Account deleted successfully"}
 
-    # response = requests.request("GET", url, headers=headers, data=payload)
-
-    # print(response.text)
-
-def change_profile_picture(profile_uri: str, user_id: str) -> None:
-    # TODO:
-    return 200
-    # url = f"https://login.auth0.com/api/v2/users/{user_id}"
-
-    # payload = json.dumps({
-    #   "picture": profile_uri
-    # })
-
-    # headers = {
-    #   'Content-Type': 'application/json',
-    #   'Accept': 'application/json'
-    # }
-
-    # response = requests.request("PATCH", url, headers=headers, data=payload)
-
-def delete(user_id: str) -> None:
-    # TODO:
-    return 200
-    # url = f"https://login.auth0.com/api/v2/users/{user_id}"
-
-    # payload = {}
-
-    # headers = {}
-
-    # response = requests.request("DELETE", url, headers=headers, data=payload)
 
 def get_invite(invite_id: str) -> None:
     print("GETTING INVITE DETAILS")
