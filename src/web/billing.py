@@ -11,14 +11,13 @@ router = APIRouter(prefix="/billing")
 async def webhook(item: Item, request: Request) -> None:
     return service.webhook(item, request)
 
-# TODO: ensure that download of billing works
+
 # Protected endpoint
 @router.get("/download-history", status_code=200)  # Downloads billing history
 async def download_history(user_id: str) -> None:
     return service.download_history(user_id)
 
-# TODO: we must return the history in the same format (dict one) as the csv
-# TESTING DONE ✅
+
 # Protected endpoint
 @router.get("/history", status_code=200)  # Retrieves billing history
 async def get_history(user_id: str) -> None:

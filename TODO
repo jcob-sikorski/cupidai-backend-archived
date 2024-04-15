@@ -2,7 +2,7 @@ tree -I 'venv'
 
 ############### MAKE THESE THINGS IN THIS ORDER. ###############
 
-run tests for image generation conmfyui + imdj/facefusion
+implement user auth with supabase JWT and OTP
 
 email should be sent when
 - referral buys plan
@@ -10,16 +10,18 @@ email should be sent when
 
 webhook: map the user_id and customer_id smh in the billing
 
-faceswap: run faceswap on the same runpon as comfyui.
-          the fastapi serer would be the same communciating with both comfy and faceufusion
-
-host image generation on runpod, install all the models
-
-midjourney action for testing after buying a plan
-
 make endpoints secure with Kinde/something simpler to implement
 
 implement all the account functionality once we intagrate with auth provider
+
+run tests for imdj/facefusion
+
+faceswap: run faceswap on the same runpon as comfyui.
+          the fastapi serer would be the same communciating with both comfy and faceufusion
+
+host image generation on runpod
+
+midjourney action for testing after buying a plan
 
 figure out what should be returned type of each endpoint + what's the structure of responses for frontend
 

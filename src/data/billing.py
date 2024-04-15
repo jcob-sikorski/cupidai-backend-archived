@@ -28,31 +28,31 @@ def get_customer_id(user_id: str) -> Optional[str]:
         return stripe_account.customer_id
     return None
 
-# # TODO: why this is here - we already have similar function in a team
-# def get_team_owner_id(member_id: str) -> Optional[str]:
-#     result = team_col.find_one({"members": member_id})
-#     if result is not None:
-#         team = Team(**result)
-#         return team.owner
-#     return None
-
-
 # TESTING DONE ✅
-def get_history(solo: bool, user_id: str) -> None:
-    # if solo:
-    #     customer_id = get_customer_id(user_id)
-    # else:
-    #     # TODO: test when solo is false
-    #     owner_id = get_team_owner_id(user_id)
-    #     customer_id = get_customer_id(owner_id)
+def get_history(solo: bool, user_id: str) -> dict:
+    # Fetch customer ID
     customer_id = get_customer_id(user_id)
 
     if customer_id is not None:
+        # Fetch invoices from Stripe
         invoices = stripe.Invoice.list(customer=customer_id)
-        return invoices
+        
+        # Prepare dictionary data
+        dict_data = []
+        for invoice in invoices.auto_paging_iter():
+            for line_item in invoice.lines.auto_paging_iter():
+                dict_data.append({
+                    'Date': invoice.created,
+                    'Invoice ID': invoice.id,
+                    'Purchase Method': line_item.type,
+                    'Plan Name': line_item.description
+                })
+
+        return dict_data
     else:
         print("User ID not found in StripeAccount collection.")
         return None
+
 
 # TESTING DONE ✅
 def accept_tos(user_id: str) -> None:
@@ -78,7 +78,6 @@ def get_current_plan(user_id: str) -> Optional[Plan]:
 
     if customer_id is not None:
         print("RETRIEVING CUSTOMER'S SUBSCRIPTIONS FROM STRIPE")
-        # TODO: test when the customer_id is in the subcription list
         # Retrieve the customer's subscriptions from Stripe
         subscriptions = stripe.Subscription.list(customer=customer_id)
 

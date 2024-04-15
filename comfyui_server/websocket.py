@@ -219,15 +219,18 @@ async def create_item(request: Request):
 
     await send_webhook_acknowledgment(user_id, message_id, settings_id, 'in progress', webhook_url)
 
-    predefined_path = 'C:\\Users\\Shadow\\Desktop'
+    try:
+        predefined_path = 'C:\\Users\\Shadow\\Desktop'
 
-    download_and_save_images(uploadcare_uris, image_ids, predefined_path)
+        download_and_save_images(uploadcare_uris, image_ids, predefined_path)
 
-    ws = websocket.WebSocket()
-    ws.connect("ws://{}/ws?clientId={}".format(server_address, client_id))
-    images = get_images(ws, workflow)
+        ws = websocket.WebSocket()
+        ws.connect("ws://{}/ws?clientId={}".format(server_address, client_id))
+        images = get_images(ws, workflow)
 
-    s3_uris = upload_images_to_s3(images)
+        s3_uris = upload_images_to_s3(images)
+    except Exception as e:
+        await send_webhook_acknowledgment(user_id, message_id, settings_id, 'failed', webhook_url)
 
     await send_webhook_acknowledgment(user_id, message_id, settings_id, 'completed', webhook_url, s3_uris)
 

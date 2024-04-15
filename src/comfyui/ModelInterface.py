@@ -273,8 +273,6 @@ class ModelInterface():
             self.ipa2["284"]["inputs"]["image"] = ["390", 0]
 
 
-        # TODO: can user customize this model from a list of predefined models?
-        # set the model for load ipadapter model
         self.ipa2["285"]["inputs"]["ipadapter_file"] = model
         
         # set parameters

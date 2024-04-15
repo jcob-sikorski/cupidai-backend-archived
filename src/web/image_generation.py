@@ -8,7 +8,7 @@ import service.image_generation as service
 
 router = APIRouter(prefix="/image-generation")
 
-# TODO: status failed never is set because we have to handle the exception of get_images and when it occurs send webhook at with status failed
+
 @router.post("/webhook", status_code=201)
 async def webhook(message: Message) -> None:
     print("COMFYUI WEBHOOK ACTIVATED")

@@ -3,22 +3,22 @@ planning thorough tests
 COMFYUI
 
 tests:
-- getting all params from request
-- sending webhook acknowledgement
-- webhook ack received
-- updating status of the message
-- downloading and saving images from uploadcare uris
-- parsing the generated workflow
-- generating images based on the workflow
-- removing images
+- getting all params from request ✅
+- sending webhook acknowledgement ✅
+- webhook ack received ✅
+- updating status of the message ✅
+- downloading and saving images from uploadcare uris ✅
+- parsing the generated workflow ✅
+- generating images based on the workflow ✅
+- removing images ✅
 
-Note: test 5-6 different workflows
+Note: tested all components
 
 
 MIDJOURNEY/FACEFUSION
 
 tests:
-- doing faceswap on uplaoded images to uploadcare
+- doing faceswap on uplaoded images to uploadcare ✅
 - doing imagine with custom settings
 - performing various actions on the image
 - cancelling job while it's doing

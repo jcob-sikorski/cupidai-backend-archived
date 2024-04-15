@@ -14,7 +14,7 @@ import data.deepfake as data
 import service.billing as billing_service
 import service.history as history_service
 
-# TODO: after buying a plan test this function
+
 def run_inference(deepfake, deepfake_id: str, user_id: str) -> None:
     replicate.Client(api_token=os.environ["REPLICATE_API_TOKEN"])
 
