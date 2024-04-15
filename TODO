@@ -2,7 +2,7 @@ tree -I 'venv'
 
 ############### MAKE THESE THINGS IN THIS ORDER. ###############
 
-implement user auth with supabase JWT and OTP
+implement user auth with JWT and OTP
 
 email should be sent when
 - referral buys plan
