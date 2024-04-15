@@ -7,15 +7,16 @@ from error import NotAuthorized
 
 import os
 
-from model.deepfake import Deepfake
-
 import data.deepfake as data
+
+from model.account import Account
+from model.deepfake import Deepfake
 
 import service.billing as billing_service
 import service.history as history_service
 
 
-def run_inference(deepfake, deepfake_id: str, user_id: str) -> None:
+def run_inference(deepfake, deepfake_id: str, user: Account) -> None:
     replicate.Client(api_token=os.environ["REPLICATE_API_TOKEN"])
 
     print("RUNNING INFERENCE")
@@ -47,22 +48,22 @@ def run_inference(deepfake, deepfake_id: str, user_id: str) -> None:
         
         data.update(deepfake_id, status="completed")
 
-        history_service.update('deepfake', user_id)
+        history_service.update('deepfake', user.user_id)
     else:
         data.update(deepfake_id, status="failed")
 
 
-def generate(deepfake: Deepfake, user_id: str, background_tasks: BackgroundTasks) -> None:
-    if billing_service.has_permissions('deepfake', user_id):
+def generate(deepfake: Deepfake, user: Account, background_tasks: BackgroundTasks) -> None:
+    if billing_service.has_permissions('deepfake', user.user_id):
         data.create(deepfake)
 
         print("CREATING A BACKGROUND TASK WHICH MONITORS AND UPDATES THE DB")
-        background_tasks.add_task(run_inference, deepfake, deepfake.deepfake_id, user_id)
+        background_tasks.add_task(run_inference, deepfake, deepfake.deepfake_id, user.user_id)
         
         return deepfake.deepfake_id
     else:
         raise NotAuthorized(msg=f"Invalid permissions")
 
 # TESTING DONE ✅
-def get_history(user_id: str) -> None:
-    return data.get_history(user_id)
+def get_history(user: Account) -> None:
+    return data.get_history(user.user_id)

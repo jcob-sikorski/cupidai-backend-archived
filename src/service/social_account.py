@@ -1,15 +1,16 @@
 import data.social_account as data
 
+from model.account import Account
 from model.social_account import SocialAccount
 
 # TESTING DONE ✅
-def create(social_account: SocialAccount, user_id: str) -> bool:
-    return data.create(social_account, user_id)
+def create(social_account: SocialAccount, user: Account) -> bool:
+    return data.create(social_account, user.user_id)
 
 # TESTING DONE ✅
-def update(social_account: SocialAccount, user_id: str) -> None:
-    return data.update(social_account, user_id)
+def update(social_account: SocialAccount, user: Account) -> None:
+    return data.update(social_account, user.user_id)
 
 # TESTING DONE ✅
-def get(user_id: str) -> None:
-    return data.get(user_id)
+def get(user: Account) -> None:
+    return data.get(user.user_id)

@@ -10,10 +10,6 @@ email should be sent when
 
 webhook: map the user_id and customer_id smh in the billing
 
-make endpoints secure with Kinde/something simpler to implement
-
-implement all the account functionality once we intagrate with auth provider
-
 run tests for imdj/facefusion
 
 faceswap: run faceswap on the same runpon as comfyui.

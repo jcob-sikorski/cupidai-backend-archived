@@ -6,6 +6,7 @@ import stripe
 
 import data.billing as data
 
+from model.account import Account
 from model.billing import Item, StripeAccount
 
 import service.referral as referral_service
@@ -20,8 +21,8 @@ stripe.api_key = "sk_test_51P2KoI09MTVFbataUH3MvtXza4vM1XflPRcmj2tPfVcbPCTvkOaLq
 endpoint_secret = 'whsec_ed116b6b56e5b4cf34a61e6d5b8aa2708976207e53a2a6957dcf2b51eba4db85'
 
 # TESTING DONE ✅
-def has_permissions(feature: str, user_id: str) -> bool:
-    return data.has_permissions(feature, user_id)
+def has_permissions(feature: str, user: Account) -> bool:
+    return data.has_permissions(feature, user.user_id)
 
 async def webhook(item: Item, request: Request):
     event = None
@@ -80,9 +81,9 @@ async def webhook(item: Item, request: Request):
     return {"success": True}
 
 
-def download_history(user_id: str):
+def download_history(user: Account):
     # Fetch purchase history from Stripe
-    invoices = get_history(solo=True, user_id=user_id)
+    invoices = get_history(solo=True, user_id=user.user_id)
 
     if invoices:
         # Prepare CSV data
@@ -92,7 +93,7 @@ def download_history(user_id: str):
                 csv_data.append([invoice.created, invoice.id, line_item.type, line_item.description])
 
         # Write CSV data to file
-        file_name = f"{user_id}_purchase_history.csv"
+        file_name = f"{user.user_id}_purchase_history.csv"
         with open(file_name, mode='w', newline='') as file:
             writer = csv.writer(file)
             writer.writerow(['Date', 'Invoice ID', 'Purchase Method', 'Plan Name'])
@@ -103,15 +104,15 @@ def download_history(user_id: str):
         print("No purchase history found.")
 
 # TESTING DONE ✅
-def get_history(user_id: str) -> None:
-    return data.get_history(user_id)
-# def get_history(solo: bool, user_id: str) -> None:
+def get_history(user: Account) -> None:
+    return data.get_history(user.user_id)
+# def get_history(solo: bool, user: Account) -> None:
 #     return data.get_history(solo, user_id)
 
 # TESTING DONE ✅
-def accept_tos(user_id: str) -> None:
-    return data.accept_tos(user_id)
+def accept_tos(user: Account) -> None:
+    return data.accept_tos(user.user_id)
 
 # TESTING DONE ✅
-def get_current_plan(user_id: str) -> None:
-    return data.get_current_plan(user_id)
+def get_current_plan(user: Account) -> None:
+    return data.get_current_plan(user.user_id)

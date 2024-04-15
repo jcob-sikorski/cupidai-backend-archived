@@ -12,6 +12,7 @@ from comfyui.ModelInterface import generate_workflow
 
 import data.image_generation as data
 
+from model.account import Account
 from model.image_generation import Settings, Message
 
 import service.billing as billing_service
@@ -172,8 +173,8 @@ def check_settings(settings: Settings):
 def save_settings(settings: Settings):
     return data.save_settings(settings)
 
-def update_message(user_id: str, status: Optional[str] = None, uploadcare_uris: Optional[Dict[str, str]] = None, message_id: Optional[str] = None, settings_id: Optional[str] = None, s3_uris: Optional[List[str]] = None):
-    return data.update_message(user_id, status, uploadcare_uris, message_id, settings_id, s3_uris)
+def update_message(user: Account, status: Optional[str] = None, uploadcare_uris: Optional[Dict[str, str]] = None, message_id: Optional[str] = None, settings_id: Optional[str] = None, s3_uris: Optional[List[str]] = None):
+    return data.update_message(user.user_id, status, uploadcare_uris, message_id, settings_id, s3_uris)
 
 def extract_id_from_uri(uri):
     # Use regex to extract the UUID from the URI
@@ -187,18 +188,18 @@ async def send_post_request(url: str, headers: dict, payload: dict) -> None:
     async with httpx.AsyncClient() as client:
         await client.post(url, headers=headers, json=payload)
 
-async def generate(settings: Settings, uploadcare_uris: Dict[str, str], user_id: str, background_tasks: BackgroundTasks) -> None:
-    if billing_service.has_permissions('image_generation', user_id):
+async def generate(settings: Settings, uploadcare_uris: Dict[str, str], user: Account, background_tasks: BackgroundTasks) -> None:
+    if billing_service.has_permissions('image_generation', user.user_id):
         image_ids = {key: extract_id_from_uri(uri) for key, uri in uploadcare_uris.items()}
 
         settings_id = save_settings(settings)
 
-        message_id = update_message(user_id, "started", uploadcare_uris, None, settings_id, None)
+        message_id = update_message(user.user_id, "started", uploadcare_uris, None, settings_id, None)
 
         workflow_json = generate_workflow(settings, image_ids)
 
         if workflow_json is None:
-            update_message(user_id, message_id, "failed")
+            update_message(user.user_id, message_id, "failed")
             return None
 
         # Define the URL of the server
@@ -216,7 +217,7 @@ async def generate(settings: Settings, uploadcare_uris: Dict[str, str], user_id:
             'image_ids': image_ids,
             'message_id': message_id,
             'settings_id': settings_id,
-            'user_id': user_id
+            'user_id': user.user_id
         }
 
         background_tasks.add_task(send_post_request, url, headers, payload)
