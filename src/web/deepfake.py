@@ -1,7 +1,11 @@
-from fastapi import APIRouter, BackgroundTasks
+from fastapi import APIRouter, Depends, BackgroundTasks
 
+from typing import Annotated
+
+from model.account import Account
 from model.deepfake import Deepfake
 
+from service import account as account_service
 from service import deepfake as service
 
 router = APIRouter(prefix="/deepfake")
@@ -10,11 +14,11 @@ router = APIRouter(prefix="/deepfake")
 #       because users must be able to pass necessary params for the model
 # Protected endpoint
 @router.post("/generate", status_code=201)  # Generates a new resource
-async def generate(deepfake: Deepfake, user_id: str, background_tasks: BackgroundTasks) -> None:
-    return service.generate(deepfake, user_id, background_tasks)
+async def generate(deepfake: Deepfake, user: Annotated[Account, Depends(account_service.get_current_active_user)], background_tasks: BackgroundTasks) -> None:
+    return service.generate(deepfake, user, background_tasks)
 
 # TESTING DONE ✅
 # Protected endpoint
 @router.get("/history", status_code=200)  # Retrieves history
-async def get_history(user_id: str) -> None:
-    return service.get_history(user_id)
+async def get_history(user: Annotated[Account, Depends(account_service.get_current_active_user)]) -> None:
+    return service.get_history(user)

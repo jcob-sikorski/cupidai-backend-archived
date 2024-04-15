@@ -35,9 +35,7 @@ async def change_email(email: str, user: Annotated[Account, Depends(service.get_
 
 # Protected endpoint
 @router.get("/", response_model=Account)
-async def get(
-    user: Annotated[Account, Depends(service.get_current_active_user)],
-):
+async def get(user: Annotated[Account, Depends(service.get_current_active_user)]):
     return user
 
 # Protected endpoint

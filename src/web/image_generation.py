@@ -1,9 +1,11 @@
-from fastapi import APIRouter, BackgroundTasks
+from fastapi import APIRouter, Depends, BackgroundTasks
 
-from typing import Dict, List, Optional
+from typing import Annotated, Dict
 
+from model.account import Account
 from model.image_generation import Settings, Message
 
+from service import account as account_service
 import service.image_generation as service
 
 router = APIRouter(prefix="/image-generation")
@@ -15,5 +17,5 @@ async def webhook(message: Message) -> None:
     return service.webhook(message)
 
 @router.post("/", status_code=201)
-async def generate(settings: Settings, uploadcare_uris: Dict[str, str], user_id: str, background_tasks: BackgroundTasks) -> None:
-    return await service.generate(settings, uploadcare_uris, user_id, background_tasks)
+async def generate(settings: Settings, uploadcare_uris: Dict[str, str], user: Annotated[Account, Depends(account_service.get_current_active_user)], background_tasks: BackgroundTasks) -> None:
+    return await service.generate(settings, uploadcare_uris, user, background_tasks)
