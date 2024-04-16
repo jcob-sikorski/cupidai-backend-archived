@@ -40,7 +40,7 @@ def change_email(email: str, user: Account) -> None:
     )
 
 
-def get_user(username: str) -> None:
+def get_by_username(username: str) -> None:
     print("GETTING USER DETAILS")
     result = account_col.find_one({"username": username})
 
@@ -49,6 +49,14 @@ def get_user(username: str) -> None:
         return account
     return None
 
+def get_by_id(user_id: str) -> None:
+    print("GETTING USER DETAILS BY USER_ID")
+    result = account_col.find_one({"user_id": user_id})
+
+    if result is not None:
+        account = Account(**result)
+        return account
+    return None
 
 def get_by_email(email: str) -> None:
     print("GETTING USER DETAILS BY EMAIL")

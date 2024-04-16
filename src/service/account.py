@@ -35,7 +35,7 @@ def get_password_hash(password):
 
 
 def authenticate_user(username: str, password: str):
-    user = data.get_user(username)
+    user = data.get_by_username(username)
 
     if not user:
         return False
@@ -79,7 +79,7 @@ async def get_current_user(token: Annotated[str, Depends(oauth2_scheme)]):
     except JWTError:
         raise credentials_exception
     
-    user = data.get_user(username=token_data.username)
+    user = data.get_by_username(username=token_data.username)
 
     if user is None:
         raise credentials_exception
@@ -158,6 +158,9 @@ def reset_password(email: str) -> None:
 
 def change_email(email: str, user: Account) -> None:
     return data.change_email(email, user)
+
+def get_by_id(user_id: str) -> None:
+    return data.get_by_id(user_id)
 
 # TODO: all of the functions which get user should check if user was disabled
 #       btw this function does not do that

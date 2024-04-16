@@ -9,6 +9,8 @@ import data.billing as data
 from model.account import Account
 from model.billing import Item, StripeAccount
 
+import service.account as account_service
+import service.email as email_service
 import service.referral as referral_service
 
 from data.init import stripe_account_col, referral_col
@@ -59,6 +61,12 @@ async def webhook(item: Item, request: Request):
         if referral:
             referral_service.update_statistics(session.metadata['host_id'], session["amount_total"] / 100)
 
+            user = account_service.get_by_id(session.metadata['host_id'])
+
+            if user:                                      
+                # get user by host_id and get his email
+                email_service.send(user.email, 'clv2tl6jd00vybfeainihiu2j')
+                
             # referral_service.remove_link(session["client_reference_id"])
 
     elif event['type'] == 'customer.subscription.deleted':

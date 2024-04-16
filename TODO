@@ -5,8 +5,6 @@ tree -I 'venv'
 
 test stripe webhook using stripe CLI https://docs.stripe.com/webhooks  https://docs.stripe.com/stripe-vscode
 
-webhook: map the user_id and customer_id smh in the billing
-
 email should be sent when
 - referral buys plan - we can do this while we map the user id to customer id
 
