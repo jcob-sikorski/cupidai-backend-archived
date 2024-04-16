@@ -5,7 +5,7 @@ from model.account import Account, Invite, PasswordReset
 from service.account import get_password_hash
 
 from pymongo import ReturnDocument
-from .init import account_col, invite_col
+from .init import account_col, invite_col, password_reset_col
 
 def signup(username: str, password: str) -> None:
     # Check if account with the given user_id already exists
@@ -15,7 +15,7 @@ def signup(username: str, password: str) -> None:
         raise ValueError("Account already exists for this user ID")
 
     # Create a new account
-    account = Account(user_id=str(ObjectId()), username=username, password=get_password_hash(password))
+    account = Account(user_id=str(ObjectId()), username=username, password_hash=get_password_hash(password))
     account_col.insert_one(account.dict())
 
     # Optionally, return the newly created account
@@ -92,3 +92,43 @@ def get_invite(invite_id: str) -> None:
 
 def create_password_reset(password_reset: PasswordReset):
     result = password_reset_col.insert_one(password_reset.dict())
+
+def get_password_reset(password_reset_id: str) -> None:
+    print("GETTING PASSWORD RESET DETAILS")
+    result = password_reset_col.find_one({"_id": password_reset_id})
+
+    if result is not None:
+        password_reset = PasswordReset(**result)
+        return password_reset
+    return None
+
+# TODO: check how service interacts with password field and rename user.password
+#       to user.password_hash
+
+# TODO: we should not always make upserts because it's unsafe like in this case
+#       updates only should suffice
+def set_new_password(password: str, user_id: str) -> None:
+    print("GETTING PASSWORD RESET DETAILS")
+    result = account_col.find_one_and_update(
+        {"user_id": user_id},
+        {"$set": {"password_hash": get_password_hash(password)}},
+        upsert=True,
+        return_document=ReturnDocument.AFTER
+    )
+
+    if result is not None:
+        return True
+    return False
+
+def disable_password_reset(user_id: str) -> None:
+    print("GETTING PASSWORD RESET DETAILS")
+    result = account_col.find_one_and_update(
+        {"user_id": user_id},
+        {"$set": {"disabled": True}},
+        upsert=True,
+        return_document=ReturnDocument.AFTER
+    )
+
+    if result is not None:
+        return True
+    return False

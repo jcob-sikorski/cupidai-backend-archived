@@ -17,9 +17,16 @@ async def login(form_data: Annotated[OAuth2PasswordRequestForm, Depends()]) -> T
 async def signup(form_data: Annotated[OAuth2PasswordRequestForm, Depends()]) -> Token:
     return service.signup(form_data)
 
-@router.post("/forgot-password")
-async def forgot_password(email: str) -> Token:
-    return service.forgot_password(email)
+from fastapi import Path
+
+@router.post("/reset-password-request/{password_reset_id}", status_code=200)
+async def reset_password_request(password_reset_id: str = Path(...)) -> Token:
+    return service.reset_password_request(password_reset_id)
+
+
+@router.post("/reset-password", status_code=200)
+async def reset_password(email: str) -> Token:
+    return service.reset_password(email)
 
 # TODO: this should be run to map the referral id to the new user_id
 #       then in the webhook we update the referral model

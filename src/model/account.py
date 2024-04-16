@@ -3,6 +3,7 @@ from pydantic import BaseModel
 class Account(BaseModel):
     user_id: str
     username: str
+    password_hash: str | None = None
     email: str | None = None
     full_name: str | None = None
     profile_uri: str | None = None

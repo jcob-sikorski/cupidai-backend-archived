@@ -121,7 +121,17 @@ def signup(form_data: OAuth2PasswordRequestForm) -> None:
 def signup_ref(ref: str) -> None:
     return data.signup_ref(ref)
 
-def forgot_password(email: str) -> None:
+def reset_password_request(password_reset_id: str, password: str) -> None:
+    password_reset = data.get_password_reset(password_reset_id)
+    
+    now = datetime.now()
+    expiry_time = password_reset.created_at + timedelta(minutes=10)
+
+    if password_reset and password_reset.disabled == False and now <= expiry_time:
+        if data.set_new_password(password, password_reset.user_id):
+            data.disable_password_reset(password_reset)
+
+def reset_password(email: str) -> None:
     user = get_by_email(email)
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
