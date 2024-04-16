@@ -114,7 +114,7 @@ async def login(form_data: OAuth2PasswordRequestForm) -> Token:
 
 
 def signup(form_data: OAuth2PasswordRequestForm) -> None:
-    data.signup(form_data.username, form_data.password)
+    data.signup(form_data.username, get_password_hash(form_data.password))
     
     return login(form_data.username, form_data.password)
 
@@ -128,7 +128,7 @@ def reset_password_request(password_reset_id: str, password: str) -> None:
     expiry_time = password_reset.created_at + timedelta(minutes=10)
 
     if password_reset and password_reset.disabled == False and now <= expiry_time:
-        if data.set_new_password(password, password_reset.user_id):
+        if data.set_new_password(get_password_hash(password), password_reset.user_id):
             data.disable_password_reset(password_reset)
 
 def reset_password(email: str) -> None:

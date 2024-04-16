@@ -13,7 +13,7 @@ router = APIRouter(prefix="/billing")
 # Non-protected endpoint
 @router.post('/webhook')
 async def webhook(item: Item, request: Request) -> None:
-    return service.webhook(item, request)
+    return await service.webhook(item, request)
 
 
 # Protected endpoint

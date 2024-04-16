@@ -2,12 +2,10 @@ from bson.objectid import ObjectId
 
 from model.account import Account, Invite, PasswordReset
 
-from service.account import get_password_hash
-
 from pymongo import ReturnDocument
 from .init import account_col, invite_col, password_reset_col
 
-def signup(username: str, password: str) -> None:
+def signup(username: str, password_hash: str) -> None:
     # Check if account with the given user_id already exists
     existing_account = account_col.find_one({"username": username})
     if existing_account:
@@ -15,7 +13,7 @@ def signup(username: str, password: str) -> None:
         raise ValueError("Account already exists for this user ID")
 
     # Create a new account
-    account = Account(user_id=str(ObjectId()), username=username, password_hash=get_password_hash(password))
+    account = Account(user_id=str(ObjectId()), username=username, password_hash=password_hash)
     account_col.insert_one(account.dict())
 
     # Optionally, return the newly created account
@@ -107,11 +105,11 @@ def get_password_reset(password_reset_id: str) -> None:
 
 # TODO: we should not always make upserts because it's unsafe like in this case
 #       updates only should suffice
-def set_new_password(password: str, user_id: str) -> None:
+def set_new_password(password_hash: str, user_id: str) -> None:
     print("GETTING PASSWORD RESET DETAILS")
     result = account_col.find_one_and_update(
         {"user_id": user_id},
-        {"$set": {"password_hash": get_password_hash(password)}},
+        {"$set": {"password_hash": password_hash}},
         upsert=True,
         return_document=ReturnDocument.AFTER
     )
