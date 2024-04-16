@@ -23,3 +23,11 @@ class TokenData(BaseModel):
     # TODO: wht do we want to transport back to the user?
 
     pass
+
+class PasswordReset(BaseModel):
+    reset_id: str | None = None
+    user_id: str | None = None
+    email: str | None = None
+    reset_link: str | None = None
+    is_used: bool | None = None
+    created_at: str | None = None

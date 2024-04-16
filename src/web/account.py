@@ -10,16 +10,16 @@ from service import account as service
 router = APIRouter(prefix="/account")
 
 @router.post("/login")
-async def login(
-    form_data: Annotated[OAuth2PasswordRequestForm, Depends()],
-) -> Token:
+async def login(form_data: Annotated[OAuth2PasswordRequestForm, Depends()]) -> Token:
     return service.login(form_data)
 
 @router.post("/signup")
-async def login(
-    form_data: Annotated[OAuth2PasswordRequestForm, Depends()],
-) -> Token:
+async def signup(form_data: Annotated[OAuth2PasswordRequestForm, Depends()]) -> Token:
     return service.signup(form_data)
+
+@router.post("/forgot-password")
+async def forgot_password(email: str) -> Token:
+    return service.forgot_password(email)
 
 # TODO: this should be run to map the referral id to the new user_id
 #       then in the webhook we update the referral model

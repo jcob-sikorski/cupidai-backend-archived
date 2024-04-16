@@ -1,6 +1,6 @@
 from bson.objectid import ObjectId
 
-from model.account import Account, Invite
+from model.account import Account, Invite, PasswordReset
 
 from service.account import get_password_hash
 
@@ -89,3 +89,6 @@ def get_invite(invite_id: str) -> None:
         invite = Invite(**result)
         return invite
     return None
+
+def create_password_reset(password_reset: PasswordReset):
+    result = password_reset_col.insert_one(password_reset.dict())

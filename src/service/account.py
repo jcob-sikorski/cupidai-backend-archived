@@ -6,10 +6,13 @@ from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from jose import JWTError, jwt
 from passlib.context import CryptContext
 
-
 from data import account as data
 
-from model.account import Account, Token, TokenData
+from model.account import Account, Token, TokenData, PasswordReset
+
+import service.email as email_service
+
+import uuid
 
 # to get a string like this run:
 # openssl rand -hex 32
@@ -118,9 +121,36 @@ def signup(form_data: OAuth2PasswordRequestForm) -> None:
 def signup_ref(ref: str) -> None:
     return data.signup_ref(ref)
 
+def forgot_password(email: str) -> None:
+    user = get_by_email(email)
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    password_reset_id = str(uuid.uuid4())
+
+    # TODO for dev purposes use ngrok domain
+    password_reset_link = f"https://cupidai.tech/account/new-password/{password_reset_id}"
+
+    now = datetime.now()
+
+    password_reset = PasswordReset(
+        reset_id=password_reset_id,
+        user_id=user.user_id,
+        email=email,
+        reset_link=password_reset_link,
+        is_used=False,
+        created_at=now.strftime("%Y-%m-%d %H:%M:%S")
+    )
+
+    data.create_password_reset(password_reset)
+
+    email_service.send(email, 'clv2h2bt800bm1147nw7gtngv', password_reset_link=password_reset_link)
+
 def change_email(email: str, user: Account) -> None:
     return data.change_email(email, user)
 
+# TODO: all of the functions which get user should check if user was disabled
+#       btw this function does not do that
 def get_by_email(email: str) -> None:
     return data.get_by_email(email)
 
