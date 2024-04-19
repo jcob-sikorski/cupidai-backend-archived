@@ -11,6 +11,10 @@ from service import deepfake as service
 router = APIRouter(prefix="/deepfake")
 
 # TODO: add two webhooks: one for facefusion and second for higher plans' API
+@router.post("/ff-webhook", status_code=201)
+async def facefusion_webhook(message: Message) -> None:
+    print("FACEFUSION WEBHOOK ACTIVATED")
+    return service.facefusion_webhook(message)
 
 # Protected endpoint
 @router.post("/generate", status_code=201)  # Generates a new resource

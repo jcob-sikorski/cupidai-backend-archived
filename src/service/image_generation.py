@@ -22,7 +22,10 @@ import service.history as history_service
 
 def webhook(message: Message) -> None:
     print(message)
-    update_message(user_id=message.user_id, message_id=message.message_id, status=message.status, s3_uris=message.s3_uris)
+    update_message(user_id=message.user_id, 
+                   message_id=message.message_id, 
+                   status=message.status, 
+                   s3_uris=message.s3_uris)
 
     if message.status == 'in progress':
         history_service.update('image_generation', message.user_id)

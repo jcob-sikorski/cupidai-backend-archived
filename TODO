@@ -1,11 +1,6 @@
 tree -I 'venv'
 
-# TODO: what about other file formats like movies or jpgs for image generation: uploads, generation, which one are interacting with these formats
-#       how we handle downloads, uploads, removals
-
 ############################################## IMAGE GENERATION ##############################################
-
-make comfyui also for formats: jpg, png
 
 test extensively facefusion endpoint
 test jpg, png, mov, mp4, HEIC file formats in facefusion

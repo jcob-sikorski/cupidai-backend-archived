@@ -18,7 +18,7 @@ from model.deepfake import Message
 import service.billing as billing_service
 import service.history as history_service
 
-def webhook(message: Message) -> None:
+def facefusion_webhook(message: Message) -> None:
     print(message)
     update_message(user_id=message.user_id, 
                    message_id=message.message_id, 
