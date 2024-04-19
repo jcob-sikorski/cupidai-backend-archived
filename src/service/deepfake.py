@@ -8,6 +8,8 @@ import httpx
 
 import re
 
+from pyuploadcare import Uploadcare
+
 import data.deepfake as data
 
 from model.account import Account
@@ -88,18 +90,6 @@ async def send_post_request(url: str, headers: dict, payload: dict) -> None:
     async with httpx.AsyncClient() as client:
         await client.post(url, headers=headers, json=payload)
 
-# TODO: figure out if the process of generation, upload/download is the same for all the file formats
-# TODO: update the endings of file names in the comfyui and facefusion, instead of .png add other endings if they are relevant
-# TODO: we don't operate solely on images, we can also operate on videos that's why we need to update the namings
-# TODO: based on the each uploadcare_uri get its format from the uploadcare api:
-
-# from pyuploadcare import Uploadcare
-# uploadcare = Uploadcare(public_key='YOUR_PUBLIC_KEY', secret_key='YOUR_SECRET_KEY')
-
-# file = uploadcare.file(uploadcare_id)
-# print(file.info)
-
-
 def generate(
         message: Message, 
         user: Account, 
@@ -113,7 +103,18 @@ def generate(
         # TODO: if above or equal to business plan call the api
         #       else call our runpod server + set up webhook probably for both?     
 
-        image_ids = [extract_id_from_uri(uri) for uri in message.uploadcare_uris]
+        file_ids = [extract_id_from_uri(uri) for uri in message.uploadcare_uris]
+
+        uploadcare = Uploadcare(public_key='e6daeb69aa105a823395', secret_key='9a1b92e275b8fc7855a9')
+
+        file_formats = []
+
+        for file_id in file_ids:
+            file_info = uploadcare.file(file_id).info()
+            file_formats.append(file_info['mime_type'].split('/')[1])
+
+        print("FILE FORMATS")
+        print(file_formats)
 
         message_id = update_message(user.user_id, 
                                     "started", 
@@ -137,7 +138,8 @@ def generate(
         payload = {
             'user_id': user.user_id,
             'uploadcare_uris': message.uploadcare_uris,
-            'image_ids': image_ids,
+            'file_ids': file_ids,
+            'file_formats': file_formats,
             'message_id': message_id,
             'reference_face_distance': message.reference_face_distance,
             'face_enhancer_model': message.face_enhancer_model,

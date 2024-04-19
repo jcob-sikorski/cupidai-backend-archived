@@ -1,6 +1,3 @@
-#This is an example that uses the websockets api to know when a prompt execution is done
-#Once the prompt execution is done it downloads the images using the /history endpoint
-
 import uuid
 import os
 import httpx
@@ -191,6 +188,7 @@ async def create_item(request: Request):
                    "--face-enhancer-model", face_enhancer_model, 
                    "--frame-enhancer-blend", frame_enhancer_blend]
 
+        # TODO: get sense of how each file format looks like in uploadcare
         # Add a '-s' flag for each image
         for source_id, source_format in zip(file_ids[:-1], file_formats[:-1]):
             source_path = os.path.join(predefined_path, f"{source_id}.{source_format}")
