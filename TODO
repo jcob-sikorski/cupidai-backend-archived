@@ -4,7 +4,11 @@ tree -I 'venv'
 #       how we handle downloads, uploads, removals
 
 ############################################## IMAGE GENERATION ##############################################
+finish facefusion logic
+
 test facefusion endpoint
+
+add second api
 
 make facefusion also for formats: jpg, png, mov, mp4, HEIC
 

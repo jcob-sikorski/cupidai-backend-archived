@@ -12,10 +12,6 @@ router = APIRouter(prefix="/deepfake")
 
 # TODO: add two webhooks: one for facefusion and second for higher plans' API
 
-
-# TODO: we should probably somehow make difference between endpoint for higher plans API and our custom one - facefusion
-#       at least how do we pass the request for the paid API?
-
 # Protected endpoint
 @router.post("/generate", status_code=201)  # Generates a new resource
 async def generate(message: Message, 

@@ -39,22 +39,22 @@ def check_parameters(message: Message):
         "restoreformer_plus_plus"
     ]
     
-    # TODO: we don't check for settings.X is None
-    # TODO: we should return more information what's wrong with settings
+    if message.reference_face_distance is None:
+        return "Error: reference_face_distance is None"
+    elif not (0.0 <= message.reference_face_distance <= 1.5 and
+              message.reference_face_distance % 0.05 == 0):
+        return "Error: reference_face_distance must be between 0.0 and 1.5 and a multiple of 0.05"
 
-    if not (message.reference_face_distance is not None and
-        0.0 <= message.reference_face_distance <= 1.5 and
-        message.reference_face_distance % 0.05 == 0):
-        return False
+    if message.face_enhancer_model is None:
+        return "Error: face_enhancer_model is None"
+    elif message.face_enhancer_model not in face_enhancer_models:
+        return f"Error: face_enhancer_model must be one of {face_enhancer_models}"
 
-    if not (message.face_enhancer_model is not None and
-            message.face_enhancer_model in face_enhancer_models):
-        return False
-    
-    if not (message.frame_enhancer_blend is not None and
-            0 <= message.frame_enhancer_blend <= 100):
-        return False
-    
+    if message.frame_enhancer_blend is None:
+        return "Error: frame_enhancer_blend is None"
+    elif not (0 <= message.frame_enhancer_blend <= 100):
+        return "Error: frame_enhancer_blend must be between 0 and 100"
+
     return True
 
 
@@ -94,8 +94,9 @@ def generate(
         background_tasks: BackgroundTasks) -> None:
     
     if billing_service.has_permissions('deepfake', user.user_id):
-        if not check_parameters(message):
-            return 'Invalid message'
+        check = check_parameters(message)
+        if check is not True:
+            return check
         
         # TODO: if above or equal to business plan call the api
         #       else call our runpod server + set up webhook probably for both?     
