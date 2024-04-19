@@ -1,4 +1,3 @@
-import uuid
 import os
 
 from dotenv import load_dotenv
@@ -7,6 +6,9 @@ from fastapi import FastAPI
 import uvicorn
 
 import boto3
+
+import comfyui
+import facefusion
 
 load_dotenv()
 
