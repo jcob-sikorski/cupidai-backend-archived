@@ -27,6 +27,38 @@ def webhook(message: Message) -> None:
     if message.status == 'in progress':
         history_service.update('deepfake', message.user_id)
 
+def check_parameters(message: Message):
+    face_enhancer_models = [
+        "codeformer",
+        "gfpgan_1.2",
+        "gfpgan_1.3",
+        "gfpgan_1.4",
+        "gpen_bfr_256",
+        "gpen_bfr_512",
+        "gpen_bfr_1024",
+        "gpen_bfr_2048",
+        "restoreformer_plus_plus"
+    ]
+    
+    # TODO: we don't check for settings.X is None
+    # TODO: we should return more information what's wrong with settings
+
+    if not (message.reference_face_distance is not None and
+        0.0 <= message.reference_face_distance <= 1.5 and
+        message.reference_face_distance % 0.05 == 0):
+        return False
+
+    if not (message.face_enhancer_model is not None and
+            message.face_enhancer_model in face_enhancer_models):
+        return False
+    
+    if not (message.frame_enhancer_blend is not None and
+            0 <= message.frame_enhancer_blend <= 100):
+        return False
+    
+    return True
+
+
 def update_message(
             user_id: str, 
             status: Optional[str] = None, 
@@ -59,13 +91,15 @@ async def send_post_request(url: str, headers: dict, payload: dict) -> None:
     async with httpx.AsyncClient() as client:
         await client.post(url, headers=headers, json=payload)
 
-# TODO: check paramters before creating a generation request
 def generate(
         message: Message, 
         user: Account, 
         background_tasks: BackgroundTasks) -> None:
     
     if billing_service.has_permissions('deepfake', user.user_id):
+        if not check_parameters(message):
+            return 'Invalid message'
+        
         # TODO: if above or equal to business plan call the api
         #       else call our runpod server + set up webhook probably for both?     
 
@@ -82,8 +116,7 @@ def generate(
         headers = {
             'Content-Type': 'application/json'
         }
-
-        # TODO: pass here other facefusion paramters
+        
         # Define the payload for the request
         payload = {
             'user_id': user.user_id,

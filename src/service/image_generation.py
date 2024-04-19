@@ -105,70 +105,67 @@ def check_settings(settings: Settings):
         "Transparent_Clothes_V2.safetensors",
         "weight_slider_v2.safetensors"
     ]
-
-    controlnet_model = [
-        "open_pose_dwp",
-        "midas_depth_map",
-        "canny",
-        "ip2p"
-    ]
     
+    # TODO: we don't check for settings.X is None
+    # TODO: we should return more information what's wrong with settings
     if settings.basic_sampling_steps is not None and settings.basic_sampling_steps > 120:
-        return
+        return False
     if settings.basic_sampler_method is not None and settings.basic_sampler_method not in samplers:
-        return
+        return False
     if settings.basic_model is not None and settings.basic_model not in checkpoint_models:
-        return
+        return False
     if settings.basic_cfg_scale is not None and settings.basic_cfg_scale > 100.0:
-        return
+        return False
     if settings.basic_batch_size is not None and not (1 <= settings.basic_batch_size <= 8):
-        return
+        return False
     if settings.basic_batch_count is not None and not (1 <= settings.basic_batch_count <= 4):
-        return
+        return False
     if settings.basic_denoise is not None and settings.basic_denoise > 1.0:
-        return
+        return False
     if settings.ipa_1_model is not None and settings.ipa_1_model not in ipa_models:
-        return
+        return False
     if settings.ipa_1_weight is not None and settings.ipa_1_weight < 1.0:
-        return
+        return False
     if settings.ipa_1_noise is not None and settings.ipa_1_noise > 1.0:
-        return
+        return False
     if settings.ipa_1_start_at is not None and settings.basic_sampling_steps and (settings.ipa_1_start_at > 1.0 or settings.ipa_1_start_at >= settings.ipa_1_end_at):
-        return
+        return False
     if settings.ipa_1_end_at is not None and settings.basic_sampling_steps and settings.ipa_1_end_at > 1.0:
-        return
+        return False
     if settings.ipa_2_model is not None and settings.ipa_2_model not in ipa_models:
-        return
+        return False
     if settings.ipa_2_weight is not None and settings.ipa_2_weight > 1.0:
-        return
+        return False
     if settings.ipa_2_noise is not None and settings.ipa_2_noise > 1.0:
-        return
+        return False
     if settings.ipa_2_start_at is not None and settings.basic_sampling_steps and (settings.ipa_2_start_at > 1.0 or settings.ipa_2_start_at >= settings.ipa_2_end_at):
-        return
+        return False
     if settings.ipa_2_end_at is not None and settings.basic_sampling_steps and settings.ipa_2_end_at > 1.0:
-        return
+        return False
     if settings.refinement_steps is not None and settings.refinement_steps > 120:
-        return
+        return False
     if settings.refinement_cfg_scale is not None and settings.refinement_cfg_scale > 100.0:
-        return
+        return False
     if settings.refinement_denoise is not None and settings.refinement_denoise > 1.0:
-        return
+        return False
     if settings.refinement_sampler is not None and settings.refinement_sampler not in samplers:
-        return
+        return False
     if settings.lora_count is not None and not (1 <= settings.lora_count <= 4):
-        return
+        return False
     if settings.lora_model is not None and settings.lora_model not in lora_models:
-        return
+        return False
     if settings.lora_strengths is not None and all(map(lambda x: x <= 10.0, settings.lora_strengths)):
-        return
+        return False
     if settings.controlnet_model is not None and settings.controlnet_model not in checkpoint_models:
-        return
+        return False
     if settings.controlnet_strength is not None and settings.controlnet_strength > 10.0:
-        return
+        return False
     if settings.controlnet_start_percent is not None and not (settings.controlnet_start_percent < 100.0):
-        return
+        return False
     if settings.controlnet_end_percent is not None and not (settings.controlnet_end_percent <= 100.0):
-        return
+        return False
+    
+    return True
 
 def save_settings(settings: Settings):
     return data.save_settings(settings)
@@ -192,6 +189,9 @@ async def send_post_request(url: str, headers: dict, payload: dict) -> None:
 
 async def generate(settings: Settings, uploadcare_uris: Dict[str, str], user: Account, background_tasks: BackgroundTasks) -> None:
     if billing_service.has_permissions('image_generation', user.user_id):
+        if not check_settings(settings):
+            return "Invalid settings"
+
         image_ids = {key: extract_id_from_uri(uri) for key, uri in uploadcare_uris.items()}
 
         settings_id = save_settings(settings)

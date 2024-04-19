@@ -120,7 +120,7 @@ class Message(BaseModel):
     message_id: Optional[str] = None
     reference_face_distance: Optional[float] = None
     face_enhancer_model: Optional[str] = None
-    frame_enhancer_blend: Optional[float] = None
+    frame_enhancer_blend: Optional[int] = None
     s3_uris: Optional[List[str]] = None
 
 async def send_webhook_acknowledgment(
