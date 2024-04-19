@@ -10,8 +10,6 @@ from service import deepfake as service
 
 router = APIRouter(prefix="/deepfake")
 
-# TODO: we must communicate with our custom facefusion running on rnupod
-#       because users must be able to pass necessary params for the model
 # Protected endpoint
 @router.post("/generate", status_code=201)  # Generates a new resource
 async def generate(deepfake: Deepfake, user: Annotated[Account, Depends(account_service.get_current_active_user)], background_tasks: BackgroundTasks) -> None:

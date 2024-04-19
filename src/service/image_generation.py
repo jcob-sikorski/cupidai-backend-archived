@@ -173,8 +173,8 @@ def check_settings(settings: Settings):
 def save_settings(settings: Settings):
     return data.save_settings(settings)
 
-def update_message(user: Account, status: Optional[str] = None, uploadcare_uris: Optional[Dict[str, str]] = None, message_id: Optional[str] = None, settings_id: Optional[str] = None, s3_uris: Optional[List[str]] = None):
-    return data.update_message(user.user_id, status, uploadcare_uris, message_id, settings_id, s3_uris)
+def update_message(user_id: str, status: Optional[str] = None, uploadcare_uris: Optional[Dict[str, str]] = None, message_id: Optional[str] = None, settings_id: Optional[str] = None, s3_uris: Optional[List[str]] = None):
+    return data.update_message(user_id, status, uploadcare_uris, message_id, settings_id, s3_uris)
 
 def extract_id_from_uri(uri):
     # Use regex to extract the UUID from the URI

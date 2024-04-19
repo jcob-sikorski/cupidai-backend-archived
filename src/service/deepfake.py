@@ -1,11 +1,12 @@
 from fastapi import BackgroundTasks
 
-import replicate
-from replicate.exceptions import ReplicateError
+from typing import Dict, List, Optional
 
 from error import NotAuthorized
 
-import os
+import httpx
+
+import re
 
 import data.deepfake as data
 
@@ -15,50 +16,59 @@ from model.deepfake import Deepfake
 import service.billing as billing_service
 import service.history as history_service
 
+def webhook(deepfake: Deepfake) -> None:
+    print(deepfake)
+    update_deepfake(user_id=deepfake.user_id, deepfake_id=deepfake.deepfake_id, status=deepfake.status, s3_uri=deepfake.s3_uri)
 
-def run_inference(deepfake, deepfake_id: str, user: Account) -> None:
-    replicate.Client(api_token=os.environ["REPLICATE_API_TOKEN"])
+    if deepfake.status == 'in progress':
+        history_service.update('deepfake', deepfake.user_id)
 
-    print("RUNNING INFERENCE")
-    try:
-        output = replicate.run(
-            "okaris/facefusion:963e964879a44c24b0b5b9cc612a5c64c60dc2e27e0ace0173b1c3c47ef3a188",
-            input={
-                "source": deepfake.source_uri,
-                "target": deepfake.target_uri,
-                "keep_fps": deepfake.keep_fps,
-                "enhance_face": deepfake.enhance_face
-            }
-        )
-        
-    except ReplicateError as e:
-        print(f"Error running inference: {e}")
-        data.update(deepfake_id, status="failed")
-        return
+def update_deepfake(user_id: str, status: Optional[str] = None, source_uris: Optional[Dict[str, str]] = None, target_uri: Optional[str] = None, deepfake_id: Optional[str] = None, reference_face_distance: Optional[str] = None, face_enhancer_model: Optional[float] = None, frame_enhancer_blend: Optional[float] = None, s3_uri: Optional[str] = None):
+    return data.update_deepfake(user_id, status, source_uris, target_uri, deepfake_id, reference_face_distance, face_enhancer_model, frame_enhancer_blend, s3_uri)
 
-    # The predict method returns an iterator, and you can iterate over that output.
-    output_uri = None
-    for item in output:
-        output_uri = item
-
-    if output_uri:
-        print(f"GOT THE OUTPUT URI: {output_uri}")
-
-        data.update(deepfake_id, output_uri=output_uri)
-        
-        data.update(deepfake_id, status="completed")
-
-        history_service.update('deepfake', user.user_id)
+def extract_id_from_uri(uri):
+    # Use regex to extract the UUID from the URI
+    match = re.search(r"/([a-f0-9-]+)/-/", uri)
+    if match:
+        return match.group(1)
     else:
-        data.update(deepfake_id, status="failed")
+        return None
+    
+async def send_post_request(url: str, headers: dict, payload: dict) -> None:
+    async with httpx.AsyncClient() as client:
+        await client.post(url, headers=headers, json=payload)
 
+# TODO: same with deepfake: this should probably be named similar to message (deepfake_message?) and (image_gen_message)?
 
 def generate(deepfake: Deepfake, user: Account, background_tasks: BackgroundTasks) -> None:
     if billing_service.has_permissions('deepfake', user.user_id):
-        data.create(deepfake)
+        # TODO: if above or equal to business plan call the api
+        #       else call our runpod server + set up webhook probably for both?
 
-        print("CREATING A BACKGROUND TASK WHICH MONITORS AND UPDATES THE DB")
-        background_tasks.add_task(run_inference, deepfake, deepfake.deepfake_id, user.user_id)
+        image_ids = {key: extract_id_from_uri(uri) 
+                   for key, uri in {**deepfake.source_uris, deepfake.target_uri: deepfake.target_uri}.items()}
+
+        deepfake_id = update_deepfake(user.user_id, "started", deepfake.source_uris, deepfake.target_uri, None, deepfake.reference_face_distance, deepfake.face_enhancer_model, deepfake.frame_enhancer_blend, None)
+
+
+        # Define the URL of the server
+        url = "https://native-goat-saved.ngrok-free.app/"
+
+        # Define the headers for the request
+        headers = {
+            'Content-Type': 'application/json'
+        }
+    
+        # Define the payload for the request
+        payload = {
+            'source_uris': deepfake.source_uris,
+            'target_uri': deepfake.target_uri,
+            'image_ids': image_ids,
+            'deepfake_id': deepfake_id,
+            'user_id': user.user_id
+        }
+
+        background_tasks.add_task(send_post_request, url, headers, payload)
         
         return deepfake.deepfake_id
     else:

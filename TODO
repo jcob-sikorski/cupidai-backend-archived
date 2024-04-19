@@ -3,15 +3,23 @@ tree -I 'venv'
 # TODO: what about other file formats like movies or jpgs for image generation: uploads, generation, which one are interacting with these formats
 #       how we handle downloads, uploads, removals
 
-####################### IMAGE GENERATION TESTS #######################
-host image generation on runpod - use prebuild image from their site during pod config then remove it and install from github
+############################################## IMAGE GENERATION ##############################################
+make deepfake also for formats: jpg, png, mov, mp4, HEIC
 
-faceswap/facefusion: run faceswap on the same runpod as comfyui.
+merge facefusion and comfui server on runpod into one
+
+same for functionality when it comes to interacting with the server
+
+test deepfake with facefusion
+
+run facefusion deepfake on the same runpod as comfyui.
           the fastapi server would be the same communciating with both comfy and faceufusion
+
+host image generation on runpod - use prebuild image from their site during pod config then remove it and install from github
 
 midjourney action for testing after buying a plan
 
-run tests for imagine, action midjourney / facefusion
+run tests for imagine, action midjourney, faceswap
 
 figure out what should be returned type of each endpoint + what's the structure of responses for frontend
 
