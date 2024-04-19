@@ -106,17 +106,18 @@ def remove_images(image_ids: List[str], predefined_path: str) -> None:
             print(f"Image not found: {image_path}")
 
 # TODO: same with image generation this can be webhook update model instead which is simpler
-class DeepfakeMessage(BaseModel):
+class Message(BaseModel):
     user_id: str
     status: Optional[str] = None
-    uploadcare_uris: Optional[List[str]] = None
-    deepfake_id: Optional[str] = None
+    uploadcare_uris: Optional[List[str]] = None # the last one is the target uri
+    created_at: Optional[str] = Field(default_factory=lambda: datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
+    message_id: Optional[str] = None
     reference_face_distance: Optional[float] = None
     face_enhancer_model: Optional[str] = None
     frame_enhancer_blend: Optional[float] = None
     s3_uris: Optional[List[str]] = None
 
-async def send_webhook_acknowledgment(user_id: str, deepfake_id: str, status: str, webhook_url: str, s3_uri: str = None) -> None:
+async def send_webhook_acknowledgment(user_id: str, message_id: str, status: str, webhook_url: str, s3_uri: str = None) -> None:
     """
     Sends an acknowledgment message via webhook.
 
@@ -134,23 +135,23 @@ async def send_webhook_acknowledgment(user_id: str, deepfake_id: str, status: st
     try:
         print("CREATING DICTIONARY TO STORE THE FIELDS")
         # Create a dictionary to store the fields
-        deepfake_message_fields = {
+        message_fields = {
             'user_id': user_id,
-            'deepfake_id': deepfake_id,
+            'message_id': message_id,
             'status': status
         }
 
         if s3_uri is not None:
             print("ADDING S3_URI FIELD TO MESSAGE MODEL")
-            deepfake_message_fields['s3_uri'] = s3_uri
+            message_fields['s3_uri'] = s3_uri
 
         print("CREATING MESSAGE MODEL")
         # Create the Message object
-        deepfake_message = DeepfakeMessage(**deepfake_message_fields)
+        message = Message(**message_fields)
 
         print(f"MAKING POST REQUEST TO THE WEBHHOK {webhook_url}")
         async with httpx.AsyncClient() as client:
-            response = await client.post(webhook_url, json=deepfake_message.__dict__)
+            response = await client.post(webhook_url, json=message.__dict__)
             if response.status_code == 200:
                 print("Webhook request successful!")
             else:
@@ -160,27 +161,28 @@ async def send_webhook_acknowledgment(user_id: str, deepfake_id: str, status: st
 
 @app.post("/")
 async def create_item(request: Request):
+    # TODO: get here other facefusion paramters
     payload = await request.json()
     uploadcare_uris = payload.get('uploadcare_uris', {})
     image_ids = payload.get('image_ids', {})
-    deepfake_id = payload.get('deepfake_id', {})
+    message_id = payload.get('message_id', {})
     user_id = payload.get('user_id', {})
 
     webhook_url = 'https://garfish-cute-typically.ngrok-free.app/deepfake/webhook'
 
-    await send_webhook_acknowledgment(user_id, deepfake_id, 'in progress', webhook_url)
+    await send_webhook_acknowledgment(user_id, message_id, 'in progress', webhook_url)
 
     try:
         predefined_path = 'C:\\Users\\Shadow\\Desktop'
 
-        download_and_save_images(image_ids, predefined_path)
+        download_and_save_images(uploadcare_uris, image_ids, predefined_path)
 
         # TODO: add commands for model and face distance
         command = ["python", "run.py", "--headless"]
 
         # Add a '-s' flag for each image
-        for source_uri in uploadcare_uris[:-1]:
-            source_path = os.path.join(predefined_path, f"{image_ids[source_uri]}.jpg")
+        for source_id in image_ids[:-1]:
+            source_path = os.path.join(predefined_path, f"{source_id}.jpg")
             command.extend(["-s", source_path])
 
         target_path = predefined_path + f"{image_ids[-1]}.png"
@@ -195,9 +197,9 @@ async def create_item(request: Request):
 
         s3_uri = upload_image_to_s3(output_path)
     except Exception as e:
-        await send_webhook_acknowledgment(user_id, deepfake_id, 'failed', webhook_url)
+        await send_webhook_acknowledgment(user_id, message_id, 'failed', webhook_url)
 
-    await send_webhook_acknowledgment(user_id, deepfake_id, 'completed', webhook_url, s3_uri)
+    await send_webhook_acknowledgment(user_id, message_id, 'completed', webhook_url, s3_uri)
 
     remove_images(image_ids, predefined_path)
 
