@@ -107,7 +107,6 @@ def check_settings(settings: Settings):
     ]
     
     # TODO: we don't check for settings.X is None
-    # TODO: we should return more information what's wrong with settings
     
     if settings.basic_sampling_steps is None:
         return "Error: basic_sampling_steps is None"

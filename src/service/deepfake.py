@@ -88,6 +88,18 @@ async def send_post_request(url: str, headers: dict, payload: dict) -> None:
     async with httpx.AsyncClient() as client:
         await client.post(url, headers=headers, json=payload)
 
+# TODO: figure out if the process of generation, upload/download is the same for all the file formats
+# TODO: update the endings of file names in the comfyui and facefusion, instead of .png add other endings if they are relevant
+# TODO: we don't operate solely on images, we can also operate on videos that's why we need to update the namings
+# TODO: based on the each uploadcare_uri get its format from the uploadcare api:
+
+# from pyuploadcare import Uploadcare
+# uploadcare = Uploadcare(public_key='YOUR_PUBLIC_KEY', secret_key='YOUR_SECRET_KEY')
+
+# file = uploadcare.file(uploadcare_id)
+# print(file.info)
+
+
 def generate(
         message: Message, 
         user: Account, 

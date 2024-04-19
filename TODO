@@ -4,13 +4,16 @@ tree -I 'venv'
 #       how we handle downloads, uploads, removals
 
 ############################################## IMAGE GENERATION ##############################################
+
+make facefusion also for formats: jpg, png, mov, mp4, HEIC
+
+make comfyui also for formats: jpg, png, mov, mp4, HEIC
+
 finish facefusion logic
 
 test facefusion endpoint
 
 add second api
-
-make facefusion also for formats: jpg, png, mov, mp4, HEIC
 
 run facefusion deepfake on the same runpod as comfyui.
           the fastapi server would be the same communciating with both comfy and faceufusion (probably? what's the best option for us in the future to keep it simple?)
@@ -20,6 +23,8 @@ host image generation on runpod - use prebuild image from their site during pod 
 midjourney action for testing after buying a plan
 
 run tests for imagine, action midjourney, faceswap
+
+add paramters to facefusion, midjourney, comfyui to make generated images/videos superior quality
 
 figure out what should be returned type of each endpoint + what's the structure of responses for frontend
 
