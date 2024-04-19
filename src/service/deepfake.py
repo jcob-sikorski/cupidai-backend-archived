@@ -18,11 +18,10 @@ import service.history as history_service
 
 def webhook(message: Message) -> None:
     print(message)
-    update_message(
-        user_id=message.user_id, 
-        message_id=message.message_id, 
-        status=message.status, 
-        s3_uri=message.s3_uri)
+    update_message(user_id=message.user_id, 
+                   message_id=message.message_id, 
+                   status=message.status, 
+                   s3_uri=message.s3_uri)
 
     if message.status == 'in progress':
         history_service.update('deepfake', message.user_id)
@@ -59,25 +58,23 @@ def check_parameters(message: Message):
     return True
 
 
-def update_message(
-            user_id: str, 
-            status: Optional[str] = None, 
-            uploadcare_uris: Optional[List[str]] = None, 
-            message_id: Optional[str] = None, 
-            reference_face_distance: Optional[str] = None, 
-            face_enhancer_model: Optional[float] = None, 
-            frame_enhancer_blend: Optional[float] = None, 
-            s3_uri: Optional[str] = None):
+def update_message(user_id: str, 
+                   status: Optional[str] = None, 
+                   uploadcare_uris: Optional[List[str]] = None, 
+                   message_id: Optional[str] = None, 
+                   reference_face_distance: Optional[str] = None, 
+                   face_enhancer_model: Optional[float] = None, 
+                   frame_enhancer_blend: Optional[float] = None, 
+                   s3_uri: Optional[str] = None):
     
-    return data.update_deepfake(
-                            user_id, 
-                            status, 
-                            uploadcare_uris, 
-                            message_id, 
-                            reference_face_distance, 
-                            face_enhancer_model, 
-                            frame_enhancer_blend, 
-                            s3_uri)
+    return data.update_deepfake(user_id, 
+                                status, 
+                                uploadcare_uris, 
+                                message_id, 
+                                reference_face_distance, 
+                                face_enhancer_model, 
+                                frame_enhancer_blend, 
+                                s3_uri)
 
 def extract_id_from_uri(uri):
     # Use regex to extract the UUID from the URI
@@ -105,8 +102,14 @@ def generate(
 
         image_ids = [extract_id_from_uri(uri) for uri in message.uploadcare_uris]
 
-        # TODO: we can add here kwargs of message instead to make this more compact + search for all other similar function in codebase
-        message_id = update_message(user.user_id, "started", message.uploadcare_uris, None, message.reference_face_distance, message.face_enhancer_model, message.frame_enhancer_blend, None)
+        message_id = update_message(user.user_id, 
+                                    "started", 
+                                    message.uploadcare_uris,
+                                    None,
+                                    message.reference_face_distance, 
+                                    message.face_enhancer_model, 
+                                    message.frame_enhancer_blend, 
+                                    None)
 
 
         # Define the URL of the server
@@ -116,7 +119,7 @@ def generate(
         headers = {
             'Content-Type': 'application/json'
         }
-        
+
         # Define the payload for the request
         payload = {
             'user_id': user.user_id,

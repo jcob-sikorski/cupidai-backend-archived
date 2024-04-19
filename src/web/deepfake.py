@@ -14,10 +14,13 @@ router = APIRouter(prefix="/deepfake")
 
 
 # TODO: we should probably somehow make difference between endpoint for higher plans API and our custom one - facefusion
+#       at least how do we pass the request for the paid API?
 
 # Protected endpoint
 @router.post("/generate", status_code=201)  # Generates a new resource
-async def generate(message: Message, user: Annotated[Account, Depends(account_service.get_current_active_user)], background_tasks: BackgroundTasks) -> None:
+async def generate(message: Message, 
+                   user: Annotated[Account, Depends(account_service.get_current_active_user)], 
+                   background_tasks: BackgroundTasks) -> None:
     return service.generate(message, user, background_tasks)
 
 # TESTING DONE ✅
