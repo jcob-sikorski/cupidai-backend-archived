@@ -58,15 +58,15 @@
 #     else:
 #         return # TODO: return some error here
 
-# # TESTING DONE ✅
+# 
 # def update_permissions(permissions: List[str], member_id: str, user_id: str) -> None:
 #     return data.update_permissions(permissions, member_id, user_id)
 
-# # TESTING DONE ✅
+# 
 # def delete(member_id: str, user_id: str) -> None:
 #     return data.delete(member_id, user_id)
 
-# # TESTING DONE ✅
+# 
 # def transfer_ownership(member_id: str, user_id: str) -> None:
 #     if data.transfer_ownership(member_id, user_id):
 #         team_name = team_service.get_team_name(user_id)
@@ -78,7 +78,7 @@
 
 #         email_service.send(email=old_owner.email, transactional_id="cluwpvrgx03u3k2unkpll3vnp", new_owner=new_owner.email, team_name=team_name)
 
-# # TESTING DONE ✅
+# 
 # def get_members(user_id: str) -> None:
 #     return data.get_members(user_id)
 
@@ -88,7 +88,7 @@
 # def get_team_name(user_id: str) -> None:
 #     return data.get_team_name(user_id)
 
-# # TESTING DONE ✅
+# 
 # def disband(user_id: str) -> None:
 #     team_name = team_service.get_team_name(user_id)
 
@@ -97,11 +97,11 @@
 
 #         email_service.send(account.email, team_name=team_name)
 
-# # TESTING DONE ✅
+# 
 # def create(team: Team, user_id: str) -> None:
 #     return data.create(team, user_id)
 
-# # TESTING DONE ✅
+# 
 # def leave(user_id: str) -> None:
 #     team = team_service.get_team(user_id)
     
@@ -112,11 +112,11 @@
 
 #         email_service.send(email=owner_account.email, transactional_id="cluwq6js302cgkqeo2awjl6fh", leaver_email=leaver_account.email, team_name=team.name)
 
-# # TESTING DONE ✅
+# 
 # def owner(user_id: str) -> None:
 #     return data.owner(user_id)
 
-# # TESTING DONE ✅
+# 
 # def get_team(user_id: str):
 #     return data.get_team(user_id)
 

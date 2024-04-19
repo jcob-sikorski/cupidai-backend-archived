@@ -24,6 +24,7 @@ ACCESS_TOKEN_EXPIRE_MINUTES = 30
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
+
 def verify_password(plain_password: str, password_hash: str):
     password_byte_enc = plain_password.encode('utf-8')
     password_hash_bytes = password_hash.encode('utf-8')
@@ -35,6 +36,7 @@ def get_password_hash(password: str):
     salt = bcrypt.gensalt()
     password_hash = bcrypt.hashpw(password=pwd_bytes, salt=salt)
     return password_hash
+
 
 def authenticate_user(username: str, password: str):
     user = data.get_by_username(username)
@@ -77,11 +79,10 @@ async def get_current_user(token: Annotated[str, Depends(oauth2_scheme)]):
         if username is None:
             raise credentials_exception
         
-        token_data = TokenData(username=username)
     except JWTError:
         raise credentials_exception
     
-    user = data.get_by_username(username=token_data.username)
+    user = data.get_by_username(username=username)
 
     if user is None:
         raise credentials_exception

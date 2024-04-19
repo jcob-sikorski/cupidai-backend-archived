@@ -276,7 +276,7 @@ async def send_post_request(url: str, headers: dict, payload: dict) -> None:
         await client.post(url, headers=headers, json=payload)
 
 async def generate(settings: Settings, uploadcare_uris: Dict[str, str], user: Account, background_tasks: BackgroundTasks) -> None:
-    if billing_service.has_permissions('image_generation', user.user_id):
+    if billing_service.has_permissions('image_generation', user):
         check = check_settings(settings)
         if check is not True:
             return check

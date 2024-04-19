@@ -18,8 +18,12 @@ from typing import List, Optional
 router = APIRouter(prefix="/deepfake")
 
 def upload_file_to_s3(output_path):
+    print("UPLOADING FILE TO S3")
+
+    print("INITIALIZING S3 CLIENT")
     s3_client = boto3.client('s3')
 
+    print("UPLOADING FILEOBJ TO S3")
     # Open the file in binary mode
     with open(output_path, 'rb') as data:
         # Upload the file to S3
@@ -28,6 +32,7 @@ def upload_file_to_s3(output_path):
     # Construct the S3 URI
     s3_uri = f's3://magicalcurie/{output_path}'
 
+    print("REMOVING THE LOCAL FILE")
     # Remove the local file
     os.remove(output_path)
 
@@ -85,6 +90,48 @@ def remove_files(
         except FileNotFoundError:
             print(f"File not found: {file_path}")
 
+def run_facefusion(file_ids, file_formats, reference_face_distance, face_enhancer_model, frame_enhancer_blend, predefined_path):
+    print("INITIALIZING PYTHON COMMAND")
+
+    # Activate Conda environment
+    activate_env = "conda activate facefusion"
+
+    # Python command to run
+    run_command = [
+        "python", "C:\\Users\\Shadow\\facefusion\\run.py",
+        "--headless", 
+        "--reference-face-distance", str(reference_face_distance), 
+        "--face-enhancer-model", face_enhancer_model, 
+        "--frame-enhancer-blend", str(frame_enhancer_blend)
+    ]
+
+    # Add a '-s' flag for each image except the last one (target)
+    for source_id, source_format in zip(file_ids[:-1], file_formats[:-1]):
+        source_path = os.path.join(predefined_path, f"{source_id}.{source_format}")
+        run_command.extend(["-s", source_path])
+
+    # The last file is assumed to be the target
+    target_path = os.path.join(predefined_path, f"{file_ids[-1]}.{file_formats[-1]}")
+
+    # Output file details
+    output_id = uuid.uuid4()
+    output_format = file_formats[-1]  # Assuming output format is the same as the target's format
+    output_path = os.path.join(predefined_path, f"{output_id}.{output_format}")
+
+    # Complete the command with target and output paths
+    run_command.extend(["-t", target_path, "-o", output_path])
+    
+    # Combine commands to run in the same subprocess
+    full_command = f"{activate_env} && " + " ".join(run_command)
+
+    print(full_command)
+    
+    print("RUNNING THE PROCESS AND CALLING FACEFUSION")
+    # Execute the full command within the Conda environment
+    subprocess.run(full_command, shell=True, check=True)
+
+    return output_path
+
 class Message(BaseModel):
     user_id: str
     status: Optional[str] = None
@@ -94,7 +141,7 @@ class Message(BaseModel):
     reference_face_distance: Optional[float] = None
     face_enhancer_model: Optional[str] = None
     frame_enhancer_blend: Optional[int] = None
-    s3_uris: Optional[List[str]] = None
+    s3_uri: Optional[List[str]] = None
 
 async def send_webhook_acknowledgment(
         user_id: str, 
@@ -145,6 +192,7 @@ async def send_webhook_acknowledgment(
 
 @router.post("/generate")
 async def generate_deepfake(request: Request):
+    print("EXTRACTING PAYLOAD")
     payload = await request.json()
     user_id = payload.get('user_id', {})
     uploadcare_uris = payload.get('uploadcare_uris', {})
@@ -164,35 +212,18 @@ async def generate_deepfake(request: Request):
 
         download_and_save_files(uploadcare_uris, file_ids, file_formats, predefined_path)
 
-        command = ["python", "run.py", 
-                   "--headless", 
-                   "--reference-face-distance", reference_face_distance, 
-                   "--face-enhancer-model", face_enhancer_model, 
-                   "--frame-enhancer-blend", frame_enhancer_blend]
-
-        # TODO: get sense of how each file format looks like in uploadcare
-        # Add a '-s' flag for each image
-        for source_id, source_format in zip(file_ids[:-1], file_formats[:-1]):
-            source_path = os.path.join(predefined_path, f"{source_id}.{source_format}")
-            command.extend(["-s", source_path])
-
-        target_path = predefined_path + f"{file_ids[-1]}.{file_formats[-1]}"
-
-        # TODO: how we determine format of the output file? the facefusion has different formats...
-        output_id = uuid.uuid4()
-        output_path = os.path.join(predefined_path, f"{output_id}.{file_formats[-1]}")
-
-        command.extend([["-t", target_path, "-o", output_path]])
-        
-        # Run the command
-        subprocess.run(command, check=True)
+        output_path = run_facefusion(file_ids,
+                       file_formats,
+                       reference_face_distance,
+                       face_enhancer_model,
+                       frame_enhancer_blend,
+                       predefined_path)
 
         s3_uri = upload_file_to_s3(output_path)
+
+        await send_webhook_acknowledgment(user_id, message_id, 'completed', webhook_url, s3_uri)
     except Exception as e:
+        print(e)
         await send_webhook_acknowledgment(user_id, message_id, 'failed', webhook_url)
 
-    await send_webhook_acknowledgment(user_id, message_id, 'completed', webhook_url, s3_uri)
-
     remove_files(file_ids, file_formats, predefined_path)
-
-    return s3_uri

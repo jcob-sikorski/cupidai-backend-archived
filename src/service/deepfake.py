@@ -29,6 +29,8 @@ def facefusion_webhook(message: Message) -> None:
         history_service.update('deepfake', message.user_id)
 
 def check_parameters(message: Message):
+    print("CHECKING PARAMETERS")
+    print(message)
     face_enhancer_models = [
         "codeformer",
         "gfpgan_1.2",
@@ -40,11 +42,11 @@ def check_parameters(message: Message):
         "gpen_bfr_2048",
         "restoreformer_plus_plus"
     ]
-    
+
     if message.reference_face_distance is None:
         return "Error: reference_face_distance is None"
     elif not (0.0 <= message.reference_face_distance <= 1.5 and
-              message.reference_face_distance % 0.05 == 0):
+              int(message.reference_face_distance*100) % 5 == 0):
         return "Error: reference_face_distance must be between 0.0 and 1.5 and a multiple of 0.05"
 
     if message.face_enhancer_model is None:
@@ -69,7 +71,8 @@ def update_message(user_id: str,
                    frame_enhancer_blend: Optional[float] = None, 
                    s3_uri: Optional[str] = None):
     
-    return data.update_deepfake(user_id, 
+    print("UPDATING MESSAGE")
+    return data.update_message(user_id,
                                 status, 
                                 uploadcare_uris, 
                                 message_id, 
@@ -87,6 +90,7 @@ def extract_id_from_uri(uri):
         return None
     
 async def send_post_request(url: str, headers: dict, payload: dict) -> None:
+    print("SENDING POST REQUEST")
     async with httpx.AsyncClient() as client:
         await client.post(url, headers=headers, json=payload)
 
@@ -95,7 +99,7 @@ def generate(
         user: Account, 
         background_tasks: BackgroundTasks) -> None:
     
-    if billing_service.has_permissions('deepfake', user.user_id):
+    if billing_service.has_permissions('deepfake', user):
         check = check_parameters(message)
         if check is not True:
             return check
@@ -103,14 +107,17 @@ def generate(
         # TODO: if above or equal to business plan call the api
         #       else call our runpod server + set up webhook probably for both?     
 
+        print("EXTRACTING FILE IDS")
         file_ids = [extract_id_from_uri(uri) for uri in message.uploadcare_uris]
 
+        print("INITIALIZING UPLOADCARE CLIENT")
         uploadcare = Uploadcare(public_key='e6daeb69aa105a823395', secret_key='9a1b92e275b8fc7855a9')
 
         file_formats = []
 
+        print("GETTING FILE FORMATS")
         for file_id in file_ids:
-            file_info = uploadcare.file(file_id).info()
+            file_info = uploadcare.file(file_id).info
             file_formats.append(file_info['mime_type'].split('/')[1])
 
         print("FILE FORMATS")
@@ -127,13 +134,14 @@ def generate(
 
 
         # Define the URL of the server
-        url = "https://native-goat-saved.ngrok-free.app/"
+        url = "https://native-goat-saved.ngrok-free.app/deepfake/generate"
 
         # Define the headers for the request
         headers = {
             'Content-Type': 'application/json'
         }
 
+        print("PREPARING PAYLOAD")
         # Define the payload for the request
         payload = {
             'user_id': user.user_id,
@@ -146,12 +154,13 @@ def generate(
             'frame_enhancer_blend': message.frame_enhancer_blend
         }
 
+        print("ADDING BACKGROUND TASK")
         background_tasks.add_task(send_post_request, url, headers, payload)
         
         return message_id
     else:
         raise NotAuthorized(msg=f"Invalid permissions")
 
-# TESTING DONE ✅
+
 def get_history(user: Account) -> None:
     return data.get_history(user.user_id)

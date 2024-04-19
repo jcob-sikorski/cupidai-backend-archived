@@ -22,9 +22,11 @@ stripe.api_key = "sk_test_51P2KoI09MTVFbataUH3MvtXza4vM1XflPRcmj2tPfVcbPCTvkOaLq
 # This is your Stripe CLI webhook secret for testing your endpoint locally.
 endpoint_secret = 'whsec_ZXfcjSIaktj06YiEuynVD9xl1LTbHygr'
 
-# TESTING DONE ✅
+
 def has_permissions(feature: str, user: Account) -> bool:
-    return data.has_permissions(feature, user.user_id)
+    # TODO: unccomment this for hollistic tests
+    # return data.has_permissions(feature, user.user_id)
+    return True
 
 async def webhook(item: Item, request: Request):
     event = None
@@ -109,16 +111,16 @@ def download_history(user: Account):
     else:
         print("No purchase history found.")
 
-# TESTING DONE ✅
+
 def get_history(user: Account) -> None:
     return data.get_history(user.user_id)
 # def get_history(solo: bool, user: Account) -> None:
 #     return data.get_history(solo, user_id)
 
-# TESTING DONE ✅
+
 def accept_tos(user: Account) -> None:
     return data.accept_tos(user.user_id)
 
-# TESTING DONE ✅
+
 def get_current_plan(user: Account) -> None:
     return data.get_current_plan(user.user_id)

@@ -20,9 +20,9 @@ import service.midjourney as midjourney_service
 
 MIDJOURNEY_TOKEN = os.getenv("MIDJOURNEY_TOKEN")
 
-# TESTING DONE ✅
+
 async def faceswap(source_uri: str, target_uri: str, user: Account) -> None:
-    if billing_service.has_permissions('ai_verification', user.user_id):
+    if billing_service.has_permissions('ai_verification', user):
         url = "https://api.mymidjourney.ai/api/v1/midjourney/faceswap"
         headers = {
             "Content-Type": "application/json",
@@ -56,7 +56,7 @@ async def faceswap(source_uri: str, target_uri: str, user: Account) -> None:
     else:
         raise NotAuthorized(msg=f"Invalid permissions")
     
-# TESTING DONE ✅
+
 def create_prompt_string(prompt: Prompt) -> str:
     attributes = ["prompt", "generation_speed", "engine_version", "style", "aspect_ratio", "step_stop", "stylize", "seed"]
     prompt_string = " ".join([f"--{attr} {getattr(prompt, attr)}" for attr in attributes if getattr(prompt, attr) is not None])
@@ -76,7 +76,7 @@ async def imagine(prompt: Prompt, user: Account) -> None:
         # - stylize: --stylize x   ; default value is 100 and accepts integer values 0–1000
         # - seed: --seed x  ; accepts whole numbers 0–4294967295
 
-    if billing_service.has_permissions('ai_verification', user.user_id):
+    if billing_service.has_permissions('ai_verification', user):
         url = "https://api.mymidjourney.ai/api/v1/midjourney/imagine"
         headers = {
             "Content-Type": "application/json",
@@ -104,12 +104,12 @@ async def imagine(prompt: Prompt, user: Account) -> None:
     else:
         raise NotAuthorized(msg="Invalid permissions")
 
-# TESTING DONE ✅
+
 def get_history(user: Account) -> List[Message]:
     return midjourney_service.get_history(user.user_id)
 
 async def action(message_id: str, button: str, user: Account) -> None:
-    if billing_service.has_permissions('ai_verification', user.user_id):
+    if billing_service.has_permissions('ai_verification', user):
         url = "https://api.mymidjourney.ai/api/v1/midjourney/button"
         headers = {
             "Content-Type": "application/json",

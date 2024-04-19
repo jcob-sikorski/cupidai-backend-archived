@@ -11,7 +11,7 @@ router = APIRouter(prefix="/account")
 
 @router.post("/login")
 async def login(form_data: Annotated[OAuth2PasswordRequestForm, Depends()]) -> Token:
-    return service.login(form_data)
+    return await service.login(form_data)
 
 @router.post("/signup")
 async def signup(form_data: Annotated[OAuth2PasswordRequestForm, Depends()]) -> Token:

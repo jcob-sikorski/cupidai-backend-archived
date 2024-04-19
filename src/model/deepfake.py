@@ -12,4 +12,4 @@ class Message(BaseModel):
     reference_face_distance: Optional[float] = None
     face_enhancer_model: Optional[str] = None
     frame_enhancer_blend: Optional[int] = None
-    s3_uris: Optional[List[str]] = None
+    s3_uri: Optional[List[str]] = None
