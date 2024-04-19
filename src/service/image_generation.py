@@ -4,6 +4,8 @@ from typing import Dict, List, Optional
 
 import re
 
+from pyuploadcare import Uploadcare
+
 import httpx
 
 from error import NotAuthorized
@@ -278,10 +280,18 @@ async def generate(settings: Settings, uploadcare_uris: Dict[str, str], user: Ac
 
         image_ids = {key: extract_id_from_uri(uri) for key, uri in uploadcare_uris.items()}
 
+        uploadcare = Uploadcare(public_key='e6daeb69aa105a823395', secret_key='9a1b92e275b8fc7855a9')
+
+        image_formats = {key: uploadcare.file(uri).info()['mime_type'].split('/')[1] for key, uri in uploadcare_uris.items()}
+
+        print("IMAGE FORMATS")
+        print(image_formats)
+
         settings_id = save_settings(settings)
 
         message_id = update_message(user.user_id, "started", uploadcare_uris, None, settings_id, None)
 
+        # TODO: we should probaby pass here the image formats too
         workflow_json = generate_workflow(settings, image_ids)
 
         if workflow_json is None:
@@ -301,6 +311,7 @@ async def generate(settings: Settings, uploadcare_uris: Dict[str, str], user: Ac
             'workflow': workflow_json,
             'uploadcare_uris': uploadcare_uris,
             'image_ids': image_ids,
+            'image_formats': image_formats,
             'message_id': message_id,
             'settings_id': settings_id,
             'user_id': user.user_id

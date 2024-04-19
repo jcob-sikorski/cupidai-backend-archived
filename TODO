@@ -5,13 +5,12 @@ tree -I 'venv'
 
 ############################################## IMAGE GENERATION ##############################################
 
-make facefusion also for formats: jpg, png, mov, mp4, HEIC
-
 make comfyui also for formats: jpg, png, mov, mp4, HEIC
 
-finish facefusion logic
+test extensively facefusion endpoint
+test jpg, png, mov, mp4, HEIC file formats in facefusion
 
-test facefusion endpoint
+test extensively comfyui endpoint in terms of image formats
 
 add second api
 

@@ -211,9 +211,12 @@ async def create_item(request: Request):
     workflow = payload.get('workflow', {})
     uploadcare_uris = payload.get('uploadcare_uris', {})
     image_ids = payload.get('image_ids', {})
+    image_formats = payload.get('image_formats', {})
     message_id = payload.get('message_id', {})
     settings_id = payload.get('settings_id', {})
     user_id = payload.get('user_id', {})
+
+    # TODO: handle image formats as dict
 
     webhook_url = 'https://garfish-cute-typically.ngrok-free.app/image-generation/webhook'
 
@@ -222,19 +225,19 @@ async def create_item(request: Request):
     try:
         predefined_path = 'C:\\Users\\Shadow\\Desktop'
 
-        download_and_save_images(uploadcare_uris, image_ids, predefined_path)
+        download_and_save_images(uploadcare_uris, image_ids, image_formats, predefined_path)
 
         ws = main.WebSocket()
         ws.connect("ws://{}/ws?clientId={}".format(server_address, client_id))
-        images = get_images(ws, workflow)
+        images = get_images(ws, workflow) # TODO: how do we handle here image formats?
 
-        s3_uris = upload_images_to_s3(images)
+        s3_uris = upload_images_to_s3(images) # TODO: how do we handle here image fomrats?
     except Exception as e:
         await send_webhook_acknowledgment(user_id, message_id, settings_id, 'failed', webhook_url)
 
     await send_webhook_acknowledgment(user_id, message_id, settings_id, 'completed', webhook_url, s3_uris)
 
-    remove_images(image_ids, predefined_path)
+    remove_images(image_ids, predefined_path) # TODO: how do we handle here image formats?
 
     return s3_uris
 
