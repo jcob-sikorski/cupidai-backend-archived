@@ -1,13 +1,13 @@
 from typing import List
 
-from model.deepfake import Deepfake
+from model.deepfake import DeepfakeMessage
 
 from .init import deepfake_col
 
 # TESTING DONE ✅
-def create(deepfake: Deepfake) -> bool:
+def create(deepfake_message: DeepfakeMessage) -> bool:
     print("ADDING DEEPFAKE TO THE COLLECTION")
-    result = deepfake_col.insert_one(deepfake.dict())
+    result = deepfake_col.insert_one(deepfake_message.dict())
     return result.inserted_id is not None
 
 
@@ -20,10 +20,10 @@ def update(deepfake_id: str, **kwargs) -> bool:
 
 
 # TESTING DONE ✅
-def get_history(user_id: str) -> List[Deepfake]:
+def get_history(user_id: str) -> List[DeepfakeMessage]:
     print("GETTING DEEPFAKE HISTORY")
     results = deepfake_col.find({"user_id": user_id})
 
-    deepfakes = [Deepfake(**result) for result in results]
+    deepfakes = [DeepfakeMessage(**result) for result in results]
 
     return deepfakes

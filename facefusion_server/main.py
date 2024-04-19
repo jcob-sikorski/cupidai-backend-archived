@@ -62,43 +62,40 @@ def upload_image_to_s3(output_path):
 
     return s3_uri
 
-def download_and_save_images(uploadcare_uris: Dict[str, str], image_ids: Dict[str, str], predefined_path: str) -> None:
+def download_and_save_images(uploadcare_uris: List[str], image_ids: List[str], predefined_path: str) -> None:
     """
     Downloads and saves images based on image URIs and image IDs.
     Args:
-        uploadcare_uris (Dict[str, str]): Dictionary of image URIs.
-        image_ids (Dict[str, str]): Dictionary of image IDs.
+        uploadcare_uris (List[str]): List of image URIs.
+        image_ids (List[str]): List of image IDs.
         predefined_path (str): Predefined path to save the images.
     """
     print(f"DOWNLOADING AND SAVING IMAGES")
-    for key, uri in uploadcare_uris.items():
-        print(f"GETTING IMAGE ID")
-        image_id = image_ids.get(key)
-        
+    for image_uri, image_id in zip(uploadcare_uris, image_ids):        
         if image_id:
             print(f"SETTING THE UNIQUE FILEPATH OF THE IMAGE")
             image_path = os.path.join(predefined_path, f"{image_id}.jpg")
             print(f"DOWNLOADING IMAGE")
-            response = requests.get(uri)
+            response = requests.get(image_uri)
             if response.status_code == 200:
                 print(f"WRITING IMAGE TO THE UNIQUE PATH")
                 with open(image_path, "wb") as f:
                     f.write(response.content)
                 print(f"Image saved at {image_path}")
             else:
-                print(f"Failed to download image from {uri}")
+                print(f"Failed to download image from {image_uri}")
         else:
-            print(f"No image ID found for key: {key}")
+            print(f"Zip of uploadcare_uris and image_ids is fucked.")
 
-def remove_images(image_ids: Dict[str, str], predefined_path: str) -> None:
+def remove_images(image_ids: List[str], predefined_path: str) -> None:
     """
     Removes images based on image IDs.
     Args:
-        image_ids (Dict[str, str]): Dictionary of image IDs.
+        image_ids (List[str]): List of image IDs.
         predefined_path (str): Predefined path where the images are stored.
     """
     print(f"REMOVING IMAGES")
-    for key, image_id in image_ids.items():
+    for image_id in image_ids:
         print(f"SETTING THE UNIQUE FILEPATH OF THE IMAGE")
         image_path = os.path.join(predefined_path, f"{image_id}.jpg")
         try:
@@ -108,13 +105,16 @@ def remove_images(image_ids: Dict[str, str], predefined_path: str) -> None:
         except FileNotFoundError:
             print(f"Image not found: {image_path}")
 
-class Message(BaseModel):
-    user_id: Optional[str] = None
+# TODO: same with image generation this can be webhook update model instead which is simpler
+class DeepfakeMessage(BaseModel):
+    user_id: str
     status: Optional[str] = None
-    uploadcare_uris: Optional[Dict[str, str]] = None
-    created_at: Optional[str] = None
-    message_id: Optional[str] = None
-    s3_uri: str = None
+    uploadcare_uris: Optional[List[str]] = None
+    deepfake_id: Optional[str] = None
+    reference_face_distance: Optional[float] = None
+    face_enhancer_model: Optional[str] = None
+    frame_enhancer_blend: Optional[float] = None
+    s3_uris: Optional[List[str]] = None
 
 async def send_webhook_acknowledgment(user_id: str, deepfake_id: str, status: str, webhook_url: str, s3_uri: str = None) -> None:
     """
@@ -134,7 +134,7 @@ async def send_webhook_acknowledgment(user_id: str, deepfake_id: str, status: st
     try:
         print("CREATING DICTIONARY TO STORE THE FIELDS")
         # Create a dictionary to store the fields
-        deepfake_fields = {
+        deepfake_message_fields = {
             'user_id': user_id,
             'deepfake_id': deepfake_id,
             'status': status
@@ -142,15 +142,15 @@ async def send_webhook_acknowledgment(user_id: str, deepfake_id: str, status: st
 
         if s3_uri is not None:
             print("ADDING S3_URI FIELD TO MESSAGE MODEL")
-            deepfake_fields['s3_uri'] = s3_uri
+            deepfake_message_fields['s3_uri'] = s3_uri
 
         print("CREATING MESSAGE MODEL")
         # Create the Message object
-        deepfake = Deepfake(**deepfake_fields)
+        deepfake_message = DeepfakeMessage(**deepfake_message_fields)
 
         print(f"MAKING POST REQUEST TO THE WEBHHOK {webhook_url}")
         async with httpx.AsyncClient() as client:
-            response = await client.post(webhook_url, json=deepfake.__dict__)
+            response = await client.post(webhook_url, json=deepfake_message.__dict__)
             if response.status_code == 200:
                 print("Webhook request successful!")
             else:
@@ -161,8 +161,7 @@ async def send_webhook_acknowledgment(user_id: str, deepfake_id: str, status: st
 @app.post("/")
 async def create_item(request: Request):
     payload = await request.json()
-    source_uris = payload.get('source_uris', {})
-    target_uri = payload.get('target_uri', {})
+    uploadcare_uris = payload.get('uploadcare_uris', {})
     image_ids = payload.get('image_ids', {})
     deepfake_id = payload.get('deepfake_id', {})
     user_id = payload.get('user_id', {})
@@ -174,17 +173,17 @@ async def create_item(request: Request):
     try:
         predefined_path = 'C:\\Users\\Shadow\\Desktop'
 
-        # TODO: what's wrong with source uris, image_ids and target uri? can this be simpler?
-        download_and_save_images(source_uris, image_ids, predefined_path)
+        download_and_save_images(image_ids, predefined_path)
 
+        # TODO: add commands for model and face distance
         command = ["python", "run.py", "--headless"]
 
         # Add a '-s' flag for each image
-        for source_uri in source_uris:
+        for source_uri in uploadcare_uris[:-1]:
             source_path = os.path.join(predefined_path, f"{image_ids[source_uri]}.jpg")
             command.extend(["-s", source_path])
 
-        target_path = predefined_path + f"{image_ids[target_uri]}.png"
+        target_path = predefined_path + f"{image_ids[-1]}.png"
 
         output_id = uuid.uuid4()
         output_path = os.path.join(predefined_path, f"{output_id}.png")

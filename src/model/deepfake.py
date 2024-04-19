@@ -3,13 +3,10 @@ from typing import Optional, Dict, List
 
 from datetime import datetime
 
-from bson import ObjectId
-
-class Deepfake(BaseModel):
+class DeepfakeMessage(BaseModel):
     user_id: str
     status: Optional[str] = None
-    source_uris: Dict[str, str] = None
-    target_uri: Optional[str] = None
+    image_uris: Optional[List[str]] = None # TODO: the last one is the target uri
     created_at: Optional[str] = Field(default_factory=lambda: datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
     deepfake_id: Optional[str] = None
     reference_face_distance: Optional[float] = None

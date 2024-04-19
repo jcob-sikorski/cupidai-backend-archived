@@ -177,6 +177,8 @@ def update_message(user_id: str, status: Optional[str] = None, uploadcare_uris: 
     return data.update_message(user_id, status, uploadcare_uris, message_id, settings_id, s3_uris)
 
 def extract_id_from_uri(uri):
+    """Extracts id from: https://ucarecdn.com/{id}/-/preview/{x}x{y}/"""
+    
     # Use regex to extract the UUID from the URI
     match = re.search(r"/([a-f0-9-]+)/-/", uri)
     if match:
