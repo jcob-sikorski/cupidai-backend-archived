@@ -1,4 +1,3 @@
-import comfyui_server.main as main #NOTE: websocket-client (https://github.com/websocket-client/websocket-client)
 import uuid
 import json
 import urllib.request

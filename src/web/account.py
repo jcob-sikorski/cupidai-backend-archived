@@ -1,6 +1,6 @@
 from typing import Annotated
 
-from fastapi import Depends, APIRouter
+from fastapi import Depends, APIRouter, Path
 from fastapi.security import OAuth2PasswordRequestForm
 
 from model.account import Account, Token
@@ -15,9 +15,7 @@ async def login(form_data: Annotated[OAuth2PasswordRequestForm, Depends()]) -> T
 
 @router.post("/signup")
 async def signup(form_data: Annotated[OAuth2PasswordRequestForm, Depends()]) -> Token:
-    return service.signup(form_data)
-
-from fastapi import Path
+    return await service.signup(form_data)
 
 @router.post("/reset-password-request/{password_reset_id}", status_code=200)
 async def reset_password_request(password_reset_id: str = Path(...)) -> Token:

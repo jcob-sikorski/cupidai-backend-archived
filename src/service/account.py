@@ -4,7 +4,7 @@ from typing import Annotated
 from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from jose import JWTError, jwt
-from passlib.context import CryptContext
+import bcrypt
 
 from data import account as data
 
@@ -22,17 +22,19 @@ SECRET_KEY = "09d25e094faa6ca2556c818166b7a9563b93f7099f6f0f4caa6cf63b88e8d3e7"
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 30
 
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
-
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
-def verify_password(plain_password, hashed_password):
-    return pwd_context.verify(plain_password, hashed_password)
+def verify_password(plain_password: str, password_hash: str):
+    password_byte_enc = plain_password.encode('utf-8')
+    password_hash_bytes = password_hash.encode('utf-8')
+    return bcrypt.checkpw(password = password_byte_enc, hashed_password = password_hash_bytes)
 
 
-def get_password_hash(password):
-    return pwd_context.hash(password)
-
+def get_password_hash(password: str):
+    pwd_bytes = password.encode('utf-8')
+    salt = bcrypt.gensalt()
+    password_hash = bcrypt.hashpw(password=pwd_bytes, salt=salt)
+    return password_hash
 
 def authenticate_user(username: str, password: str):
     user = data.get_by_username(username)
@@ -40,7 +42,7 @@ def authenticate_user(username: str, password: str):
     if not user:
         return False
     
-    if not verify_password(password, user.hashed_password):
+    if not verify_password(password, user.password_hash):
         return False
     
     return user
@@ -116,7 +118,7 @@ async def login(form_data: OAuth2PasswordRequestForm) -> Token:
 def signup(form_data: OAuth2PasswordRequestForm) -> None:
     data.signup(form_data.username, get_password_hash(form_data.password))
     
-    return login(form_data.username, form_data.password)
+    return login(form_data)
 
 def signup_ref(ref: str) -> None:
     return data.signup_ref(ref)

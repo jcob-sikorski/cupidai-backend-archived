@@ -11,9 +11,9 @@ from fastapi import Request, APIRouter
 
 import boto3
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
-from typing import List, Field, Optional
+from typing import List, Optional
 
 router = APIRouter(prefix="/deepfake")
 
@@ -155,7 +155,7 @@ async def generate_deepfake(request: Request):
     face_enhancer_model = payload.get('face_enhancer_model', {})
     frame_enhancer_blend = payload.get('frame_enhancer_blend', {})
 
-    webhook_url = 'https://garfish-cute-typically.ngrok-free.app/deepfake/webhook'
+    webhook_url = 'https://garfish-cute-typically.ngrok-free.app/deepfake/ff-webhook'
 
     await send_webhook_acknowledgment(user_id, message_id, 'in progress', webhook_url)
 
