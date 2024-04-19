@@ -105,7 +105,11 @@ def upload_images_to_s3(images):
 
     return s3_uris
 
-def download_and_save_images(uploadcare_uris: Dict[str, str], image_ids: Dict[str, str], predefined_path: str) -> None:
+def download_and_save_images(
+        uploadcare_uris: Dict[str, str], 
+        image_ids: Dict[str, str], 
+        image_formats: Dict[str, str], 
+        predefined_path: str) -> None:
     """
     Downloads and saves images based on image URIs and image IDs.
     Args:
@@ -117,10 +121,11 @@ def download_and_save_images(uploadcare_uris: Dict[str, str], image_ids: Dict[st
     for key, uri in uploadcare_uris.items():
         print(f"GETTING IMAGE ID")
         image_id = image_ids.get(key)
+        image_format = image_formats.get(key)
         
         if image_id:
             print(f"SETTING THE UNIQUE FILEPATH OF THE IMAGE")
-            image_path = os.path.join(predefined_path, f"{image_id}.jpg")
+            image_path = os.path.join(predefined_path, f"{image_id}.{image_format}")
             print(f"DOWNLOADING IMAGE")
             response = requests.get(uri)
             if response.status_code == 200:
@@ -133,7 +138,9 @@ def download_and_save_images(uploadcare_uris: Dict[str, str], image_ids: Dict[st
         else:
             print(f"No image ID found for key: {key}")
 
-def remove_images(image_ids: Dict[str, str], predefined_path: str) -> None:
+def remove_images(
+        image_ids: Dict[str, str], 
+        predefined_path: str) -> None:
     """
     Removes images based on image IDs.
     Args:
@@ -141,7 +148,7 @@ def remove_images(image_ids: Dict[str, str], predefined_path: str) -> None:
         predefined_path (str): Predefined path where the images are stored.
     """
     print(f"REMOVING IMAGES")
-    for key, image_id in image_ids.items():
+    for _, image_id in image_ids.items():
         print(f"SETTING THE UNIQUE FILEPATH OF THE IMAGE")
         image_path = os.path.join(predefined_path, f"{image_id}.jpg")
         try:
@@ -216,8 +223,6 @@ async def create_item(request: Request):
     settings_id = payload.get('settings_id', {})
     user_id = payload.get('user_id', {})
 
-    # TODO: handle image formats as dict
-
     webhook_url = 'https://garfish-cute-typically.ngrok-free.app/image-generation/webhook'
 
     await send_webhook_acknowledgment(user_id, message_id, settings_id, 'in progress', webhook_url)
@@ -229,15 +234,15 @@ async def create_item(request: Request):
 
         ws = main.WebSocket()
         ws.connect("ws://{}/ws?clientId={}".format(server_address, client_id))
-        images = get_images(ws, workflow) # TODO: how do we handle here image formats?
+        images = get_images(ws, workflow)
 
-        s3_uris = upload_images_to_s3(images) # TODO: how do we handle here image fomrats?
+        s3_uris = upload_images_to_s3(images)
     except Exception as e:
         await send_webhook_acknowledgment(user_id, message_id, settings_id, 'failed', webhook_url)
 
     await send_webhook_acknowledgment(user_id, message_id, settings_id, 'completed', webhook_url, s3_uris)
 
-    remove_images(image_ids, predefined_path) # TODO: how do we handle here image formats?
+    remove_images(image_ids, predefined_path)
 
     return s3_uris
 

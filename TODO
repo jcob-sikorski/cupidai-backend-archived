@@ -5,7 +5,7 @@ tree -I 'venv'
 
 ############################################## IMAGE GENERATION ##############################################
 
-make comfyui also for formats: jpg, png, mov, mp4, HEIC
+make comfyui also for formats: jpg, png
 
 test extensively facefusion endpoint
 test jpg, png, mov, mp4, HEIC file formats in facefusion
@@ -29,6 +29,12 @@ figure out what should be returned type of each endpoint + what's the structure 
 
 
 before frontend integration run holistic and detailed tests for every endpoint once again
+
+add logs
+
+make the switch for production and development variables in code
+
+educate yourself on how to switch between development and production environment
 
 
 invitation + acceptance

@@ -291,8 +291,7 @@ async def generate(settings: Settings, uploadcare_uris: Dict[str, str], user: Ac
 
         message_id = update_message(user.user_id, "started", uploadcare_uris, None, settings_id, None)
 
-        # TODO: we should probaby pass here the image formats too
-        workflow_json = generate_workflow(settings, image_ids)
+        workflow_json = generate_workflow(settings, image_ids, image_formats)
 
         if workflow_json is None:
             update_message(user.user_id, message_id, "failed")
