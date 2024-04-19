@@ -10,6 +10,8 @@ import numpy as np
 
 import subprocess
 
+from datetime import datetime
+
 from dotenv import load_dotenv
 
 from fastapi import FastAPI, Request
@@ -19,7 +21,7 @@ import boto3
 
 from pydantic import BaseModel
 
-from typing import List, Dict, Optional
+from typing import List, Field, Optional
 
 load_dotenv()
 
@@ -62,7 +64,10 @@ def upload_image_to_s3(output_path):
 
     return s3_uri
 
-def download_and_save_images(uploadcare_uris: List[str], image_ids: List[str], predefined_path: str) -> None:
+def download_and_save_images(
+        uploadcare_uris: List[str], 
+        image_ids: List[str], 
+        predefined_path: str) -> None:
     """
     Downloads and saves images based on image URIs and image IDs.
     Args:
@@ -87,7 +92,9 @@ def download_and_save_images(uploadcare_uris: List[str], image_ids: List[str], p
         else:
             print(f"Zip of uploadcare_uris and image_ids is fucked.")
 
-def remove_images(image_ids: List[str], predefined_path: str) -> None:
+def remove_images(
+        image_ids: List[str], 
+        predefined_path: str) -> None:
     """
     Removes images based on image IDs.
     Args:
@@ -105,7 +112,6 @@ def remove_images(image_ids: List[str], predefined_path: str) -> None:
         except FileNotFoundError:
             print(f"Image not found: {image_path}")
 
-# TODO: same with image generation this can be webhook update model instead which is simpler
 class Message(BaseModel):
     user_id: str
     status: Optional[str] = None
@@ -117,7 +123,12 @@ class Message(BaseModel):
     frame_enhancer_blend: Optional[float] = None
     s3_uris: Optional[List[str]] = None
 
-async def send_webhook_acknowledgment(user_id: str, message_id: str, status: str, webhook_url: str, s3_uri: str = None) -> None:
+async def send_webhook_acknowledgment(
+        user_id: str, 
+        message_id: str, 
+        status: str, 
+        webhook_url: str, 
+        s3_uri: str = None) -> None:
     """
     Sends an acknowledgment message via webhook.
 
@@ -161,12 +172,14 @@ async def send_webhook_acknowledgment(user_id: str, message_id: str, status: str
 
 @app.post("/")
 async def create_item(request: Request):
-    # TODO: get here other facefusion paramters
     payload = await request.json()
+    user_id = payload.get('user_id', {})
     uploadcare_uris = payload.get('uploadcare_uris', {})
     image_ids = payload.get('image_ids', {})
     message_id = payload.get('message_id', {})
-    user_id = payload.get('user_id', {})
+    reference_face_distance = payload.get('reference_face_distance', {})
+    face_enhancer_model = payload.get('face_enhancer_model', {})
+    frame_enhancer_blend = payload.get('frame_enhancer_blend', {})
 
     webhook_url = 'https://garfish-cute-typically.ngrok-free.app/deepfake/webhook'
 
@@ -177,8 +190,11 @@ async def create_item(request: Request):
 
         download_and_save_images(uploadcare_uris, image_ids, predefined_path)
 
-        # TODO: add commands for model and face distance
-        command = ["python", "run.py", "--headless"]
+        command = ["python", "run.py", 
+                   "--headless", 
+                   "--reference-face-distance", reference_face_distance, 
+                   "--face-enhancer-model", face_enhancer_model, 
+                   "--frame-enhancer-blend", frame_enhancer_blend]
 
         # Add a '-s' flag for each image
         for source_id in image_ids[:-1]:

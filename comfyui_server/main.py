@@ -1,7 +1,7 @@
 #This is an example that uses the websockets api to know when a prompt execution is done
 #Once the prompt execution is done it downloads the images using the /history endpoint
 
-import websocket #NOTE: websocket-client (https://github.com/websocket-client/websocket-client)
+import comfyui_server.main as main #NOTE: websocket-client (https://github.com/websocket-client/websocket-client)
 import uuid
 import json
 import urllib.request
@@ -224,7 +224,7 @@ async def create_item(request: Request):
 
         download_and_save_images(uploadcare_uris, image_ids, predefined_path)
 
-        ws = websocket.WebSocket()
+        ws = main.WebSocket()
         ws.connect("ws://{}/ws?clientId={}".format(server_address, client_id))
         images = get_images(ws, workflow)
 
