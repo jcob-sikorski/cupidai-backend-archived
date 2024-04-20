@@ -58,7 +58,6 @@ def status_message(status_code: int) -> str:
     else:
         return "unknown"
 
-# TODO: return status code of 200 or 400
 def webhook(response: dict) -> None:
     clientId = "AKUw5R4PFfNhcxFDTWX5k="
     clientSecret = "LHjoqjWCxWacxwXJa63NXnJqlTH1Pwyk"
@@ -72,6 +71,8 @@ def webhook(response: dict) -> None:
     if signature == new_signature:
         result = generate_aes_decrypt(msg_encrypt, clientId, clientSecret)
         result = json.loads(result)
+
+        print(f"AKOOL RESULT: {result}")
         
         # # Extracting status code and generating status message
         status_code = result.get("status", 0)
@@ -86,14 +87,6 @@ def webhook(response: dict) -> None:
     else:
         return 400
 
-def extract_id_from_uri(uri):
-    # Use regex to extract the UUID from the URI
-    match = re.search(r"/([a-f0-9-]+)/-/", uri)
-    if match:
-        return match.group(1)
-    else:
-        return None
-    
 def send_post_request(url: str, 
                       headers: dict, 
                       payload: dict,
@@ -129,6 +122,13 @@ def send_post_request(url: str,
     if code == 1000:
         history_service.update('deepfake', user_id)
 
+def extract_id_from_uri(uri):
+    # Use regex to extract the UUID from the URI
+    match = re.search(r"/([a-f0-9-]+)/", uri)
+    if match:
+        return match.group(1)
+    else:
+        return None
 
 def get_file_format(file_id: str):
     uploadcare = Uploadcare(public_key='e6daeb69aa105a823395', secret_key='9a1b92e275b8fc7855a9')
@@ -195,31 +195,38 @@ def run_photo(source_uri: str,
 def run_video(source_uri: str,
               target_uri: str,
               source_opts: str,
-              modify_video: str,
               target_opts: str,
+              modify_video: str,
               user_id: str,
               background_tasks: BackgroundTasks):
-    print("running generate video")
-    url = "https://openapi.akool.com/api/open/v3/faceswap/highquality/specifyimage"
+    url = "https://openapi.akool.com/api/open/v3/faceswap/highquality/specifyvideo"
 
-    payload = json.dumps({
-      "sourceImage": {
-            "path": source_uri,
-            "opts": source_opts
-        },
-      "targetImage": {
-            "path": target_uri,
-            "opts": target_opts
-        },
-      "modifyVideo": modify_video,
-      "webhookUrl": "https://garfish-cute-typically.ngrok-free.app/deepfake/webhook"
-    })
     headers = {
       'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY0MDIzNGJjZWI2NWNkMjdhOTFlZTg0ZCIsInVpZCI6MTM3NTM2LCJlbWFpbCI6ImxsYW1hemFkZUBnbWFpbC5jb20iLCJjcmVkZW50aWFsSWQiOiI2NjIyZWM5NWQ5MWRmYjc4OWY1OWI1NzgiLCJmaXJzdE5hbWUiOiJLaUQgVFRTIiwiZnJvbSI6InRvTyIsInR5cGUiOiJ1c2VyIiwiaWF0IjoxNzEzNjE3OTk2LCJleHAiOjIwMjQ2NTc5OTZ9.-E9Xan-w4aQt0A5mQw7aFBhGHN1Pl4KSKiXxudnIzYk',
       'Content-Type': 'application/json'
     }
 
-    # background_tasks.add_task(send_post_request, url, headers, payload, user_id)
+    payload = {
+      "sourceImage": [{
+            "path": source_uri,
+            "opts": source_opts
+        }],
+      "targetImage": [{
+            "path": target_uri,
+            "opts": target_opts
+        }],
+      "modifyVideo": modify_video,
+      "webhookUrl": "https://garfish-cute-typically.ngrok-free.app/deepfake/webhook"
+    }
+
+    background_tasks.add_task(send_post_request,
+                              url,
+                              headers,
+                              payload,
+                              source_uri,
+                              target_uri,
+                              modify_video,
+                              user_id)
 
 # TODO: if the uploaded file is a video there must be toggle button
 # if the video is running then there are three areas to drag and drop:
@@ -245,16 +252,12 @@ def generate(source_uri: str,
 
             return 500 # TODO we must also raise exceptions
             
-        if modify_video:       
-            print(f"message.modify_video: {modify_video}")     
-            print("extract_id_from_uri")
+        if modify_video:
             video_id = extract_id_from_uri(modify_video)
-            print("get_file_format")
+
             video_format = get_file_format(video_id)
 
-            print("checking video format")
-            if video_format not in ['mov', 'mp4']:
-                print("video is of invalid format")
+            if video_format not in ['mov', 'mp4', 'quicktime']:
                 return 500 # TODO we must also raise exceptions
             
             source_opts = run_face_detection(source_uri)
@@ -262,9 +265,9 @@ def generate(source_uri: str,
         
             run_video(source_uri,
                       target_uri,
-                      modify_video,
                       source_opts,
                       target_opts,
+                      modify_video,
                       user.user_id,
                       background_tasks)
         else:            
