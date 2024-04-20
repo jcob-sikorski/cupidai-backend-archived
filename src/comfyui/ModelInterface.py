@@ -307,10 +307,13 @@ def generate_workflow(settings: Settings, image_ids: Dict[str, str], image_forma
 
         predefined_path = 'C:\\Users\\Shadow\\Desktop'
 
+        format_map = {"jpeg": ".jpg",
+                      "heic": ".heic",
+                      "png": ".png"}
+
         if settings.controlnet_enabled:
             print("CONTROLNET ENABLED")
-            file_extension = ".jpg" if image_formats["controlnet_reference_image"] == "jpeg" else ".png"
-
+            file_extension = format_map[image_formats["controlnet_reference_image"]]
             settings.controlnet_reference_image = predefined_path + "\\" + image_ids["controlnet_reference_image"] + file_extension
             model_interface.connect_control_net(unit=settings.controlnet_model, image_path=settings.controlnet_reference_image, strength=settings.controlnet_strength, start_percent=settings.controlnet_start_percent, end_percent=settings.controlnet_end_percent)
 
@@ -340,13 +343,13 @@ def generate_workflow(settings: Settings, image_ids: Dict[str, str], image_forma
 
         if settings.ipa_1_enabled:
             print("IPA 1 ENABLED")
-            file_extension = ".jpg" if image_formats["ipa_1_reference_image"] == "jpeg" else ".png"
+            file_extension = format_map[image_formats["ipa_1_reference_image"]]
             settings.ipa_1_reference_image = predefined_path + "\\" + image_ids["ipa_1_reference_image"] + file_extension
             model_interface.connect_ip_adapter_1(image_path=settings.ipa_1_reference_image, model=settings.ipa_1_model, weight=settings.ipa_1_weight, noise=settings.ipa_1_noise, start_at=settings.ipa_1_start_at, end_at=settings.ipa_1_end_at)
 
         if settings.ipa_2_enabled:
-            print("IPA 2 ENABLED")
-            file_extension = ".jpg" if image_formats["ipa_2_reference_image"] == "jpeg" else ".png"
+            print("IPA 2 ENABLED") 
+            file_extension = format_map[image_formats["ipa_2_reference_image"]]
             settings.ipa_2_reference_image = predefined_path + "\\" + image_ids["ipa_2_reference_image"] + file_extension
             model_interface.connect_ip_adapter_2(image_path=settings.ipa_2_reference_image, model=settings.ipa_2_model, weight=settings.ipa_2_weight, noise=settings.ipa_2_noise, start_at=settings.ipa_2_start_at, end_at=settings.ipa_2_end_at)
 

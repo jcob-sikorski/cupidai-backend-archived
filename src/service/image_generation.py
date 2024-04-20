@@ -290,6 +290,9 @@ async def generate(settings: Settings, uploadcare_uris: Dict[str, str], user: Ac
         print("IMAGE FORMATS")
         print(image_formats)
 
+        if any(ext not in ['jpeg', 'png', 'heic'] for ext in image_formats.items()):
+            return 500
+
         settings_id = save_settings(settings)
 
         message_id = update_message(user.user_id, "started", uploadcare_uris, None, settings_id, None)

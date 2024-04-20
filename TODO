@@ -3,8 +3,8 @@ tree -I 'venv'
 ############################################## IMAGE GENERATION ##############################################
 
 HIGH LEVEL GOALS FOR TODAY:
- - finish face swap with akool
- - test comfyui for other formats
+ - test akool
+ - test comfyui for other image formats
  - test midjourney action, imagine, faceswap
  - add some parameters to make images superior quality time is not key, quality and reliability is for our customers
  - run holistic tests for each endpoint, simplify make each better, figure out what they should all return
