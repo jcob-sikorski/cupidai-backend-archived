@@ -17,21 +17,17 @@ def create(message: Message) -> bool:
 
 def update_message(user_id: str, 
                    status: Optional[str] = None, 
-                   uploadcare_uris: Optional[List[str]] = None, 
-                   message_id: Optional[str] = None, 
-                   reference_face_distance: Optional[str] = None, 
-                   face_enhancer_model: Optional[float] = None, 
-                   frame_enhancer_blend: Optional[float] = None, 
+                   source_uri: Optional[str] = None, 
+                   target_uri: Optional[str] = None,
+                   message_id: Optional[str] = None,
                    s3_uri: Optional[str] = None):
     
     message = Message(
         user_id=user_id,
         status=status,
-        uploadcare_uris=uploadcare_uris,
+        source_uri=source_uri, 
+        target_uri=target_uri,
         message_id=message_id,
-        reference_face_distance=reference_face_distance,
-        face_enhancer_mode=face_enhancer_model,
-        frame_enhancer_blend=frame_enhancer_blend,
         s3_uri=s3_uri
     )
 

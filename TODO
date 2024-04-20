@@ -2,15 +2,9 @@ tree -I 'venv'
 
 ############################################## IMAGE GENERATION ##############################################
 
-test extensively facefusion endpoint
-test jpg, png, mov, mp4, HEIC file formats in facefusion
+test jpg, png, mov, mp4, HEIC file formats in second api
 
 test extensively comfyui endpoint in terms of image formats
-
-add second api
-
-run facefusion deepfake on the same runpod as comfyui.
-          the fastapi server would be the same communciating with both comfy and faceufusion (probably? what's the best option for us in the future to keep it simple?)
 
 host image generation on runpod - use prebuild image from their site during pod config then remove it and install from github
 

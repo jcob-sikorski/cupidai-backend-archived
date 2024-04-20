@@ -8,6 +8,10 @@ import httpx
 
 import re
 
+import json
+
+import requests
+
 from pyuploadcare import Uploadcare
 
 import data.deepfake as data
@@ -18,67 +22,19 @@ from model.deepfake import Message
 import service.billing as billing_service
 import service.history as history_service
 
-def facefusion_webhook(message: Message) -> None:
-    print(message)
-    update_message(user_id=message.user_id, 
-                   message_id=message.message_id, 
-                   status=message.status, 
-                   s3_uri=message.s3_uri)
-
-    if message.status == 'in progress':
-        history_service.update('deepfake', message.user_id)
-
-def check_parameters(message: Message):
-    print("CHECKING PARAMETERS")
-    print(message)
-    face_enhancer_models = [
-        "codeformer",
-        "gfpgan_1.2",
-        "gfpgan_1.3",
-        "gfpgan_1.4",
-        "gpen_bfr_256",
-        "gpen_bfr_512",
-        "gpen_bfr_1024",
-        "gpen_bfr_2048",
-        "restoreformer_plus_plus"
-    ]
-
-    if message.reference_face_distance is None:
-        return "Error: reference_face_distance is None"
-    elif not (0.0 <= message.reference_face_distance <= 1.5 and
-              int(message.reference_face_distance*100) % 5 == 0):
-        return "Error: reference_face_distance must be between 0.0 and 1.5 and a multiple of 0.05"
-
-    if message.face_enhancer_model is None:
-        return "Error: face_enhancer_model is None"
-    elif message.face_enhancer_model not in face_enhancer_models:
-        return f"Error: face_enhancer_model must be one of {face_enhancer_models}"
-
-    if message.frame_enhancer_blend is None:
-        return "Error: frame_enhancer_blend is None"
-    elif not (0 <= message.frame_enhancer_blend <= 100):
-        return "Error: frame_enhancer_blend must be between 0 and 100"
-
-    return True
-
-
 def update_message(user_id: str, 
                    status: Optional[str] = None, 
-                   uploadcare_uris: Optional[List[str]] = None, 
+                   source_uri: Optional[str] = None,
+                   target_uri: Optional[str] = None,
                    message_id: Optional[str] = None, 
-                   reference_face_distance: Optional[str] = None, 
-                   face_enhancer_model: Optional[float] = None, 
-                   frame_enhancer_blend: Optional[float] = None, 
                    s3_uri: Optional[str] = None):
     
     print("UPDATING MESSAGE")
     return data.update_message(user_id,
-                                status, 
-                                uploadcare_uris, 
-                                message_id, 
-                                reference_face_distance, 
-                                face_enhancer_model, 
-                                frame_enhancer_blend, 
+                                status,
+                                source_uri,
+                                target_uri,
+                                message_id,
                                 s3_uri)
 
 def extract_id_from_uri(uri):
@@ -94,68 +50,125 @@ async def send_post_request(url: str, headers: dict, payload: dict) -> None:
     async with httpx.AsyncClient() as client:
         await client.post(url, headers=headers, json=payload)
 
+def get_file_format(file_id: str):
+    print("INITIALIZING UPLOADCARE CLIENT")
+    uploadcare = Uploadcare(public_key='e6daeb69aa105a823395', secret_key='9a1b92e275b8fc7855a9')
+
+    print("GETTING FILE FORMAT")
+    file_info = uploadcare.file(file_id).info
+
+    return file_info['mime_type'].split('/')[1]
+
+def run_face_detection(uploadcare_uri: str):
+    url = "https://sg3.akool.com/detect"
+
+    payload = json.dumps({
+      "single_face": True,
+      "image_url": uploadcare_uri
+    })
+    headers = {
+      'Authorization': 'Bearer token',
+      'Content-Type': 'application/json'
+    }
+
+    response = requests.request("POST", url, headers=headers, data=payload)
+    response_data = json.loads(response.text)
+    landmarks_str = response_data.get("landmarks_str", "")
+
+    return landmarks_str
+
+def run_photo(source_uri: str, 
+              target_uri: str, 
+              source_opts: str, 
+              target_opts: str, 
+              background_tasks: BackgroundTasks):
+    url = "https://openapi.akool.com/api/open/v3/faceswap/highquality/specifyimage"
+
+    payload = json.dumps({
+      "sourceImage": {
+            "path": source_uri,
+            "opts": source_opts
+        },
+      "targetImage": {
+            "path": target_uri,
+            "opts": target_opts
+        },
+      "face_enhance": 1,
+      "modifyImage": target_uri,
+      "webhookUrl": "https://garfish-cute-typically.ngrok-free.app/deepfake/a-webhook"
+    })
+    headers = {
+      'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY2MjEwYzUzZDkxZGZiNzg5ZjUxNDg1MyIsInVpZCI6MTkzMzU0NywiZW1haWwiOiJqbS5zaWVraWVyYUBnbWFpbC5jb20iLCJjcmVkZW50aWFsSWQiOiI2NjIyNGM1YWQ5MWRmYjc4OWY1NmJiOGMiLCJmaXJzdE5hbWUiOiJKYWt1YiIsImZyb20iOiJ0b08iLCJ0eXBlIjoidXNlciIsImlhdCI6MTcxMzUyMzk1MCwiZXhwIjoyMDI0NTYzOTUwfQ.K0DvoRu5mTloYdWfF4zAEAf3oSl3o1zWmioGdHB06Kk',
+      'Content-Type': 'application/json'
+    }
+
+    print("ADDING BACKGROUND TASK")
+    background_tasks.add_task(send_post_request, url, headers, payload)
+
+def run_video(source_uri: str, 
+              target_uri: str, 
+              source_opts: str, 
+              target_opts: str, 
+              background_tasks: BackgroundTasks):
+    url = "https://openapi.akool.com/api/open/v3/faceswap/highquality/specifyimage"
+
+    payload = json.dumps({
+      "sourceImage": {
+            "path": source_uri,
+            "opts": source_opts
+        },
+      "targetImage": {
+            "path": target_uri,
+            "opts": target_opts
+        },
+      "modifyVideo": target_uri, # TODO: this should be target video link not target image link
+      "webhookUrl": "https://garfish-cute-typically.ngrok-free.app/deepfake/a-webhook"
+    })
+    headers = {
+      'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY2MjEwYzUzZDkxZGZiNzg5ZjUxNDg1MyIsInVpZCI6MTkzMzU0NywiZW1haWwiOiJqbS5zaWVraWVyYUBnbWFpbC5jb20iLCJjcmVkZW50aWFsSWQiOiI2NjIyNGM1YWQ5MWRmYjc4OWY1NmJiOGMiLCJmaXJzdE5hbWUiOiJKYWt1YiIsImZyb20iOiJ0b08iLCJ0eXBlIjoidXNlciIsImlhdCI6MTcxMzUyMzk1MCwiZXhwIjoyMDI0NTYzOTUwfQ.K0DvoRu5mTloYdWfF4zAEAf3oSl3o1zWmioGdHB06Kk',
+      'Content-Type': 'application/json'
+    }
+
+    print("ADDING BACKGROUND TASK")
+    background_tasks.add_task(send_post_request, url, headers, payload)
+
 def generate(
         message: Message, 
         user: Account, 
         background_tasks: BackgroundTasks) -> None:
     
     if billing_service.has_permissions('deepfake', user):
-        check = check_parameters(message)
-        if check is not True:
-            return check
-        
-        # TODO: if above or equal to business plan call the api
-        #       else call our runpod server + set up webhook probably for both?     
+        source_id = extract_id_from_uri(message.source_uri)
+        source_format = get_file_format(source_id)
 
-        print("EXTRACTING FILE IDS")
-        file_ids = [extract_id_from_uri(uri) for uri in message.uploadcare_uris]
+        if source_format not in ['jpeg', 'png', 'heic']:
+            return 500 # TODO we must also raise exceptions
 
-        print("INITIALIZING UPLOADCARE CLIENT")
-        uploadcare = Uploadcare(public_key='e6daeb69aa105a823395', secret_key='9a1b92e275b8fc7855a9')
+        target_id = extract_id_from_uri(message.target_uri)
+        target_format = get_file_format(target_id)
 
-        file_formats = []
-
-        print("GETTING FILE FORMATS")
-        for file_id in file_ids:
-            file_info = uploadcare.file(file_id).info
-            file_formats.append(file_info['mime_type'].split('/')[1])
-
-        print("FILE FORMATS")
-        print(file_formats)
-
-        message_id = update_message(user.user_id, 
-                                    "started", 
-                                    message.uploadcare_uris,
+        message_id = update_message(user.user_id,
+                                    "started",
+                                    message.source_uri,
+                                    message.target_uri,
                                     None,
-                                    message.reference_face_distance, 
-                                    message.face_enhancer_model, 
-                                    message.frame_enhancer_blend, 
                                     None)
+        
+        source_opts = run_face_detection(message.source_uri)
+        target_opts = run_face_detection(message.target_uri)
 
-
-        # Define the URL of the server
-        url = "https://native-goat-saved.ngrok-free.app/deepfake/generate"
-
-        # Define the headers for the request
-        headers = {
-            'Content-Type': 'application/json'
-        }
-
-        print("PREPARING PAYLOAD")
-        # Define the payload for the request
-        payload = {
-            'user_id': user.user_id,
-            'uploadcare_uris': message.uploadcare_uris,
-            'file_ids': file_ids,
-            'file_formats': file_formats,
-            'message_id': message_id,
-            'reference_face_distance': message.reference_face_distance,
-            'face_enhancer_model': message.face_enhancer_model,
-            'frame_enhancer_blend': message.frame_enhancer_blend
-        }
-
-        print("ADDING BACKGROUND TASK")
-        background_tasks.add_task(send_post_request, url, headers, payload)
+        if target_format in ['mov', 'mp4']:
+            run_video(message.source_uri,
+                      message.target_uri,
+                      source_opts,
+                      target_opts,
+                      background_tasks)
+        else:
+            run_photo(message.source_uri,
+                      message.target_uri,
+                      source_opts,
+                      target_opts,
+                      background_tasks)
         
         return message_id
     else:
