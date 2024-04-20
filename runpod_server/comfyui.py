@@ -1,3 +1,4 @@
+import websocket
 import uuid
 import json
 import urllib.request
@@ -38,6 +39,7 @@ def get_history(prompt_id):
         return json.loads(response.read())
 
 def get_images(ws, prompt):
+    print("QUEUEING PROMPT")
     prompt_id = queue_prompt(prompt)['prompt_id']
     output_images = {}
     while True:
@@ -62,9 +64,12 @@ def get_images(ws, prompt):
                     images_output.append(image_data)
             output_images[node_id] = images_output
 
+    print("GOT THE IMAGES")
     return output_images
 
+
 def upload_images_to_s3(images):
+    print("UPLOADING IMAGES TO S3")
     s3_client = boto3.client('s3')
 
     s3_uris = []
@@ -74,13 +79,17 @@ def upload_images_to_s3(images):
             image_key = str(uuid.uuid4()) + '.png'
 
             image_array = cv2.imdecode(np.frombuffer(image_data, np.uint8), cv2.IMREAD_UNCHANGED)
+            
+            print("SAVING IMAGE FILE TEMPORARILY")
 
             # Save the image as a PNG file
             cv2.imwrite(image_key, image_array)
 
             with open(image_key, 'rb') as data:
+                print("UPLOADING THE IMAGE")
                 s3_client.upload_fileobj(data, 'magicalcurie', image_key)
 
+            print(f"UPLOADED THE IMAGE: " + f's3://magicalcurie/{image_key}')
             s3_uris.append(f's3://magicalcurie/{image_key}')
 
             # Remove the local image file
@@ -109,6 +118,7 @@ def download_and_save_images(
         if image_id:
             print(f"SETTING THE UNIQUE FILEPATH OF THE IMAGE")
             image_path = os.path.join(predefined_path, f"{image_id}.{image_format}")
+            print(f"image_path: {image_path}")
             print(f"DOWNLOADING IMAGE")
             response = requests.get(uri)
             if response.status_code == 200:
@@ -122,7 +132,9 @@ def download_and_save_images(
             print(f"No image ID found for key: {key}")
 
 def remove_images(
-        image_ids: Dict[str, str], 
+        uploadcare_uris: Dict[str, str],
+        image_ids: Dict[str, str],
+        image_formats: Dict[str, str],
         predefined_path: str) -> None:
     """
     Removes images based on image IDs.
@@ -131,15 +143,20 @@ def remove_images(
         predefined_path (str): Predefined path where the images are stored.
     """
     print(f"REMOVING IMAGES")
-    for _, image_id in image_ids.items():
+    for key, uri in uploadcare_uris.items():
         print(f"SETTING THE UNIQUE FILEPATH OF THE IMAGE")
-        image_path = os.path.join(predefined_path, f"{image_id}.jpg")
-        try:
-            print(f"REMOVING AN IMAGE")
-            os.remove(image_path)
-            print(f"Image removed: {image_path}")
-        except FileNotFoundError:
-            print(f"Image not found: {image_path}")
+        print(f"GETTING IMAGE ID")
+        image_id = image_ids.get(key)
+
+        if image_id:
+            image_format = image_formats.get(key)
+            image_path = os.path.join(predefined_path, f"{image_id}.{image_format}")
+            try:
+                print(f"REMOVING AN IMAGE")
+                os.remove(image_path)
+                print(f"Image removed: {image_path}")
+            except FileNotFoundError:
+                print(f"Image not found: {image_path}")
 
 class Message(BaseModel):
     user_id: Optional[str] = None
@@ -150,7 +167,12 @@ class Message(BaseModel):
     settings_id: Optional[str] = None
     s3_uris: Optional[List[str]] = None
 
-async def send_webhook_acknowledgment(user_id: str, message_id: str, settings_id: str, status: str, webhook_url: str, s3_uris: Optional[List[str]] = None) -> None:
+async def send_webhook_acknowledgment(user_id: str, 
+                                      message_id: str, 
+                                      settings_id: str, 
+                                      status: str, 
+                                      webhook_url: str, 
+                                      s3_uris: Optional[List[str]] = None) -> None:
     """
     Sends an acknowledgment message via webhook.
 
@@ -195,7 +217,7 @@ async def send_webhook_acknowledgment(user_id: str, message_id: str, settings_id
 
 
 
-@router.post("/generate")
+@router.post("/")
 async def create_item(request: Request):
     payload = await request.json() 
     workflow = payload.get('workflow', {})
@@ -208,6 +230,8 @@ async def create_item(request: Request):
 
     webhook_url = 'https://garfish-cute-typically.ngrok-free.app/image-generation/webhook'
 
+    print(image_formats)
+
     await send_webhook_acknowledgment(user_id, message_id, settings_id, 'in progress', webhook_url)
 
     try:
@@ -215,16 +239,15 @@ async def create_item(request: Request):
 
         download_and_save_images(uploadcare_uris, image_ids, image_formats, predefined_path)
 
-        ws = main.WebSocket()
+        ws = websocket.WebSocket()
         ws.connect("ws://{}/ws?clientId={}".format(server_address, client_id))
         images = get_images(ws, workflow)
 
         s3_uris = upload_images_to_s3(images)
+
+        await send_webhook_acknowledgment(user_id, message_id, settings_id, 'completed', webhook_url, s3_uris)
     except Exception as e:
+        print(f"ERROR: {e}")
         await send_webhook_acknowledgment(user_id, message_id, settings_id, 'failed', webhook_url)
 
-    await send_webhook_acknowledgment(user_id, message_id, settings_id, 'completed', webhook_url, s3_uris)
-
-    remove_images(image_ids, predefined_path)
-
-    return s3_uris
+    remove_images(uploadcare_uris, image_ids, image_formats, predefined_path)

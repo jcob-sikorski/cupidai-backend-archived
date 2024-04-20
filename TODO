@@ -3,14 +3,12 @@ tree -I 'venv'
 ############################################## IMAGE GENERATION ##############################################
 
 HIGH LEVEL GOALS FOR TODAY:
- - test akool
- - test comfyui for other image formats
+ - test comfyui for all image formats (png, jpg, heic)
  - test midjourney action, imagine, faceswap
  - add some parameters to make images superior quality time is not key, quality and reliability is for our customers
  - run holistic tests for each endpoint, simplify make each better, figure out what they should all return
  - add http exceptions everuywhere and graceful error handling
-
-test jpg, png, mov, mp4, HEIC file formats in second api
+ - test akool video + mov, mp4, HEIC
 
 test extensively comfyui endpoint in terms of image formats
 
@@ -35,6 +33,8 @@ add logs
 
 
 host image generation on runpod - use prebuild image from their site during pod config then remove it and install from github
+
+test midjourney action, imagine, faceswap after buying a plan
 
 before frontend integration run holistic and detailed tests for every endpoint once again
 

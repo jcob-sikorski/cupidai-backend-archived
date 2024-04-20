@@ -6,7 +6,7 @@ import re
 
 from pyuploadcare import Uploadcare
 
-import httpx
+import requests
 
 from error import NotAuthorized
 
@@ -50,7 +50,7 @@ def check_settings(settings: Settings):
         "dpmpp_3m_sde",
         "dpmpp_3m_sde_gpu",
         "ddpm",
-        "1cm",
+        "lcm",
         "ddim",
         "uni_pc",
         "uni_pc_bh2"
@@ -110,147 +110,89 @@ def check_settings(settings: Settings):
         "Transparent_Clothes_V2.safetensors",
         "weight_slider_v2.safetensors"
     ]
-    
-    # TODO: we don't check for settings.X is None
-    
-    if settings.basic_sampling_steps is None:
-        return "Error: basic_sampling_steps is None"
-    elif settings.basic_sampling_steps > 120:
+        
+    if settings.basic_sampling_steps and settings.basic_sampling_steps > 120:
         return "Error: basic_sampling_steps must be less than or equal to 120"
 
-    if settings.basic_sampler_method is None:
-        return "Error: basic_sampler_method is None"
-    elif settings.basic_sampler_method not in samplers:
+    if settings.basic_sampler_method and settings.basic_sampler_method not in samplers:
         return f"Error: basic_sampler_method must be one of {samplers}"
-    
-    if settings.basic_model is None:
-        return "Error: basic_model is None"
-    elif settings.basic_model not in checkpoint_models:
+
+    if settings.basic_model and settings.basic_model not in checkpoint_models:
         return f"Error: basic_model must be one of {checkpoint_models}"
-    
-    if settings.basic_cfg_scale is None:
-        return "Error: basic_cfg_scale is None"
-    elif settings.basic_cfg_scale > 100.0:
+
+    if settings.basic_cfg_scale and settings.basic_cfg_scale > 100.0:
         return "Error: basic_cfg_scale must be less than or equal to 100.0"
-    
-    if settings.basic_batch_size is None:
-        return "Error: basic_batch_size is None"
-    elif not (1 <= settings.basic_batch_size <= 8):
+
+    if settings.basic_batch_size and not (1 <= settings.basic_batch_size <= 8):
         return "Error: basic_batch_size must be between 1 and 8"
-    
-    if settings.basic_batch_count is None:
-        return "Error: basic_batch_count is None"
-    elif not (1 <= settings.basic_batch_count <= 4):
+
+    if settings.basic_batch_count and not (1 <= settings.basic_batch_count <= 4):
         return "Error: basic_batch_count must be between 1 and 4"
-    
-    if settings.basic_denoise is None:
-        return "Error: basic_denoise is None"
-    elif settings.basic_denoise > 1.0:
+
+    if settings.basic_denoise and settings.basic_denoise > 1.0:
         return "Error: basic_denoise must be less than or equal to 1.0"
-    
-    if settings.ipa_1_model is None:
-        return "Error: ipa_1_model is None"
-    elif settings.ipa_1_model not in ipa_models:
+
+    if settings.ipa_1_model and settings.ipa_1_model not in ipa_models:
         return f"Error: ipa_1_model must be one of {ipa_models}"
 
-    if settings.ipa_1_weight is None:
-        return "Error: ipa_1_weight is None"
-    elif settings.ipa_1_weight < 1.0:
-        return "Error: ipa_1_weight must be greater than or equal to 1.0"
+    if settings.ipa_1_weight and settings.ipa_1_weight > 1.0:
+        return "Error: ipa_1_weight must be less than or equal to 1.0"
     
-    if settings.ipa_1_noise is None:
-        return "Error: ipa_1_noise is None"
-    elif settings.ipa_1_noise > 1.0:
+    if settings.ipa_1_noise and settings.ipa_1_noise > 1.0:
         return "Error: ipa_1_noise must be less than or equal to 1.0"
 
-    if settings.ipa_1_start_at is None:
-        return "Error: ipa_1_start_at is None"
-    elif settings.basic_sampling_steps and (settings.ipa_1_start_at > 1.0 or settings.ipa_1_start_at >= settings.ipa_1_end_at):
+    if settings.basic_sampling_steps and settings.ipa_1_start_at and settings.ipa_1_end_at and (settings.ipa_1_start_at > 1.0 or settings.ipa_1_start_at >= settings.ipa_1_end_at):
         return "Error: ipa_1_start_at must be less than or equal to 1.0 and less than ipa_1_end_at"
 
-    if settings.ipa_1_end_at is None:
-        return "Error: ipa_1_end_at is None"
-    elif settings.basic_sampling_steps and settings.ipa_1_end_at > 1.0:
+    if settings.ipa_1_end_at and settings.ipa_1_end_at > 1.0:
         return "Error: ipa_1_end_at must be less than or equal to 1.0"
 
-    if settings.ipa_2_model is None:
-        return "Error: ipa_2_model is None"
-    elif settings.ipa_2_model not in ipa_models:
+    if settings.ipa_2_model and settings.ipa_2_model not in ipa_models:
         return f"Error: ipa_2_model must be one of {ipa_models}"
 
-    if settings.ipa_2_weight is None:
-        return "Error: ipa_2_weight is None"
-    elif settings.ipa_2_weight > 1.0:
+    if settings.ipa_2_weight and settings.ipa_2_weight > 1.0:
         return "Error: ipa_2_weight must be less than or equal to 1.0"
 
-    if settings.ipa_2_noise is None:
-        return "Error: ipa_2_noise is None"
-    elif settings.ipa_2_noise > 1.0:
+    if settings.ipa_2_noise and settings.ipa_2_noise > 1.0:
         return "Error: ipa_2_noise must be less than or equal to 1.0"
 
-    if settings.ipa_2_start_at is None:
-        return "Error: ipa_2_start_at is None"
-    elif settings.basic_sampling_steps and (settings.ipa_2_start_at > 1.0 or settings.ipa_2_start_at >= settings.ipa_2_end_at):
+    if settings.basic_sampling_steps and settings.ipa_2_start_at and settings.ipa_2_end_at and (settings.ipa_2_start_at > 1.0 or settings.ipa_2_start_at >= settings.ipa_2_end_at):
         return "Error: ipa_2_start_at must be less than or equal to 1.0 and less than ipa_2_end_at"
 
-    if settings.ipa_2_end_at is None:
-        return "Error: ipa_2_end_at is None"
-    elif settings.basic_sampling_steps and settings.ipa_2_end_at > 1.0:
+    if settings.basic_sampling_steps and settings.ipa_2_end_at and settings.ipa_2_end_at > 1.0:
         return "Error: ipa_2_end_at must be less than or equal to 1.0"
 
-    if settings.refinement_steps is None:
-        return "Error: refinement_steps is None"
-    elif settings.refinement_steps > 120:
+    if settings.refinement_steps and settings.refinement_steps > 120:
         return "Error: refinement_steps must be less than or equal to 120"
 
-    if settings.refinement_cfg_scale is None:
-        return "Error: refinement_cfg_scale is None"
-    elif settings.refinement_cfg_scale > 100.0:
+    if settings.refinement_cfg_scale and settings.refinement_cfg_scale > 100.0:
         return "Error: refinement_cfg_scale must be less than or equal to 100.0"
     
-    if settings.refinement_denoise is None:
-        return "Error: refinement_denoise is None"
-    elif settings.refinement_denoise > 1.0:
+    if settings.refinement_denoise and settings.refinement_denoise > 1.0:
         return "Error: refinement_denoise must be less than or equal to 1.0"
 
-    if settings.refinement_sampler is None:
-        return "Error: refinement_sampler is None"
-    elif settings.refinement_sampler not in samplers:
+    if settings.refinement_sampler and settings.refinement_sampler not in samplers:
         return f"Error: refinement_sampler must be one of {samplers}"
 
-    if settings.lora_count is None:
-        return "Error: lora_count is None"
-    elif not (1 <= settings.lora_count <= 4):
+    if settings.lora_count and not (1 <= settings.lora_count <= 4):
         return "Error: lora_count must be between 1 and 4"
     
-    if settings.lora_model is None:
-        return "Error: lora_model is None"
-    elif settings.lora_model not in lora_models:
-        return f"Error: lora_model must be one of {lora_models}"
+    # if settings.lora_model and settings.lora_model not in lora_models:
+    #     return f"Error: lora_model must be one of {lora_models}"
 
-    if settings.lora_strengths is None:
-        return "Error: lora_strengths is None"
-    elif all(map(lambda x: x <= 10.0, settings.lora_strengths)):
+    if settings.lora_strengths and all(map(lambda x: x <= 10.0, settings.lora_strengths)):
         return "Error: All values in lora_strengths must be greater than 10.0"
 
-    if settings.controlnet_model is None:
-        return "Error: controlnet_model is None"
-    elif settings.controlnet_model not in checkpoint_models:
+    if settings.controlnet_model and settings.controlnet_model not in checkpoint_models:
         return f"Error: controlnet_model must be one of {checkpoint_models}"
 
-    if settings.controlnet_strength is None:
-        return "Error: controlnet_strength is None"
-    elif settings.controlnet_strength > 10.0:
+    if settings.controlnet_strength and settings.controlnet_strength > 10.0:
         return "Error: controlnet_strength must be less than or equal to 10.0"
 
-    if settings.controlnet_start_percent is None:
-        return "Error: controlnet_start_percent is None"
-    elif not (settings.controlnet_start_percent < 100.0):
+    if settings.controlnet_start_percent and not (settings.controlnet_start_percent < 100.0):
         return "Error: controlnet_start_percent must be less than 100.0"
 
-    if settings.controlnet_end_percent is None:
-        return "Error: controlnet_end_percent is None"
-    elif not (settings.controlnet_end_percent <= 100.0):
+    if settings.controlnet_end_percent and not (settings.controlnet_end_percent <= 100.0):
         return "Error: controlnet_end_percent must be less than or equal to 100.0"
     
     return True
@@ -262,18 +204,15 @@ def update_message(user_id: str, status: Optional[str] = None, uploadcare_uris: 
     return data.update_message(user_id, status, uploadcare_uris, message_id, settings_id, s3_uris)
 
 def extract_id_from_uri(uri):
-    """Extracts id from: https://ucarecdn.com/{id}/-/preview/{x}x{y}/"""
-    
     # Use regex to extract the UUID from the URI
-    match = re.search(r"/([a-f0-9-]+)/-/", uri)
+    match = re.search(r"/([a-f0-9-]+)/", uri)
     if match:
         return match.group(1)
     else:
         return None
     
-async def send_post_request(url: str, headers: dict, payload: dict) -> None:
-    async with httpx.AsyncClient() as client:
-        await client.post(url, headers=headers, json=payload)
+def send_post_request(url: str, headers: dict, payload: dict) -> None:
+    requests.post(url, headers=headers, json=payload)
 
 async def generate(settings: Settings, uploadcare_uris: Dict[str, str], user: Account, background_tasks: BackgroundTasks) -> None:
     if billing_service.has_permissions('image_generation', user):
@@ -281,16 +220,26 @@ async def generate(settings: Settings, uploadcare_uris: Dict[str, str], user: Ac
         if check is not True:
             return check
 
-        image_ids = {key: extract_id_from_uri(uri) for key, uri in uploadcare_uris.items()}
+        image_ids = {}
+        for key, uri in uploadcare_uris.items():
+            if uri is not None:
+                image_ids[key] = extract_id_from_uri(uri)
+
+        print(image_ids)
 
         uploadcare = Uploadcare(public_key='e6daeb69aa105a823395', secret_key='9a1b92e275b8fc7855a9')
 
-        image_formats = {key: uploadcare.file(uri).info()['mime_type'].split('/')[1] for key, uri in uploadcare_uris.items()}
+        image_formats = {}
+        for key, uploadcare_id in image_ids.items():
+            if uploadcare_id is not None:
+                image_formats[key] = uploadcare.file(uploadcare_id).info['mime_type'].split('/')[1]
+            else:
+                image_formats[key] = None
 
         print("IMAGE FORMATS")
-        print(image_formats)
+        print(image_formats.values())
 
-        if any(ext not in ['jpeg', 'png', 'heic'] for ext in image_formats.items()):
+        if any(ext and ext not in ['jpeg', 'png', 'heic'] for ext in image_formats.values()):
             return 500
 
         settings_id = save_settings(settings)
@@ -304,7 +253,7 @@ async def generate(settings: Settings, uploadcare_uris: Dict[str, str], user: Ac
             return None
 
         # Define the URL of the server
-        url = "https://native-goat-saved.ngrok-free.app/"
+        url = "https://native-goat-saved.ngrok-free.app/image-generation/"
 
         # Define the headers for the request
         headers = {
