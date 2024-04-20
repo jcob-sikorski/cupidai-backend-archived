@@ -10,11 +10,10 @@ from service import deepfake as service
 
 router = APIRouter(prefix="/deepfake")
 
-# TODO: what accepts akool webhook
-@router.post("/a-webhook", status_code=201)
-async def akool_webhook(message: Message) -> None:
-    print("AKOOL WEBHOOK ACTIVATED")
-    return service.akool_webhook(message)
+@router.post("/webhook", status_code=201)
+async def webhook(response: dict) -> None:
+    print("WEBHOOK ACTIVATED")
+    return service.webhook(response)
 
 # Protected endpoint
 @router.post("/generate", status_code=201)

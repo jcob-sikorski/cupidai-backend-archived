@@ -1,7 +1,5 @@
 from typing import List, Optional
 
-from bson.objectid import ObjectId
-
 from model.deepfake import Message
 
 from pymongo import ReturnDocument
@@ -20,8 +18,8 @@ def update_message(user_id: str,
                    source_uri: Optional[str] = None, 
                    target_uri: Optional[str] = None,
                    modify_video: Optional[str] = None,
-                   message_id: Optional[str] = None,
-                   s3_uri: Optional[str] = None):
+                   job_id: Optional[str] = None,
+                   output_url: Optional[str] = None):
     
     message = Message(
         user_id=user_id,
@@ -29,19 +27,20 @@ def update_message(user_id: str,
         source_uri=source_uri, 
         target_uri=target_uri,
         modify_video=modify_video,
-        message_id=message_id,
-        s3_uri=s3_uri
+        job_id=job_id,
+        output_url=output_url
     )
 
     update_fields = {key: value for key, value in message.dict().items() if value is not None}
 
-    if message_id:
-        print("UPDATING MESSAGE (message_id not null)")
+    if job_id:
+        print("UPDATING MESSAGE (job_id is not null)")
         deepfake_col.find_one_and_update(
-            {"_id": ObjectId(message_id)},  # Convert message_id to ObjectId
+            {"job_id": job_id},
             {"$set": update_fields},
             return_document=ReturnDocument.AFTER
         )
+        # TODO: what should we return when we update the Message?
     else:
         print("CREATING NEW MESSAGE (message_id is null)")
         message_id = deepfake_col.insert_one(update_fields)

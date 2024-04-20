@@ -14,6 +14,14 @@ import requests
 
 from pyuploadcare import Uploadcare
 
+import hashlib
+
+from Crypto.Cipher import AES
+
+from Crypto.Util.Padding import unpad
+
+import base64
+
 import data.deepfake as data
 
 from model.account import Account
@@ -22,31 +30,68 @@ from model.deepfake import Message
 import service.billing as billing_service
 import service.history as history_service
 
-# TODO: what accepts akool webhook
-def akool_webhook(message: Message) -> None:
-    print(message)
-    update_message(user_id=message.user_id,
-                   message_id=message.message_id,
-                   status=message.status,
-                   s3_uri=message.s3_uri)
+# Generate signature
+def generate_msg_signature(client_id, timestamp, nonce, msg_encrypt):
+    sorted_str = ''.join(sorted([client_id, str(timestamp), str(nonce), msg_encrypt]))
 
-    if message.status == 'in progress':
-        history_service.update('image_generation', message.user_id)
-
-def update_message(user_id: str, 
-                   status: Optional[str] = None, 
-                   source_uri: Optional[str] = None,
-                   target_uri: Optional[str] = None,
-                   message_id: Optional[str] = None, 
-                   s3_uri: Optional[str] = None):
+    hash_obj = hashlib.sha1(sorted_str.encode())
     
-    print("UPDATING MESSAGE")
-    return data.update_message(user_id,
-                                status,
-                                source_uri,
-                                target_uri,
-                                message_id,
-                                s3_uri)
+    return hash_obj.hexdigest()
+
+# Decryption algorithm
+def generate_aes_decrypt(data_encrypt, client_id, client_secret):
+    aes_key = client_secret.encode()
+
+    iv = client_id.encode()
+    cipher = AES.new(aes_key, AES.MODE_CBC, iv)
+
+    decrypted = unpad(cipher.decrypt(base64.b64decode(data_encrypt)), AES.block_size)
+
+    return decrypted.decode()
+
+def status_message(status_code: int) -> str:
+    if status_code == 1 or status_code == 2:
+        return "in progress"
+    elif status_code == 3:
+        return "completed"
+    elif status_code == 4:
+        return "failed"
+    else:
+        return "unknown"
+
+def webhook(response: dict) -> None:
+    clientId = "AKDt8rWEczpYPzCGur2xE="
+    clientSecret = "nmwUjMAK0PJpl0MOiXLOOOwZADm0gkLo"
+
+    signature = response["signature"]
+    msg_encrypt = response["dataEncrypt"]
+    timestamp = response["timestamp"]
+    nonce = response["nonce"]
+
+    new_signature = generate_msg_signature(clientId, timestamp, nonce, msg_encrypt)
+    if signature == new_signature:
+        result = generate_aes_decrypt(msg_encrypt, clientId, clientSecret)
+        decrypted_result = json.loads(result)
+        
+        # Extracting status code and generating status message
+        status_code = decrypted_result.get("status", 0)
+        status_msg = status_message(status_code)
+        
+        # Print the status message
+        print("Status:", status_msg)
+        print("_id:", decrypted_result.get("_id", ""))
+        print("type:", decrypted_result.get("type", ""))
+        print("url:", decrypted_result.get("url", ""))
+
+        job_id = decrypted_result.get("_id", "")
+
+        data.update_message(job_id=job_id,
+                            status=status_msg)
+
+        # Return success http status code 200
+    else:
+        # Return error http status code 400
+        pass
 
 def extract_id_from_uri(uri):
     # Use regex to extract the UUID from the URI
@@ -56,10 +101,27 @@ def extract_id_from_uri(uri):
     else:
         return None
     
-async def send_post_request(url: str, headers: dict, payload: dict) -> None:
+async def send_post_request(url: str, headers: dict, payload: dict, user_id: str) -> None:
     print("SENDING POST REQUEST")
     async with httpx.AsyncClient() as client:
-        await client.post(url, headers=headers, json=payload)
+        response = await client.post(url, headers=headers, json=payload)
+
+        response_data = response.json()
+
+        code = response_data.get("code")
+
+        data = response_data.get("data", {})
+        job_id = data.get("_id")
+        output_url = data.get("url")
+
+        data.update_message(user_id=user_id,
+                            status='in progress' if code == 1000 else 'failed',
+                            job_id=job_id,
+                            output_url=output_url)
+        
+        if code == 1000:
+            history_service.update('deepfake', user_id)
+
 
 def get_file_format(file_id: str):
     print("INITIALIZING UPLOADCARE CLIENT")
@@ -171,15 +233,6 @@ def generate(
 
             if video_format not in ['mov', 'mp4']:
                 return 500 # TODO we must also raise exceptions
-
-
-            message_id = update_message(user.user_id,
-                "started",
-                message.source_uri,
-                message.target_uri,
-                message.modify_video,
-                None,
-                None)
             
             source_opts = run_face_detection(message.source_uri)
             target_opts = run_face_detection(message.target_uri)
@@ -190,17 +243,7 @@ def generate(
                       source_opts,
                       target_opts,
                       background_tasks)
-            
-            return message_id
-        else:
-            message_id = update_message(user.user_id,
-                "started",
-                message.source_uri,
-                message.target_uri,
-                None,
-                None,
-                None)
-            
+        else:            
             source_opts = run_face_detection(message.source_uri)
             target_opts = run_face_detection(message.target_uri)
         
@@ -209,8 +252,6 @@ def generate(
                       source_opts,
                       target_opts,
                       background_tasks)
-            
-            return message_id
     else:
         raise NotAuthorized(msg=f"Invalid permissions")
 
