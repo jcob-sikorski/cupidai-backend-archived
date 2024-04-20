@@ -29,7 +29,7 @@ def get_customer_id(user_id: str) -> Optional[str]:
     return None
 
 # TESTING DONE ✅
-def get_history(solo: bool, user_id: str) -> dict:
+def get_history(user_id: str) -> dict:
     # Fetch customer ID
     customer_id = get_customer_id(user_id)
 
@@ -50,8 +50,7 @@ def get_history(solo: bool, user_id: str) -> dict:
 
         return dict_data
     else:
-        print("User ID not found in StripeAccount collection.")
-        return None
+        raise ValueError("There is no track record of transactions for this user.")
 
 
 # TESTING DONE ✅
@@ -102,9 +101,5 @@ def get_current_plan(user_id: str) -> Optional[Plan]:
                 print("GOT THE PLAN DOC")
                 # If found, return the plan as a Plan object
                 return Plan(**plan_doc)
-            else:
-                # If not found, return None
-                return None
 
-    return None
-
+    raise ValueError("There is no track record of transactions for this user.")

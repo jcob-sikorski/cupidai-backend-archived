@@ -1,10 +1,6 @@
-from fastapi import BackgroundTasks
-
-from typing import Dict, List, Optional
+from fastapi import BackgroundTasks, HTTPException
 
 from error import NotAuthorized
-
-import httpx
 
 import re
 
@@ -192,6 +188,7 @@ def run_photo(source_uri: str,
                               None,
                               user_id)
 
+# TODO: figure out how to fix the "failed" error from the API
 def run_video(source_uri: str,
               target_uri: str,
               source_opts: str,
@@ -250,7 +247,7 @@ def generate(source_uri: str,
         if source_format not in ['jpeg', 'png', 'heic'] or \
            target_format not in ['jpeg', 'png', 'heic']:
 
-            return 500 # TODO we must also raise exceptions
+            raise HTTPException(status_code=400, detail="Invalid source/target format. Valid ones are jpeg, png, heic.")
             
         if modify_video:
             video_id = extract_id_from_uri(modify_video)
@@ -258,7 +255,7 @@ def generate(source_uri: str,
             video_format = get_file_format(video_id)
 
             if video_format not in ['mov', 'mp4', 'quicktime']:
-                return 500 # TODO we must also raise exceptions
+                raise HTTPException(status_code=400, detail="Invalid video format. Valid ones are mov, mp4, quicktime.")
             
             source_opts = run_face_detection(source_uri)
             target_opts = run_face_detection(target_uri)
@@ -281,7 +278,7 @@ def generate(source_uri: str,
                       user.user_id,
                       background_tasks)
     else:
-        raise NotAuthorized(msg=f"Invalid permissions")
+        raise HTTPException(status_code=403, detail="Upgrade your plan to unlock permissions.")
 
 
 def get_history(user: Account) -> None:

@@ -174,7 +174,10 @@ def change_profile_picture(profile_uri: str, user: Account) -> None:
     return data.change_profile_picture(profile_uri, user)
 
 def delete(user: Account) -> None:
-    return data.delete(user)
+    try:
+        data.delete(user)
+    except ValueError:
+        raise HTTPException(status_code=404, detail="No account found with this user ID")
 
 def get_invite(invite_id: str) -> None:
     return data.get_invite(invite_id)

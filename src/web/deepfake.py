@@ -9,8 +9,6 @@ from model.account import Account
 from service import account as account_service
 from service import deepfake as service
 
-import requests
-
 router = APIRouter(prefix="/deepfake")
 
 @router.post("/webhook", status_code=200)

@@ -3,32 +3,16 @@ tree -I 'venv'
 ############################################## IMAGE GENERATION ##############################################
 
 HIGH LEVEL GOALS FOR TODAY:
- - test comfyui for all image formats (png, jpg, heic)
- - test midjourney action, imagine, faceswap
- - add some parameters to make images superior quality time is not key, quality and reliability is for our customers
- - run holistic tests for each endpoint, simplify make each better, figure out what they should all return
- - add http exceptions everuywhere and graceful error handling
- - test akool video + mov, mp4, HEIC
-
-test extensively comfyui endpoint in terms of image formats
-
-midjourney action for testing after buying a plan
-
-run tests for imagine, action midjourney, faceswap
-
-add paramters to facefusion, midjourney, comfyui to make generated images/videos superior quality
-
-figure out what should be returned type of each endpoint + what's the structure of responses for frontend
-
-add extensive print statements in lowercase for each tested endpoint - we must know everything
-
-during testing modify the request fields to be exaclty the fields we need instead of models - these models are confusing
-
-run holistic and detailed tests for every endpoint once again
+- figure out what should be returned type of each endpoint
+- add extensive print statements in lowercase for each tested endpoint - we must know everything
+- during testing modify the request fields to be exaclty the fields we need instead of BaseModel models - these models are confusing
+- run holistic and detailed tests for every endpoint once again
 
 make the switch for production and development variables in code
 
 add logs
+
+test akool video + mov, mp4, HEIC
 
 
 
@@ -36,9 +20,10 @@ host image generation on runpod - use prebuild image from their site during pod 
 
 test midjourney action, imagine, faceswap after buying a plan
 
+add some parameters to make images/videos superior quality time is not key, quality and reliability is for our customers
+
 before frontend integration run holistic and detailed tests for every endpoint once again
 
-educate yourself on how to switch between development and production environment
 
 
 invitation + acceptance

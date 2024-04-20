@@ -1,4 +1,4 @@
-from fastapi import BackgroundTasks
+from fastapi import BackgroundTasks, HTTPException
 
 from typing import Dict, List, Optional
 
@@ -177,8 +177,10 @@ def check_settings(settings: Settings):
     if settings.lora_count and not (1 <= settings.lora_count <= 4):
         return "Error: lora_count must be between 1 and 4"
     
-    # if settings.lora_model and settings.lora_model not in lora_models:
-    #     return f"Error: lora_model must be one of {lora_models}"
+    if settings.lora_models:
+        for model in settings.lora_models:
+            if model not in lora_models:
+                return f"Error: lora_model must be one of lora_models."
 
     if settings.lora_strengths and all(map(lambda x: x <= 10.0, settings.lora_strengths)):
         return "Error: All values in lora_strengths must be greater than 10.0"
@@ -218,7 +220,7 @@ async def generate(settings: Settings, uploadcare_uris: Dict[str, str], user: Ac
     if billing_service.has_permissions('image_generation', user):
         check = check_settings(settings)
         if check is not True:
-            return check
+            raise HTTPException(status_code=400, detail="Invalid workflow settings.")
 
         image_ids = {}
         for key, uri in uploadcare_uris.items():
@@ -240,7 +242,7 @@ async def generate(settings: Settings, uploadcare_uris: Dict[str, str], user: Ac
         print(image_formats.values())
 
         if any(ext and ext not in ['jpeg', 'png', 'heic'] for ext in image_formats.values()):
-            return 500
+            raise HTTPException(status_code=400, detail="Invalid image format. Valid ones are jpeg, png, heic.")
 
         settings_id = save_settings(settings)
 
@@ -250,7 +252,7 @@ async def generate(settings: Settings, uploadcare_uris: Dict[str, str], user: Ac
 
         if workflow_json is None:
             update_message(user.user_id, message_id, "failed")
-            return None
+            raise HTTPException(status_code=500, detail="Error while processing the workflow.")
 
         # Define the URL of the server
         url = "https://native-goat-saved.ngrok-free.app/image-generation/"
@@ -272,7 +274,5 @@ async def generate(settings: Settings, uploadcare_uris: Dict[str, str], user: Ac
         }
 
         background_tasks.add_task(send_post_request, url, headers, payload)
-        
-        return {"message": "POST request sent in the background"}
     else:
-        raise NotAuthorized(msg=f"Invalid permissions")
+        raise HTTPException(status_code=403, detail="Upgrade your plan to unlock permissions.")

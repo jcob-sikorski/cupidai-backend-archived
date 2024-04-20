@@ -9,8 +9,6 @@ def create(social_account: SocialAccount, user_id: str) -> bool:
     social_account['user_id'] = user_id
     result = social_account_col.insert_one(social_account)
 
-    return result.inserted_id is not None
-
 # TESTING DONE ✅
 def update(social_account: SocialAccount, user_id: str) -> bool:
     result = social_account_col.find_one_and_update(
@@ -19,8 +17,6 @@ def update(social_account: SocialAccount, user_id: str) -> bool:
         upsert=True,
         return_document=ReturnDocument.AFTER
     )
-    
-    return result is not None
 
 # TESTING DONE ✅
 def get(user_id: str) -> None:

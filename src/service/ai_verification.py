@@ -54,7 +54,7 @@ async def faceswap(source_uri: str, target_uri: str, user: Account) -> None:
         
         return response_data
     else:
-        raise NotAuthorized(msg=f"Invalid permissions")
+        raise HTTPException(status_code=403, detail="Upgrade your plan to unlock permissions.")
     
 
 def create_prompt_string(prompt: Prompt) -> str:
@@ -97,12 +97,12 @@ async def imagine(prompt: Prompt, user: Account) -> None:
                 history_service.update('ai_verification', user.user_id)
 
             if resp.status_code != 200 or response_data.error:
-                raise HTTPException(status_code=400, detail="Imagine failed")
+                raise HTTPException(status_code=500, detail="Prompt execution failed.")
             
             # Serialize response data using jsonable_encoder
             return jsonable_encoder(response_data)
     else:
-        raise NotAuthorized(msg="Invalid permissions")
+        raise HTTPException(status_code=403, detail="Upgrade your plan to unlock permissions.")
 
 
 def get_history(user: Account) -> List[Message]:
@@ -134,7 +134,7 @@ async def action(message_id: str, button: str, user: Account) -> None:
         
         return response_data
     else:
-        raise NotAuthorized(msg=f"Invalid permissions")
+        raise HTTPException(status_code=403, detail="Upgrade your plan to unlock permissions.")
 
 # TODO: test this when we buy the midjourney plan
 async def cancel_job(message_id: str, user: Account) -> None:
@@ -158,6 +158,6 @@ async def cancel_job(message_id: str, user: Account) -> None:
         response_data = Response.parse_raw(resp.text)
 
     if not response_data.success:
-        raise HTTPException(status_code=400, detail="Action failed")
+        raise HTTPException(status_code=500, detail="Failed to cancel a job.")
         
     return response_data

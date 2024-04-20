@@ -84,8 +84,6 @@ def delete(user: Account) -> None:
     if result.deleted_count == 0:
         raise ValueError("No account found with this user ID")
 
-    return {"message": "Account deleted successfully"}
-
 
 def get_invite(invite_id: str) -> None:
     print("GETTING INVITE DETAILS")

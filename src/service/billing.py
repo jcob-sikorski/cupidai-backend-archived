@@ -88,7 +88,7 @@ async def webhook(item: Item, request: Request):
 
     return {"success": True}
 
-
+# TODO: this does not in any way allows user to donwload a csv in chunks
 def download_history(user: Account):
     # Fetch purchase history from Stripe
     invoices = get_history(solo=True, user_id=user.user_id)
@@ -109,13 +109,14 @@ def download_history(user: Account):
 
         print(f"Purchase history downloaded and saved to {file_name}")
     else:
-        print("No purchase history found.")
+        raise HTTPException(status_code=404, detail="No purchase history found.")
 
 
 def get_history(user: Account) -> None:
-    return data.get_history(user.user_id)
-# def get_history(solo: bool, user: Account) -> None:
-#     return data.get_history(solo, user_id)
+    try:
+        return data.get_history(user.user_id)
+    except ValueError:
+        raise HTTPException(status_code=404, detail="There is no track record of transactions for this user.")
 
 
 def accept_tos(user: Account) -> None:
@@ -123,4 +124,7 @@ def accept_tos(user: Account) -> None:
 
 
 def get_current_plan(user: Account) -> None:
-    return data.get_current_plan(user.user_id)
+    try:
+        return data.get_current_plan(user.user_id)
+    except ValueError:
+        raise HTTPException(status_code=404, detail="There is no track record of transactions for this user.")
