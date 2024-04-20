@@ -10,14 +10,15 @@ from service import deepfake as service
 
 router = APIRouter(prefix="/deepfake")
 
+# TODO: what accepts akool webhook
 @router.post("/a-webhook", status_code=201)
 async def akool_webhook(message: Message) -> None:
     print("AKOOL WEBHOOK ACTIVATED")
     return service.akool_webhook(message)
 
 # Protected endpoint
-@router.post("/generate", status_code=201)  # Generates a new resource
-async def generate(message: Message, 
+@router.post("/generate", status_code=201)
+async def generate_photo(message: Message,
                    user: Annotated[Account, Depends(account_service.get_current_active_user)], 
                    background_tasks: BackgroundTasks) -> None:
     return service.generate(message, user, background_tasks)

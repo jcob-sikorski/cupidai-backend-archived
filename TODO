@@ -2,6 +2,16 @@ tree -I 'venv'
 
 ############################################## IMAGE GENERATION ##############################################
 
+HIGH LEVEL GOALS FOR TODAY:
+ - finish face swap with akool
+ - test comfyui for other formats
+ - test midjourney action, imagine, faceswap
+ - add some parameters to make images superior quality time is not key, quality and reliability is for our customers
+ - run holistic tests for each endpoint, simplify make each better, figure out what they should all return
+ - add http exceptions everuywhere and graceful error handling
+
+figure out how to swap faces in video if we don't have target image - how to get one?
+
 test jpg, png, mov, mp4, HEIC file formats in second api
 
 test extensively comfyui endpoint in terms of image formats
@@ -15,7 +25,6 @@ run tests for imagine, action midjourney, faceswap
 add paramters to facefusion, midjourney, comfyui to make generated images/videos superior quality
 
 figure out what should be returned type of each endpoint + what's the structure of responses for frontend
-
 
 before frontend integration run holistic and detailed tests for every endpoint once again
 

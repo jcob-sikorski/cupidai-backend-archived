@@ -19,6 +19,7 @@ def update_message(user_id: str,
                    status: Optional[str] = None, 
                    source_uri: Optional[str] = None, 
                    target_uri: Optional[str] = None,
+                   modify_video: Optional[str] = None,
                    message_id: Optional[str] = None,
                    s3_uri: Optional[str] = None):
     
@@ -27,6 +28,7 @@ def update_message(user_id: str,
         status=status,
         source_uri=source_uri, 
         target_uri=target_uri,
+        modify_video=modify_video,
         message_id=message_id,
         s3_uri=s3_uri
     )

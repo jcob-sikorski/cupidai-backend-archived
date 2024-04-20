@@ -22,6 +22,17 @@ from model.deepfake import Message
 import service.billing as billing_service
 import service.history as history_service
 
+# TODO: what accepts akool webhook
+def akool_webhook(message: Message) -> None:
+    print(message)
+    update_message(user_id=message.user_id,
+                   message_id=message.message_id,
+                   status=message.status,
+                   s3_uri=message.s3_uri)
+
+    if message.status == 'in progress':
+        history_service.update('image_generation', message.user_id)
+
 def update_message(user_id: str, 
                    status: Optional[str] = None, 
                    source_uri: Optional[str] = None,
@@ -105,10 +116,11 @@ def run_photo(source_uri: str,
     print("ADDING BACKGROUND TASK")
     background_tasks.add_task(send_post_request, url, headers, payload)
 
-def run_video(source_uri: str, 
-              target_uri: str, 
-              source_opts: str, 
-              target_opts: str, 
+def run_video(source_uri: str,
+              target_uri: str,
+              source_opts: str,
+              modify_video: str,
+              target_opts: str,
               background_tasks: BackgroundTasks):
     url = "https://openapi.akool.com/api/open/v3/faceswap/highquality/specifyimage"
 
@@ -121,7 +133,7 @@ def run_video(source_uri: str,
             "path": target_uri,
             "opts": target_opts
         },
-      "modifyVideo": target_uri, # TODO: this should be target video link not target image link
+      "modifyVideo": modify_video,
       "webhookUrl": "https://garfish-cute-typically.ngrok-free.app/deepfake/a-webhook"
     })
     headers = {
@@ -132,6 +144,10 @@ def run_video(source_uri: str,
     print("ADDING BACKGROUND TASK")
     background_tasks.add_task(send_post_request, url, headers, payload)
 
+# TODO: if the uploaded file is a video there must be toggle button
+# if the video is running then there are three areas to drag and drop:
+# first is for source image, second is for target image and third is for video
+
 def generate(
         message: Message, 
         user: Account, 
@@ -141,36 +157,60 @@ def generate(
         source_id = extract_id_from_uri(message.source_uri)
         source_format = get_file_format(source_id)
 
-        if source_format not in ['jpeg', 'png', 'heic']:
-            return 500 # TODO we must also raise exceptions
-
         target_id = extract_id_from_uri(message.target_uri)
         target_format = get_file_format(target_id)
 
-        message_id = update_message(user.user_id,
-                                    "started",
-                                    message.source_uri,
-                                    message.target_uri,
-                                    None,
-                                    None)
-        
-        source_opts = run_face_detection(message.source_uri)
-        target_opts = run_face_detection(message.target_uri)
+        if source_format not in ['jpeg', 'png', 'heic'] or \
+           target_format not in ['jpeg', 'png', 'heic']:
+                
+            return 500 # TODO we must also raise exceptions
+            
+        if message.modify_video:            
+            video_id = extract_id_from_uri(message.modify_video)
+            video_format = get_file_format(video_id)
 
-        if target_format in ['mov', 'mp4']:
+            if video_format not in ['mov', 'mp4']:
+                return 500 # TODO we must also raise exceptions
+
+
+            message_id = update_message(user.user_id,
+                "started",
+                message.source_uri,
+                message.target_uri,
+                message.modify_video,
+                None,
+                None)
+            
+            source_opts = run_face_detection(message.source_uri)
+            target_opts = run_face_detection(message.target_uri)
+        
             run_video(message.source_uri,
                       message.target_uri,
+                      message.modify_video,
                       source_opts,
                       target_opts,
                       background_tasks)
+            
+            return message_id
         else:
+            message_id = update_message(user.user_id,
+                "started",
+                message.source_uri,
+                message.target_uri,
+                None,
+                None,
+                None)
+            
+            source_opts = run_face_detection(message.source_uri)
+            target_opts = run_face_detection(message.target_uri)
+        
             run_photo(message.source_uri,
                       message.target_uri,
                       source_opts,
                       target_opts,
                       background_tasks)
-        
-        return message_id
+            
+            return message_id
     else:
         raise NotAuthorized(msg=f"Invalid permissions")
 
