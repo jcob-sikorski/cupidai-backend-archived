@@ -10,13 +10,9 @@ HIGH LEVEL GOALS FOR TODAY:
  - run holistic tests for each endpoint, simplify make each better, figure out what they should all return
  - add http exceptions everuywhere and graceful error handling
 
-figure out how to swap faces in video if we don't have target image - how to get one?
-
 test jpg, png, mov, mp4, HEIC file formats in second api
 
 test extensively comfyui endpoint in terms of image formats
-
-host image generation on runpod - use prebuild image from their site during pod config then remove it and install from github
 
 midjourney action for testing after buying a plan
 
@@ -26,11 +22,21 @@ add paramters to facefusion, midjourney, comfyui to make generated images/videos
 
 figure out what should be returned type of each endpoint + what's the structure of responses for frontend
 
-before frontend integration run holistic and detailed tests for every endpoint once again
+add extensive print statements in lowercase for each tested endpoint - we must know everything
+
+during testing modify the request fields to be exaclty the fields we need instead of models - these models are confusing
+
+run holistic and detailed tests for every endpoint once again
+
+make the switch for production and development variables in code
 
 add logs
 
-make the switch for production and development variables in code
+
+
+host image generation on runpod - use prebuild image from their site during pod config then remove it and install from github
+
+before frontend integration run holistic and detailed tests for every endpoint once again
 
 educate yourself on how to switch between development and production environment
 

@@ -1,26 +1,46 @@
-from fastapi import APIRouter, Depends, BackgroundTasks
+from fastapi import APIRouter, Depends, BackgroundTasks, HTTPException
+
+from pydantic import BaseModel
 
 from typing import Annotated
 
 from model.account import Account
-from model.deepfake import Message
 
 from service import account as account_service
 from service import deepfake as service
 
+import requests
+
 router = APIRouter(prefix="/deepfake")
 
-@router.post("/webhook", status_code=201)
+@router.post("/webhook", status_code=200)
 async def webhook(response: dict) -> None:
     print("WEBHOOK ACTIVATED")
-    return service.webhook(response)
+    print(response)
+    status_code = service.webhook(response)
+
+    if status_code == 200:
+        return
+    else:
+        raise HTTPException(status_code=400, detail="Invalid signature")
+
+class GenerateRequest(BaseModel):
+    source_uri: str
+    target_uri: str
+    modify_video: str
 
 # Protected endpoint
 @router.post("/generate", status_code=201)
-async def generate_photo(message: Message,
+async def generate(req: GenerateRequest,
                    user: Annotated[Account, Depends(account_service.get_current_active_user)], 
                    background_tasks: BackgroundTasks) -> None:
-    return service.generate(message, user, background_tasks)
+
+    return service.generate(req.source_uri, 
+                            req.target_uri, 
+                            req.modify_video, 
+                            user, 
+                            background_tasks)
+
 
 # TESTING DONE ✅
 # Protected endpoint

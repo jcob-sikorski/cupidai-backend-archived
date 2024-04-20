@@ -6,20 +6,39 @@ from pymongo import ReturnDocument
 from .init import deepfake_col
 
 
-def create(message: Message) -> bool:
+def create_message(user_id: Optional[str] = None,
+           status: Optional[str] = None,
+           source_uri: Optional[str] = None,
+           target_uri: Optional[str] = None,
+           modify_video: Optional[str] = None,
+           job_id: Optional[str] = None,
+           output_url: Optional[str] = None) -> bool:
+    
+    message = Message(
+        user_id=user_id,
+        status=status,
+        source_uri=source_uri, 
+        target_uri=target_uri,
+        modify_video=modify_video,
+        job_id=job_id,
+        output_url=output_url
+    )
+    
     print("ADDING DEEPFAKE MESSAGE TO THE COLLECTION")
     result = deepfake_col.insert_one(message.dict())
     return result.inserted_id is not None
 
 
 
-def update_message(user_id: str, 
+def update_message(user_id: Optional[str] = None, 
                    status: Optional[str] = None, 
                    source_uri: Optional[str] = None, 
                    target_uri: Optional[str] = None,
                    modify_video: Optional[str] = None,
                    job_id: Optional[str] = None,
                    output_url: Optional[str] = None):
+    
+    print("updating message")
     
     message = Message(
         user_id=user_id,
@@ -33,8 +52,10 @@ def update_message(user_id: str,
 
     update_fields = {key: value for key, value in message.dict().items() if value is not None}
 
+    print(f"fields to update: {update_fields}")
+
     if job_id:
-        print("UPDATING MESSAGE (job_id is not null)")
+        print("updating message - job_id is not null")
         deepfake_col.find_one_and_update(
             {"job_id": job_id},
             {"$set": update_fields},
@@ -42,12 +63,12 @@ def update_message(user_id: str,
         )
         # TODO: what should we return when we update the Message?
     else:
-        print("CREATING NEW MESSAGE (message_id is null)")
+        print("creating new message - job_id is null")
         message_id = deepfake_col.insert_one(update_fields)
         message_id = str(message_id.inserted_id)
     
-    return message_id
-
+        print("returning message_id")
+        return message_id
 
 
 def get_history(user_id: str) -> List[Message]:

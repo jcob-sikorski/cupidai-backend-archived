@@ -4,7 +4,7 @@ from typing import Optional, List
 from datetime import datetime
 
 class Message(BaseModel):
-    user_id: str
+    user_id: Optional[str] = None, 
     status: Optional[str] = None
     source_uri: Optional[str] = None
     target_uri: Optional[str] = None
