@@ -36,7 +36,7 @@ async def signup_ref(ref: str) -> None:
 # Protected endpoint
 @router.patch("/email", status_code=200)  # Changes the account's email
 async def change_email(email: str, 
-                       user: Annotated[Account, Depends(service.get_current_active_user)]) -> bool:
+                       user: Annotated[Account, Depends(service.get_current_active_user)]) -> None:
     return service.change_email(email, user) # TODO: we should do authentication of new email
 
 # Protected endpoint

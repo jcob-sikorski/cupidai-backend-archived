@@ -41,7 +41,8 @@ def change_email(email: str, user: Account) -> bool:
         return_document=ReturnDocument.AFTER
     )
 
-    return result is not None
+    if not result:
+        raise ValueError("Failed to change email - user does not exist.")
 
 
 def get_by_username(username: str) -> None:
@@ -72,7 +73,7 @@ def get_by_email(email: str) -> None:
     return None
 
 
-def change_profile_picture(profile_uri: str, user: Account) -> bool:
+def change_profile_picture(profile_uri: str, user: Account) -> None:
     result = account_col.find_one_and_update(
         {"user_id": user.user.user_id},
         {"$set": {"profile_uri": profile_uri}},
@@ -80,7 +81,8 @@ def change_profile_picture(profile_uri: str, user: Account) -> bool:
         return_document=ReturnDocument.AFTER
     )
 
-    return result is not None
+    if not result:
+        raise ValueError("Failed to change profile picture - user does not exist.")
 
 def delete(user: Account) -> None:
     # Find and delete the account with the given user_id
@@ -91,14 +93,14 @@ def delete(user: Account) -> None:
         raise ValueError("No account found with this user ID")
 
 
-def get_invite(invite_id: str) -> None:
-    print("GETTING INVITE DETAILS")
-    result = invite_col.find_one({"_id": invite_id})
+# def get_invite(invite_id: str) -> None:
+#     print("GETTING INVITE DETAILS")
+#     result = invite_col.find_one({"_id": invite_id})
 
-    if result is not None:
-        invite = Invite(**result)
-        return invite
-    return None
+#     if result is not None:
+#         invite = Invite(**result)
+#         return invite
+#     return None
 
 def create_password_reset(password_reset: PasswordReset):
     result = password_reset_col.insert_one(password_reset.dict())

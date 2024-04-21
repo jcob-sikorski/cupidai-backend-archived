@@ -162,8 +162,11 @@ def reset_password(email: str) -> None:
 
     email_service.send(email, 'clv2h2bt800bm1147nw7gtngv', password_reset_link=password_reset_link)
 
-def change_email(email: str, user: Account) -> bool:
-    return data.change_email(email, user)
+def change_email(email: str, user: Account) -> None:
+    try:
+        data.change_email(email, user)
+    except ValueError:
+        raise HTTPException(status_code=404, detail="Failed to change email - user does not exist.")
 
 def get_by_id(user_id: str) -> None:
     return data.get_by_id(user_id)
@@ -174,8 +177,10 @@ def get_by_email(email: str) -> None:
     return data.get_by_email(email)
 
 def change_profile_picture(profile_uri: str, user: Account) -> None:
-    if not data.change_profile_picture(profile_uri, user):
-        raise HTTPException(status_code=400, detail="Failed to change profile picture.")
+    try:
+        data.change_profile_picture(profile_uri, user)
+    except ValueError:
+        raise HTTPException(status_code=400, detail="Failed to change profile picture - user does not exist.")
 
 def delete(user: Account) -> None:
     try:
@@ -183,5 +188,5 @@ def delete(user: Account) -> None:
     except ValueError:
         raise HTTPException(status_code=404, detail="No account found with this user ID")
 
-def get_invite(invite_id: str) -> None:
-    return data.get_invite(invite_id)
+# def get_invite(invite_id: str) -> None:
+#     return data.get_invite(invite_id)

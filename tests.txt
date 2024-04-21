@@ -1,5 +1,83 @@
 planning thorough tests
 
+ACCOUNT
+
+- signing up and receving valid access Token
+- getting welcome email on successful signup
+- logging in with a valid token
+- logging in with invalid token
+- asking to reset password and receving email with resest password id
+- resetting password for existing user with a password id
+- resetting password for existing user with expired password id link
+- resetting password for user that does not exist
+- changing email
+- getting user account
+- changing profile picture
+- deleting existing user account
+- deleting non-existent user account
+
+
+MIDJOURNEY
+
+tests:
+- doing faceswap on uploaded on source and target images from uploadcare ✅
+- receiving event on webhook and updating prompt history
+- doing imagine with valid custom settings
+- doing imagine with invalid custom settings
+- getting history of midjourney prompts
+- using all the buttons to make action on the image
+- using non-existent button to make action on the image
+- cancelling job which does not run (existed or never existed)
+- cancelling job while it's doing
+
+Note: before running any tests buy a plan to do this
+
+
+BILLING
+
+tests:
+- receiving event if user bought/upgraded/downgraded/cancelled a plan
+  and updating the information in the database
+- updating statistics of a user who made referral when someone bought using his link
+- sending email to user when someone bought using his link
+- checking if user paid thanks to the referral
+- downloading invoice history in a well formatted csv file
+- getting billing history in a well formatted csv file
+- accepting tos by a user and saving the date he accepted it
+- getting the plan of the user who bought
+- getting the plan of the user who upgraded
+- getting the plan of the user who downgraded
+- getting the plan of the user who cancelled
+- handling the error when user does not have permissions
+
+Note: figure out stripe cli and test all the plans + add features for each plan
+
+
+BUG REPORTS
+
+tests:
+- reporting a bug with a description, user_id and a date
+
+
+DEEPFAKE WITH AKOOL
+
+tests:
+- generating a deepfake for source and target photos of a single face
+- generating a deepfake for source and target photos of multiple faces
+- generating a deepfake for source, target photos of single face and modify_video
+- generating a deepfake for source, target photos of multiple faces and modify_video
+- getting history of all runs: successful, failed and in progress
+
+
+HISTORY
+
+tests:
+- getting history of usage for existing user
+- getting history for user who never used anything yet
+- updating history for all the options
+
+
+
 COMFYUI
 
 tests:
@@ -12,25 +90,28 @@ tests:
 - generating images based on the workflow ✅
 - removing images ✅
 
-Note: tested all components
+Note: before running any tests preinstall all the models and 
+      then test 5-6 different workflows
 
 
-MIDJOURNEY/FACEFUSION
-
-tests:
-- doing faceswap on uplaoded images to uploadcare ✅
-- doing imagine with custom settings
-- performing various actions on the image
-- cancelling job while it's doing
-
-Note: before running any tests buy a plan to do this
-
-
-BILLING
+REFERRALS
 
 tests:
-- checking if user paid thanks to the referral
-- downloading invoice history in a well formatted csv file
+- generating valid link
+- removing exisiting link
+- removing non-exisiting link
+- requesting a payout
+- getting unpaid earnings
+- getting statistics
+- getting payout history
+- tracking number of signups thanks to the referral
+- updating user's earnings when someone paid
+
+
+SOCIAL ACCOUNT
+- creating social account
+- updating social account
+- getting social accounts for the user
 
 
 EMAIL
@@ -38,15 +119,4 @@ EMAIL
 tests:
 - receiving correct email on the specific event
 
-
-REFERRALS
-
-tests:
-- generating valid link
-- removing a link
-- requesting a payout
-- getting unpaid earnings
-- getting statistics
-- getting payout history
-- tracking number of signups thanks to the referral
-- updating user's earnings when someone paid
+Note: check receving each email on each event in your inbox + finish email configuration

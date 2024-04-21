@@ -29,7 +29,7 @@ async def faceswap(source_uri: str, target_uri: str, user: Account) -> None:
         data = {
             "source": source_uri,
             "target": target_uri,
-            "ref": user_id,
+            "ref": user.user_id,
             "webhookOverride": "https://garfish-cute-typically.ngrok-free.app/midjourney/webhook"
         }
 
