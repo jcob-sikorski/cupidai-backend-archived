@@ -127,7 +127,7 @@ def set_new_password(password_hash: str, user_id: str) -> None:
         upsert=True,
         return_document=ReturnDocument.AFTER
     )
-    print(result)
+
     return result is not None
 
 def disable_password_reset(reset_id: str) -> bool:
@@ -138,5 +138,5 @@ def disable_password_reset(reset_id: str) -> bool:
         upsert=True,
         return_document=ReturnDocument.AFTER
     )
-    print(result)
+
     return result is not None

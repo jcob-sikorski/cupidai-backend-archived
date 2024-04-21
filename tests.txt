@@ -58,7 +58,7 @@ Note: figure out stripe cli and test all the plans + add features for each plan
 BUG REPORTS
 
 tests:
-- reporting a bug with a description, user_id and a date
+- reporting a bug with a description, user_id and a date ✅ 1.
 
 
 DEEPFAKE WITH AKOOL

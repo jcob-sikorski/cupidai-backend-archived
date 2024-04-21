@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException
 
 from typing import Annotated
 
@@ -12,6 +12,10 @@ router = APIRouter(prefix="/bug")
 # TESTING DONE ✅
 
 @router.post("/", status_code=201)  # Creates a bug report
-async def create(description: str, 
+async def create(description: dict, 
                  user: Annotated[Account, Depends(account_service.get_current_active_user)]) -> None:
+    description = description.get("description")
+    if not description:
+        raise HTTPException(status_code=400, detail="Description field is required")
+
     return service.create(description, user)
