@@ -111,9 +111,9 @@ tests:
 
 
 SOCIAL ACCOUNT
-- creating social account
-- updating social account
-- getting social accounts for the user
+- creating social account ✅ 1.
+- updating social account ✅ 1.
+- getting social accounts for the user ✅ 1.
 
 
 EMAIL

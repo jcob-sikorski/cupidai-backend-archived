@@ -1,8 +1,9 @@
 from pydantic import BaseModel
 
 class SocialAccount(BaseModel):
-    profile_uri: str
-    name: str
-    platform: str
-    note: str
-    user_id: str
+    account_id: str | None = None
+    profile_uri: str | None = None
+    name: str | None = None
+    platform: str | None = None
+    note: str | None = None
+    user_id: str | None = None
