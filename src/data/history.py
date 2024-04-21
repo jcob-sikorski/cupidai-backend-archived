@@ -7,10 +7,10 @@ from pymongo import ReturnDocument
 from .init import history_col
 
 domain_to_index = {
-    "image_generation": "images_generated" ,
-    "deepfake": "deepfakes_generated" ,
-    "ai_verification": "ai_verification_generated" ,
-    "content_utilities": "content_utilities_uses" ,
+    "image_generation": "images_generated",
+    "deepfake": "deepfakes_generated",
+    "ai_verification": "ai_verification_generated",
+    "content_utilities": "content_utilities_uses",
     "referral": "people_referred" 
 }
 
@@ -40,7 +40,7 @@ def update(domain: str, user_id: str) -> None:
 
 
 # TESTING DONE ✅
-def get(user_id: str) -> Optional[History]:
+def get(user_id: str) -> History:
     # team = team_service.get_team(user_id)
 
     # if team and user_id in team.members:
@@ -52,4 +52,9 @@ def get(user_id: str) -> Optional[History]:
     if result is not None:
         return History(**result)
     else:
-        raise ValueError("Failed to find usage history.")
+        return History(user_id=user_id,
+                       images_generated=0,
+                       deepfakes_generated=0,
+                       ai_verification_generated=0,
+                       content_utilities_uses=0,
+                       people_referred=0)

@@ -74,9 +74,9 @@ tests:
 HISTORY
 
 tests:
-- getting history of usage for existing user
-- getting history for user who never used anything yet
-- updating history for all the options
+- getting history of usage for existing user ✅ 1.
+- getting history for a user who never used anything yet ✅ 1.
+- updating history for all the options ✅ 1.
 
 
 

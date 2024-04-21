@@ -16,4 +16,4 @@ router = APIRouter(prefix="/history")
 
 @router.get("/", status_code=200)  # Retrieves account details
 async def get(user: Annotated[Account, Depends(account_service.get_current_active_user)]) -> None:
-    return data.get(user)
+    return data.get(user.user_id)
