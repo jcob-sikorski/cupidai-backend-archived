@@ -15,12 +15,10 @@ router = APIRouter(prefix="/deepfake")
 async def webhook(response: dict) -> None:
     print("WEBHOOK ACTIVATED")
     print(response)
-    status_code = service.webhook(response)
-
-    if status_code == 200:
-        return
-    else:
-        raise HTTPException(status_code=400, detail="Invalid signature")
+    try:
+        service.webhook(response)
+    except ValueError:
+        raise HTTPException(status_code=400, detail="Invalid signature.")
 
 class GenerateRequest(BaseModel):
     source_uri: str

@@ -7,8 +7,9 @@ HIGH LEVEL GOALS FOR TODAY:
 - add extensive print statements in lowercase for each tested endpoint - we must know everything
 - during testing modify the request fields to be exaclty the fields we need instead of BaseModel models - these models are confusing
 - run holistic and detailed tests for every endpoint once again
+- make the switch for production and development variables in code
 
-make the switch for production and development variables in code
+
 
 add logs
 

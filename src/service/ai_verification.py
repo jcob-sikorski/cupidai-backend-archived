@@ -8,8 +8,6 @@ import httpx
 
 from typing import List
 
-from error import NotAuthorized
-
 from model.account import Account
 from model.ai_verification import Prompt
 from model.midjourney import Message, Response
@@ -99,8 +97,8 @@ async def imagine(prompt: Prompt, user: Account) -> None:
             if resp.status_code != 200 or response_data.error:
                 raise HTTPException(status_code=500, detail="Prompt execution failed.")
             
-            # Serialize response data using jsonable_encoder
-            return jsonable_encoder(response_data)
+            # # Serialize response data using jsonable_encoder
+            # return jsonable_encoder(response_data)
     else:
         raise HTTPException(status_code=403, detail="Upgrade your plan to unlock permissions.")
 
@@ -159,5 +157,3 @@ async def cancel_job(message_id: str, user: Account) -> None:
 
     if not response_data.success:
         raise HTTPException(status_code=500, detail="Failed to cancel a job.")
-        
-    return response_data

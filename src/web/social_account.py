@@ -13,13 +13,15 @@ router = APIRouter(prefix="/social-account")
 # TESTING DONE ✅
 # Protected endpoint
 @router.post("/", status_code=201)  # Creates a new social account
-async def create(social_account: SocialAccount, user: Annotated[Account, Depends(account_service.get_current_active_user)]) -> bool:
+async def create(social_account: SocialAccount, 
+                 user: Annotated[Account, Depends(account_service.get_current_active_user)]) -> bool:
     return service.create(social_account, user)
 
 # TESTING DONE ✅
 # Protected endpoint
 @router.patch("/{account_id}", status_code=200)  # Updates social account information
-async def update(social_account: SocialAccount, user: Annotated[Account, Depends(account_service.get_current_active_user)]) -> None:
+async def update(social_account: SocialAccount, 
+                 user: Annotated[Account, Depends(account_service.get_current_active_user)]) -> None:
     return service.update(social_account, user)
 
 # TESTING DONE ✅

@@ -1,5 +1,5 @@
 from datetime import datetime, timedelta, timezone
-from typing import Annotated
+from typing import Annotated, Optional
 
 from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
@@ -38,19 +38,20 @@ def get_password_hash(password: str):
     return password_hash
 
 
-def authenticate_user(username: str, password: str):
+# TODO: check for None instead of False
+def authenticate_user(username: str, password: str) -> Optional[Account]:
     user = data.get_by_username(username)
 
     if not user:
-        return False
+        return None
     
     if not verify_password(password, user.password_hash):
-        return False
+        return None
     
     return user
 
 
-def create_access_token(data: dict, expires_delta: timedelta | None = None):
+def create_access_token(data: dict, expires_delta: timedelta | None = None) -> str:
     to_encode = data.copy()
 
     if expires_delta:
@@ -131,8 +132,10 @@ def reset_password_request(password_reset_id: str, password: str) -> None:
     expiry_time = password_reset.created_at + timedelta(minutes=10)
 
     if password_reset and password_reset.disabled == False and now <= expiry_time:
-        if data.set_new_password(get_password_hash(password), password_reset.user_id):
-            data.disable_password_reset(password_reset)
+        if data.set_new_password(get_password_hash(password), password_reset.user_id) \
+        or not data.disable_password_reset(password_reset):
+            raise HTTPException(status_code=400, detail="Failed to reset password.")
+                
 
 def reset_password(email: str) -> None:
     user = get_by_email(email)
@@ -159,7 +162,7 @@ def reset_password(email: str) -> None:
 
     email_service.send(email, 'clv2h2bt800bm1147nw7gtngv', password_reset_link=password_reset_link)
 
-def change_email(email: str, user: Account) -> None:
+def change_email(email: str, user: Account) -> bool:
     return data.change_email(email, user)
 
 def get_by_id(user_id: str) -> None:
@@ -171,7 +174,8 @@ def get_by_email(email: str) -> None:
     return data.get_by_email(email)
 
 def change_profile_picture(profile_uri: str, user: Account) -> None:
-    return data.change_profile_picture(profile_uri, user)
+    if not data.change_profile_picture(profile_uri, user):
+        raise HTTPException(status_code=400, detail="Failed to change profile picture.")
 
 def delete(user: Account) -> None:
     try:

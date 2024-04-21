@@ -12,5 +12,6 @@ router = APIRouter(prefix="/bug")
 # TESTING DONE ✅
 # Protected endpoint
 @router.post("/", status_code=201)  # Creates a bug report
-async def create(description: str, user: Annotated[Account, Depends(account_service.get_current_active_user)]) -> None:
+async def create(description: str, 
+                 user: Annotated[Account, Depends(account_service.get_current_active_user)]) -> None:
     return service.create(description, user)

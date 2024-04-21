@@ -1,7 +1,5 @@
 from fastapi import BackgroundTasks, HTTPException
 
-from error import NotAuthorized
-
 import re
 
 import json
@@ -24,7 +22,10 @@ import service.billing as billing_service
 import service.history as history_service
 
 # Generate signature
-def generate_msg_signature(client_id, timestamp, nonce, msg_encrypt):
+def generate_msg_signature(client_id, 
+                           timestamp, 
+                           nonce, 
+                           msg_encrypt):
     sorted_str = ''.join(sorted([client_id, str(timestamp), str(nonce), msg_encrypt]))
 
     hash_obj = hashlib.sha1(sorted_str.encode())
@@ -32,7 +33,9 @@ def generate_msg_signature(client_id, timestamp, nonce, msg_encrypt):
     return hash_obj.hexdigest()
 
 # Decryption algorithm
-def generate_aes_decrypt(data_encrypt, client_id, client_secret):
+def generate_aes_decrypt(data_encrypt, 
+                         client_id, 
+                         client_secret) -> dict:
     aes_key = client_secret.encode()
 
     # Ensure IV is 16 bytes long
@@ -79,9 +82,8 @@ def webhook(response: dict) -> None:
         data.update_message(job_id=job_id,
                             status=status_msg)
 
-        return 200
     else:
-        return 400
+        raise ValueError("Invalid signature.")
 
 def send_post_request(url: str, 
                       headers: dict, 
@@ -99,7 +101,7 @@ def send_post_request(url: str,
     code = response_data.get("code")
 
     if code != 1000:
-        return 500
+        raise ValueError("There was an error in a post request.")
 
     response_data = response_data.get("data", {})
 

@@ -12,7 +12,7 @@ def create_message(user_id: Optional[str] = None,
            target_uri: Optional[str] = None,
            modify_video: Optional[str] = None,
            job_id: Optional[str] = None,
-           output_url: Optional[str] = None) -> bool:
+           output_url: Optional[str] = None) -> None:
     
     message = Message(
         user_id=user_id,
@@ -26,7 +26,8 @@ def create_message(user_id: Optional[str] = None,
     
     print("ADDING DEEPFAKE MESSAGE TO THE COLLECTION")
     result = deepfake_col.insert_one(message.dict())
-    return result.inserted_id is not None
+    if not result.inserted_id:
+        raise ValueError("Failed to create message.")
 
 
 
@@ -36,7 +37,7 @@ def update_message(user_id: Optional[str] = None,
                    target_uri: Optional[str] = None,
                    modify_video: Optional[str] = None,
                    job_id: Optional[str] = None,
-                   output_url: Optional[str] = None):
+                   output_url: Optional[str] = None) -> Optional[str]:
     
     print("updating message")
     

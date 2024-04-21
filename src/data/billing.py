@@ -69,7 +69,8 @@ def accept_tos(user_id: str) -> None:
 
     result = tos_col.insert_one(tos.dict())
 
-    return result.inserted_id is not None
+    if not result.inserted_id:
+        raise ValueError("Failed to accept Terms of Conditions.")
 
 # TESTING DONE ✅
 def get_current_plan(user_id: str) -> Optional[Plan]:

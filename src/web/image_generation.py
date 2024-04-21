@@ -17,5 +17,8 @@ async def webhook(message: Message) -> None:
     return service.webhook(message)
 
 @router.post("/", status_code=201)
-async def generate(settings: Settings, uploadcare_uris: Dict[str, str], user: Annotated[Account, Depends(account_service.get_current_active_user)], background_tasks: BackgroundTasks) -> None:
+async def generate(settings: Settings, 
+                   uploadcare_uris: Dict[str, str], 
+                   user: Annotated[Account, Depends(account_service.get_current_active_user)], 
+                   background_tasks: BackgroundTasks) -> None:
     return await service.generate(settings, uploadcare_uris, user, background_tasks)

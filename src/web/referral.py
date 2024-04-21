@@ -18,7 +18,8 @@ async def generate_link(user: Annotated[Account, Depends(account_service.get_cur
 
 # Protected endpoint
 @router.post("/payout/request", status_code=201)  # Requests a payout
-async def request_payout(payout_request: PayoutRequest, _: Annotated[Account, Depends(account_service.get_current_active_user)]) -> None:
+async def request_payout(payout_request: PayoutRequest, 
+                         _: Annotated[Account, Depends(account_service.get_current_active_user)]) -> None:
     return service.request_payout(payout_request)
 
 # Protected endpoint

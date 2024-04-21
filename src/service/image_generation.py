@@ -8,8 +8,6 @@ from pyuploadcare import Uploadcare
 
 import requests
 
-from error import NotAuthorized
-
 from comfyui.ModelInterface import generate_workflow
 
 import data.image_generation as data

@@ -1,5 +1,7 @@
 from bson.objectid import ObjectId
 
+from typing import Optional
+
 from model.account import Account, Invite, PasswordReset
 
 from pymongo import ReturnDocument
@@ -31,13 +33,15 @@ def create_invite(invite: Invite):
     result = invite_col.insert_one(invite.dict())
 
 
-def change_email(email: str, user: Account) -> None:
+def change_email(email: str, user: Account) -> bool:
     result = account_col.find_one_and_update(
         {"user_id": user.user_id},
         {"$set": {"email": email}},
         upsert=True,
         return_document=ReturnDocument.AFTER
     )
+
+    return result is not None
 
 
 def get_by_username(username: str) -> None:
@@ -49,7 +53,7 @@ def get_by_username(username: str) -> None:
         return account
     return None
 
-def get_by_id(user_id: str) -> None:
+def get_by_id(user_id: str) -> Optional[Account]:
     print("GETTING USER DETAILS BY USER_ID")
     result = account_col.find_one({"user_id": user_id})
 
@@ -68,13 +72,15 @@ def get_by_email(email: str) -> None:
     return None
 
 
-def change_profile_picture(profile_uri: str, user: Account) -> None:
+def change_profile_picture(profile_uri: str, user: Account) -> bool:
     result = account_col.find_one_and_update(
         {"user_id": user.user.user_id},
         {"$set": {"profile_uri": profile_uri}},
         upsert=True,
         return_document=ReturnDocument.AFTER
     )
+
+    return result is not None
 
 def delete(user: Account) -> None:
     # Find and delete the account with the given user_id
@@ -124,7 +130,7 @@ def set_new_password(password_hash: str, user_id: str) -> None:
         return True
     return False
 
-def disable_password_reset(user_id: str) -> None:
+def disable_password_reset(user_id: str) -> bool:
     print("GETTING PASSWORD RESET DETAILS")
     result = account_col.find_one_and_update(
         {"user_id": user_id},

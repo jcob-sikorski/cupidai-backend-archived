@@ -1,5 +1,7 @@
 from fastapi import Request, HTTPException
 
+from typing import Optional
+
 import csv
 
 import stripe
@@ -7,7 +9,7 @@ import stripe
 import data.billing as data
 
 from model.account import Account
-from model.billing import Item, StripeAccount
+from model.billing import Item, StripeAccount, Plan
 
 import service.account as account_service
 import service.email as email_service
@@ -28,7 +30,7 @@ def has_permissions(feature: str, user: Account) -> bool:
     # return data.has_permissions(feature, user.user_id)
     return True
 
-async def webhook(item: Item, request: Request):
+async def webhook(item: Item, request: Request) -> None:
     event = None
     payload = await request.body()
     sig_header = request.headers.get('stripe-signature')
@@ -86,10 +88,8 @@ async def webhook(item: Item, request: Request):
     else:
         print('Unhandled event type {}'.format(event['type']))
 
-    return {"success": True}
-
 # TODO: this does not in any way allows user to donwload a csv in chunks
-def download_history(user: Account):
+def download_history(user: Account) -> None:
     # Fetch purchase history from Stripe
     invoices = get_history(solo=True, user_id=user.user_id)
 
@@ -112,7 +112,7 @@ def download_history(user: Account):
         raise HTTPException(status_code=404, detail="No purchase history found.")
 
 
-def get_history(user: Account) -> None:
+def get_history(user: Account) -> dict:
     try:
         return data.get_history(user.user_id)
     except ValueError:
@@ -120,10 +120,13 @@ def get_history(user: Account) -> None:
 
 
 def accept_tos(user: Account) -> None:
-    return data.accept_tos(user.user_id)
+    try:
+        data.accept_tos(user.user_id)
+    except ValueError:
+        raise HTTPException(status_code=400, detail="Failed to accept Terms of Conditions.")
 
 
-def get_current_plan(user: Account) -> None:
+def get_current_plan(user: Account) -> Optional[Plan]:
     try:
         return data.get_current_plan(user.user_id)
     except ValueError:
