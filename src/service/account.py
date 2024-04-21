@@ -20,12 +20,13 @@ import uuid
 # TODO: this should probably stored in env vars just like all other tokens
 SECRET_KEY = "09d25e094faa6ca2556c818166b7a9563b93f7099f6f0f4caa6cf63b88e8d3e7"
 ALGORITHM = "HS256"
-ACCESS_TOKEN_EXPIRE_MINUTES = 100000000
+ACCESS_TOKEN_EXPIRE_MINUTES = 30
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
 
-def verify_password(plain_password: str, password_hash: str):
+def verify_password(plain_password: str, 
+                    password_hash: str):
     password_byte_enc = plain_password.encode('utf-8')
     password_hash_bytes = password_hash.encode('utf-8')
     return bcrypt.checkpw(password = password_byte_enc, hashed_password = password_hash_bytes)
@@ -39,7 +40,8 @@ def get_password_hash(password: str):
 
 
 # TODO: check for None instead of False
-def authenticate_user(username: str, password: str) -> Optional[Account]:
+def authenticate_user(username: str, 
+                      password: str) -> Optional[Account]:
     user = data.get_by_username(username)
 
     if not user:
@@ -51,7 +53,8 @@ def authenticate_user(username: str, password: str) -> Optional[Account]:
     return user
 
 
-def create_access_token(data: dict, expires_delta: timedelta | None = None) -> str:
+def create_access_token(data: dict, 
+                        expires_delta: timedelta | None = None) -> str:
     to_encode = data.copy()
 
     if expires_delta:
@@ -116,25 +119,38 @@ async def login(form_data: OAuth2PasswordRequestForm) -> Token:
 
     return Token(access_token=access_token, token_type="bearer")
 
+def signup(email: str, 
+           form_data: OAuth2PasswordRequestForm) -> None:
+    if not email:
+        raise HTTPException(status_code=400, detail="Email cannot be empty")
 
-def signup(form_data: OAuth2PasswordRequestForm) -> None:
-    data.signup(form_data.username, get_password_hash(form_data.password))
-    
+    try:
+        data.signup(email, form_data.username, get_password_hash(form_data.password))
+    except ValueError:
+        raise HTTPException(status_code=404, detail="User already exists.")
+
+    email_service.send(email, "clv9so1fa029b8k9nig3go17m", username=form_data.username)
+
     return login(form_data)
 
 def signup_ref(ref: str) -> None:
     return data.signup_ref(ref)
 
-def reset_password_request(password_reset_id: str, password: str) -> None:
+def reset_password_request(password_reset_id: str, 
+                           password: str) -> None:
     password_reset = data.get_password_reset(password_reset_id)
     
-    now = datetime.now()
-    expiry_time = password_reset.created_at + timedelta(minutes=10)
+    if password_reset:
+        now = datetime.now()
+        expiry_time = password_reset.created_at + timedelta(minutes=10)
 
-    if password_reset and password_reset.disabled == False and now <= expiry_time:
-        if data.set_new_password(get_password_hash(password), password_reset.user_id) \
-        or not data.disable_password_reset(password_reset):
-            raise HTTPException(status_code=400, detail="Failed to reset password.")
+        if password_reset.is_used == False and now <= expiry_time:
+            if data.set_new_password(get_password_hash(password), password_reset.user_id) \
+                and data.disable_password_reset(password_reset_id):
+
+                return
+    raise HTTPException(status_code=400, detail="Failed to reset password.")
+    
                 
 
 def reset_password(email: str) -> None:
@@ -144,8 +160,9 @@ def reset_password(email: str) -> None:
 
     password_reset_id = str(uuid.uuid4())
 
-    # TODO for dev purposes use ngrok domain
-    password_reset_link = f"https://cupidai.tech/account/new-password/{password_reset_id}"
+    # TODO: this should be a link to the UI with the password reset ID -
+    #       the UI should send this request when user types new password
+    password_reset_link = f"https://garfish-cute-typically.ngrok-free.app/reset-password-request/{password_reset_id}"
 
     now = datetime.now()
 
@@ -155,14 +172,15 @@ def reset_password(email: str) -> None:
         email=email,
         reset_link=password_reset_link,
         is_used=False,
-        created_at=now.strftime("%Y-%m-%d %H:%M:%S")
+        created_at=now
     )
 
     data.create_password_reset(password_reset)
 
     email_service.send(email, 'clv2h2bt800bm1147nw7gtngv', password_reset_link=password_reset_link)
 
-def change_email(email: str, user: Account) -> None:
+def change_email(email: str, 
+                 user: Account) -> None:
     try:
         data.change_email(email, user)
     except ValueError:
@@ -176,7 +194,8 @@ def get_by_id(user_id: str) -> None:
 def get_by_email(email: str) -> None:
     return data.get_by_email(email)
 
-def change_profile_picture(profile_uri: str, user: Account) -> None:
+def change_profile_picture(profile_uri: str, 
+                           user: Account) -> None:
     try:
         data.change_profile_picture(profile_uri, user)
     except ValueError:

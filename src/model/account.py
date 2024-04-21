@@ -1,5 +1,7 @@
 from pydantic import BaseModel
 
+from datetime import datetime
+
 class Account(BaseModel):
     user_id: str
     username: str
@@ -31,4 +33,4 @@ class PasswordReset(BaseModel):
     email: str | None = None
     reset_link: str | None = None
     is_used: bool | None = None
-    created_at: str | None = None
+    created_at: datetime | None = None

@@ -1,26 +1,28 @@
 planning thorough tests
 
+Note: for each cycle of tests place a number of a cycle
+
 ACCOUNT
 
-- signing up and receving valid access Token
-- getting welcome email on successful signup
-- logging in with a valid token
-- logging in with invalid token
-- asking to reset password and receving email with resest password id
-- resetting password for existing user with a password id
-- resetting password for existing user with expired password id link
-- resetting password for user that does not exist
-- changing email
-- getting user account
-- changing profile picture
-- deleting existing user account
-- deleting non-existent user account
+- signing up and receving valid access Token ✅ 1.
+- getting welcome email on successful signup ✅ 1.
+- logging in with a valid token ✅ 1.
+- logging in with invalid password ✅ 1.
+- asking to reset password and receving email with reset password id ✅ 1.
+- resetting password for existing user with a password id ✅ 1.
+- resetting password for existing user with expired password id link ✅ 1.
+- resetting password for user that does not exist ✅ 1.
+- changing email ✅ 1.
+- getting user account ✅ 1.
+- changing profile picture ✅ 1.
+- deleting existing user account ✅ 1.
+- deleting non-existent user account ✅ 1.
 
 
 MIDJOURNEY
 
 tests:
-- doing faceswap on uploaded on source and target images from uploadcare ✅
+- doing faceswap on uploaded on source and target images from uploadcare ✅ 0.
 - receiving event on webhook and updating prompt history
 - doing imagine with valid custom settings
 - doing imagine with invalid custom settings
@@ -81,14 +83,14 @@ tests:
 COMFYUI
 
 tests:
-- getting all params from request ✅
-- sending webhook acknowledgement ✅
-- webhook ack received ✅
-- updating status of the message ✅
-- downloading and saving images from uploadcare uris ✅
-- parsing the generated workflow ✅
-- generating images based on the workflow ✅
-- removing images ✅
+- getting all params from request ✅ 0.
+- sending webhook acknowledgement ✅ 0.
+- webhook ack received ✅ 0.
+- updating status of the message ✅ 0.
+- downloading and saving images from uploadcare uris ✅ 0.
+- parsing the generated workflow ✅ 0.
+- generating images based on the workflow ✅ 0.
+- removing images ✅ 0.
 
 Note: before running any tests preinstall all the models and 
       then test 5-6 different workflows

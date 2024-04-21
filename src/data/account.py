@@ -7,7 +7,7 @@ from model.account import Account, Invite, PasswordReset
 from pymongo import ReturnDocument
 from .init import account_col, invite_col, password_reset_col
 
-def signup(username: str, password_hash: str) -> None:
+def signup(email: str, username: str, password_hash: str) -> None:
     # Check if account with the given user_id already exists
     existing_account = account_col.find_one({"username": username})
     if existing_account:
@@ -15,7 +15,7 @@ def signup(username: str, password_hash: str) -> None:
         raise ValueError("Account already exists for this user ID")
 
     # Create a new account
-    account = Account(user_id=str(ObjectId()), username=username, password_hash=password_hash)
+    account = Account(user_id=str(ObjectId()), email=email, username=username, password_hash=password_hash)
     account_col.insert_one(account.dict())
 
     # Optionally, return the newly created account
@@ -75,7 +75,7 @@ def get_by_email(email: str) -> None:
 
 def change_profile_picture(profile_uri: str, user: Account) -> None:
     result = account_col.find_one_and_update(
-        {"user_id": user.user.user_id},
+        {"user_id": user.user_id},
         {"$set": {"profile_uri": profile_uri}},
         upsert=True,
         return_document=ReturnDocument.AFTER
@@ -107,7 +107,7 @@ def create_password_reset(password_reset: PasswordReset):
 
 def get_password_reset(password_reset_id: str) -> None:
     print("GETTING PASSWORD RESET DETAILS")
-    result = password_reset_col.find_one({"_id": password_reset_id})
+    result = password_reset_col.find_one({"reset_id": password_reset_id})
 
     if result is not None:
         password_reset = PasswordReset(**result)
@@ -120,27 +120,23 @@ def get_password_reset(password_reset_id: str) -> None:
 # TODO: we should not always make upserts because it's unsafe like in this case
 #       updates only should suffice
 def set_new_password(password_hash: str, user_id: str) -> None:
-    print("GETTING PASSWORD RESET DETAILS")
+    print("SETTING NEW PASSWORD")
     result = account_col.find_one_and_update(
         {"user_id": user_id},
         {"$set": {"password_hash": password_hash}},
         upsert=True,
         return_document=ReturnDocument.AFTER
     )
+    print(result)
+    return result is not None
 
-    if result is not None:
-        return True
-    return False
-
-def disable_password_reset(user_id: str) -> bool:
-    print("GETTING PASSWORD RESET DETAILS")
-    result = account_col.find_one_and_update(
-        {"user_id": user_id},
-        {"$set": {"disabled": True}},
+def disable_password_reset(reset_id: str) -> bool:
+    print("MARKING THE PASSWORD RESET AS USED")
+    result = password_reset_col.find_one_and_update(
+        {"reset_id": reset_id},
+        {"$set": {"is_used": True}},
         upsert=True,
         return_document=ReturnDocument.AFTER
     )
-
-    if result is not None:
-        return True
-    return False
+    print(result)
+    return result is not None
