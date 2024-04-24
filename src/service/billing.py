@@ -25,12 +25,14 @@ stripe.api_key = "sk_test_51P2KoI09MTVFbataUH3MvtXza4vM1XflPRcmj2tPfVcbPCTvkOaLq
 endpoint_secret = 'whsec_ZXfcjSIaktj06YiEuynVD9xl1LTbHygr'
 
 
-def has_permissions(feature: str, user: Account) -> bool:
+def has_permissions(feature: str, 
+                    user: Account) -> bool:
     # TODO: unccomment this for hollistic tests
     # return data.has_permissions(feature, user.user_id)
     return True
 
-async def webhook(item: Item, request: Request) -> None:
+async def webhook(item: Item, 
+                  request: Request) -> None:
     event = None
     payload = await request.body()
     sig_header = request.headers.get('stripe-signature')
@@ -40,38 +42,22 @@ async def webhook(item: Item, request: Request) -> None:
         )
     except ValueError as e:
         print(e)
-        # Invalid payload
         raise HTTPException(status_code=400, detail="Invalid payload")
     except stripe.error.SignatureVerificationError as e:
         print(e)
-        # Invalid signature
         raise HTTPException(status_code=400, detail="Invalid signature")
 
-    # Handle the event
     if event['type'] == 'checkout.session.completed':
         session = event['data']['object']
 
-        # If Stripe account does not exist then add it to the collection
-        stripe_account = stripe_account_col.find_one({"user_id": session["client_reference_id"]})
-        if not stripe_account:
-            stripe_account = StripeAccount(
-                customer_id =session["customer"],
-                user_id=session["client_reference_id"]
-            )
-            stripe_account_col.insert_one(stripe_account.dict())
+        referral = referral_service.get_referral(session['client_reference_id'])
 
-        # Get the user_id by getting StripeAccount and check if user got here thanks to referral
-        referral = referral_col.find_one({"referral_id": session.metadata['referral_id']})
         if referral:
-            referral_service.update_statistics_amount_bought(session.metadata['host_id'], session["amount_total"] / 100)
+            referral_service.update_statistics(referral.host_id, session["amount_total"] / 100, False)
 
-            user = account_service.get_by_id(session.metadata['host_id'])
-
+            user = account_service.get_by_id(referral.host_id)
             if user:                                      
-                # get user by host_id and get his email
                 email_service.send(user.email, 'clv2tl6jd00vybfeainihiu2j')
-                
-            # referral_service.remove_link(session["client_reference_id"])
 
     elif event['type'] == 'customer.subscription.deleted':
         subscription = event['data']['object']
@@ -87,6 +73,10 @@ async def webhook(item: Item, request: Request) -> None:
 
     else:
         print('Unhandled event type {}'.format(event['type']))
+
+def create_stripe_account(user_id: str, 
+                          customer_id: str):
+    return data.create_stripe_account(user_id, customer_id)
 
 # TODO: this does not in any way allows user to donwload a csv in chunks
 def download_history(user: Account) -> None:

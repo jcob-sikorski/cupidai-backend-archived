@@ -2,6 +2,7 @@ import requests
 
 
 def send(email: str, transactional_id: str, **data_variables):
+    print("SENDING EMAIL")
     response = requests.request(
         "POST", 
         "https://app.loops.so/api/v1/transactional", 

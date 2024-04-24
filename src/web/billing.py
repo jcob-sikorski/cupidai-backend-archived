@@ -10,7 +10,6 @@ import service.billing as service
 
 router = APIRouter(prefix="/billing")
 
-# Non-protected endpoint
 @router.post('/webhook')
 async def webhook(item: Item, 
                   request: Request) -> None:
@@ -23,12 +22,9 @@ async def download_history(user: Annotated[Account, Depends(account_service.get_
     return service.download_history(user)
 
 
-
 @router.get("/history", status_code=200)  # Retrieves billing history
 async def get_history(user: Annotated[Account, Depends(account_service.get_current_active_user)]) -> dict:
     return service.get_history(user)
-# async def get_history(solo: bool, user_id: str) -> None:
-#     return service.get_history(solo, user_id)
 
 # TESTING DONE ✅
 

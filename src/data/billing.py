@@ -17,6 +17,17 @@ def has_permissions(feature: str, user_id: str) -> bool:
 
     return current_plan and feature in current_plan.features
 
+def create_stripe_account(user_id: str, customer_id: str):
+    # If Stripe account does not exist then add it to the collection
+    stripe_account = stripe_account_col.find_one({"user_id": user_id})
+
+    if not stripe_account:
+        stripe_account = StripeAccount(
+            user_id=user_id,
+            customer_id=customer_id
+        )
+        stripe_account_col.insert_one(stripe_account.dict())
+
 # TESTING DONE ✅
 def get_customer_id(user_id: str) -> Optional[str]:
     print("GETTING CUSTOMER ID FROM MONGODB")
@@ -89,6 +100,26 @@ def get_current_plan(user_id: str) -> Optional[Plan]:
             most_recent_subscription_plan_id = None
             most_recent_billing_cycle_anchor = 0
 
+
+            # TODO: given that plan object has a nickname we don't 
+            #       need to store the nickname of the plan in the db
+            #       we can store features for each plan id
+            # {
+            #   "id": "price_1P2ZV609MTVFbataKtHmKS3z",
+            #   "object": "plan",
+            #    .
+            #    .
+            #    .
+            #   "amount": 149999,
+            #   "amount_decimal": "149999",
+            #    .
+            #    .
+            #    .
+            #   "nickname": null,
+            #    .
+            #    .
+            #    .
+            # },
             print("ITERATING THORUGH SUBSCRIPTIONS")
             for subscription in subscriptions:
                 billing_cycle_anchor = subscription["billing_cycle_anchor"]

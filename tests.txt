@@ -39,10 +39,10 @@ BILLING
 
 tests:
 - receiving event if user bought/upgraded/downgraded/cancelled a plan
-  and updating the information in the database
-- updating statistics of a user who made referral when someone bought using his link
-- sending email to user when someone bought using his link
-- checking if user paid thanks to the referral
+  and updating the information in the database ✅ 1.
+- updating statistics of a user who made referral when someone bought using his link ✅ 1.
+- sending email to user when someone bought using his link ✅ 1.
+- checking if user paid thanks to the referral ✅ 1.
 - downloading invoice history in a well formatted csv file
 - getting billing history in a well formatted csv file
 - accepting tos by a user and saving the date he accepted it
@@ -51,6 +51,7 @@ tests:
 - getting the plan of the user who downgraded
 - getting the plan of the user who cancelled
 - handling the error when user does not have permissions
+- checking if user has permissions - test all the plans and features
 
 Note: figure out stripe cli and test all the plans + add features for each plan
 
