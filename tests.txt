@@ -38,8 +38,7 @@ Note: before running any tests buy a plan to do this
 BILLING
 
 tests:
-- receiving event if user bought/upgraded/downgraded/cancelled a plan
-  and updating the information in the database ✅ 1.
+- receiving event if user bought/upgraded/downgraded/cancelled a plan ✅ 1.
 - updating statistics of a user who made referral when someone bought using his link ✅ 1.
 - sending email to user when someone bought using his link ✅ 1.
 - checking if user paid thanks to the referral ✅ 1.
@@ -107,7 +106,7 @@ tests:
 - getting statistics for user who does not have any stats yet ✅ 1.
 - getting payout history
 - tracking number of signups thanks to the host's referral ✅ 1.
-- updating user's earnings when someone paid
+- updating user's earnings when someone paid ✅ 1.
 
 
 SOCIAL ACCOUNT
@@ -120,5 +119,3 @@ EMAIL
 
 tests:
 - receiving correct email on the specific event
-
-Note: check receving each email on each event in your inbox + finish email configuration

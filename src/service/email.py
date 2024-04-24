@@ -1,4 +1,5 @@
 import requests
+import os
 
 
 def send(email: str, transactional_id: str, **data_variables):
@@ -12,7 +13,7 @@ def send(email: str, transactional_id: str, **data_variables):
             "dataVariables": data_variables
         },
         headers={
-            "Authorization": "Bearer 1dd67db210159eeff8910667b5db9b91",
+            "Authorization": f"Bearer {os.getenv('LOOPS_ACCESS_TOKEN')}",
             "Content-Type": "application/json"
         }
     )

@@ -1,23 +1,17 @@
 """Initialize MongoDB database"""
 
 import os
-from dotenv import load_dotenv
 from pymongo import MongoClient
-from bson.binary import UuidRepresentation
-
-load_dotenv()
 
 def get_db():
     """Connect to MongoDB database instance"""
 
-    mongoCredentials = os.getenv("MONGODB_CREDENTIALS")
     mongoClient = MongoClient(
-        f"mongodb+srv://{mongoCredentials}@atlascluster.2zt2wrb.mongodb.net/",
+        f"mongodb+srv://{os.getenv("MONGODB_CREDENTIALS")}@atlascluster.2zt2wrb.mongodb.net/",
         uuidRepresentation="standard"
     )
 
     db = mongoClient['cupidai']
-
     account_col = db['Account']
     invite_col = db['Invite']
     password_reset_col = db['PasswordReset']

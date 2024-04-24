@@ -2,6 +2,8 @@ from fastapi import BackgroundTasks, HTTPException
 
 import re
 
+import os
+
 import json
 
 import requests
@@ -58,8 +60,8 @@ def status_message(status_code: int) -> str:
         return "unknown"
 
 def webhook(response: dict) -> None:
-    clientId = "AKUw5R4PFfNhcxFDTWX5k="
-    clientSecret = "LHjoqjWCxWacxwXJa63NXnJqlTH1Pwyk"
+    clientId = os.getenv('AKOOL_CLIENT_ID')
+    clientSecret = os.getenv('AKOOL_CLIENT_SECRET')
 
     signature = response["signature"]
     msg_encrypt = response["dataEncrypt"]
@@ -129,7 +131,7 @@ def extract_id_from_uri(uri):
         return None
 
 def get_file_format(file_id: str):
-    uploadcare = Uploadcare(public_key='e6daeb69aa105a823395', secret_key='9a1b92e275b8fc7855a9')
+    uploadcare = Uploadcare(public_key=os.getenv('UPLOADCARE_PUBLIC_KEY'), secret_key=os.getenv('UPLOADCARE_SECRET_KEY'))
 
     file_info = uploadcare.file(file_id).info
 
@@ -163,7 +165,7 @@ def run_photo(source_uri: str,
     url = "https://openapi.akool.com/api/open/v3/faceswap/highquality/specifyimage"
 
     headers = {
-      'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY0MDIzNGJjZWI2NWNkMjdhOTFlZTg0ZCIsInVpZCI6MTM3NTM2LCJlbWFpbCI6ImxsYW1hemFkZUBnbWFpbC5jb20iLCJjcmVkZW50aWFsSWQiOiI2NjIyZWM5NWQ5MWRmYjc4OWY1OWI1NzgiLCJmaXJzdE5hbWUiOiJLaUQgVFRTIiwiZnJvbSI6InRvTyIsInR5cGUiOiJ1c2VyIiwiaWF0IjoxNzEzNjE3OTk2LCJleHAiOjIwMjQ2NTc5OTZ9.-E9Xan-w4aQt0A5mQw7aFBhGHN1Pl4KSKiXxudnIzYk',
+      'Authorization': f'Bearer {os.getenv('AKOOL_ACCESS_TOKEN')}',
       'Content-Type': 'application/json'
     }
 
@@ -178,7 +180,7 @@ def run_photo(source_uri: str,
         },],
       "face_enhance": 1,
       "modifyImage": target_uri,
-      "webhookUrl": "https://garfish-cute-typically.ngrok-free.app/deepfake/webhook"
+      "webhookUrl": f"{os.getenv(os.getenv('ROOT_DOMAIN'))}/deepfake/webhook"
     }
 
     background_tasks.add_task(send_post_request,
@@ -201,7 +203,7 @@ def run_video(source_uri: str,
     url = "https://openapi.akool.com/api/open/v3/faceswap/highquality/specifyvideo"
 
     headers = {
-      'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY0MDIzNGJjZWI2NWNkMjdhOTFlZTg0ZCIsInVpZCI6MTM3NTM2LCJlbWFpbCI6ImxsYW1hemFkZUBnbWFpbC5jb20iLCJjcmVkZW50aWFsSWQiOiI2NjIyZWM5NWQ5MWRmYjc4OWY1OWI1NzgiLCJmaXJzdE5hbWUiOiJLaUQgVFRTIiwiZnJvbSI6InRvTyIsInR5cGUiOiJ1c2VyIiwiaWF0IjoxNzEzNjE3OTk2LCJleHAiOjIwMjQ2NTc5OTZ9.-E9Xan-w4aQt0A5mQw7aFBhGHN1Pl4KSKiXxudnIzYk',
+      'Authorization': f'Bearer {os.getenv('AKOOL_ACCESS_TOKEN')}',
       'Content-Type': 'application/json'
     }
 
@@ -215,7 +217,7 @@ def run_video(source_uri: str,
             "opts": target_opts
         }],
       "modifyVideo": modify_video,
-      "webhookUrl": "https://garfish-cute-typically.ngrok-free.app/deepfake/webhook"
+      "webhookUrl": f"{os.getenv(os.getenv('ROOT_DOMAIN'))}/deepfake/webhook"
     }
 
     background_tasks.add_task(send_post_request,

@@ -30,7 +30,7 @@ async def faceswap(source_uri: str, target_uri: str, user: Account) -> None:
             "source": source_uri,
             "target": target_uri,
             "ref": user.user_id,
-            "webhookOverride": "https://garfish-cute-typically.ngrok-free.app/midjourney/webhook"
+            "webhookOverride": f"{os.getenv('ROOT_DOMAIN')}/midjourney/webhook"
         }
 
         
@@ -83,7 +83,7 @@ async def imagine(prompt: Prompt, user: Account) -> None:
         data = {
             "prompt": create_prompt_string(prompt),
             "ref": user.user_id,
-            "webhookOverride": "https://garfish-cute-typically.ngrok-free.app/midjourney/webhook"
+            "webhookOverride": f"{os.getenv('ROOT_DOMAIN')}/midjourney/webhook"
         }
 
         async with httpx.AsyncClient() as client:
@@ -117,7 +117,7 @@ async def action(message_id: str, button: str, user: Account) -> None:
             "message_id": message_id,
             "button": button,
             "ref": user.user_id,
-            "webhookOverride": "http://194.15.120.110/ai-verification/webhook"
+            "webhookOverride": f"{os.getenv('ROOT_DOMAIN')}/ai-verification/webhook"
         }
 
         async with httpx.AsyncClient() as client:
@@ -145,7 +145,7 @@ async def cancel_job(message_id: str, user: Account) -> None:
         "messageId": message_id,
         "button": "Cancel Job",
         "ref": user.user_id,
-        "webhookOverride": "https://1815-5-173-174-79.ngrok-free.app/ai-verification/webhook"
+        "webhookOverride": f"{os.getenv('ROOT_DOMAIN')}/ai-verification/webhook"
     }
 
     async with httpx.AsyncClient() as client:

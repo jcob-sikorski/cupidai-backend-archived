@@ -3,17 +3,11 @@ tree -I 'venv'
 ############################################## IMAGE GENERATION ##############################################
 
 HIGH LEVEL GOALS FOR TODAY:
-- run holistic and detailed tests for every endpoint once again
 - make the switch for production and development variables in code
+- add logs
+- test akool video + mov, mp4, HEIC
+- download all comfyui folders from the shadow pc
 
-
-
-add logs
-
-test akool video + mov, mp4, HEIC
-
-
-download all comfyui folders from the shadow pc
 
 host image generation on runpod - use prebuild image from their site during pod config then remove it and install from github
 

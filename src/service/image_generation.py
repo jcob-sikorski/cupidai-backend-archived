@@ -2,6 +2,8 @@ from fastapi import BackgroundTasks, HTTPException
 
 from typing import Dict, List, Optional
 
+import os
+
 import re
 
 from pyuploadcare import Uploadcare
@@ -227,7 +229,7 @@ async def generate(settings: Settings, uploadcare_uris: Dict[str, str], user: Ac
 
         print(image_ids)
 
-        uploadcare = Uploadcare(public_key='e6daeb69aa105a823395', secret_key='9a1b92e275b8fc7855a9')
+        uploadcare = Uploadcare(public_key=os.getenv('UPLOADCARE_PUBLIC_KEY'), secret_key=os.getenv('UPLOADCARE_SECRET_KEY'))
 
         image_formats = {}
         for key, uploadcare_id in image_ids.items():
@@ -251,8 +253,7 @@ async def generate(settings: Settings, uploadcare_uris: Dict[str, str], user: Ac
         if workflow_json is None:
             update_message(user.user_id, message_id, "failed")
             raise HTTPException(status_code=500, detail="Error while processing the workflow.")
-
-        # Define the URL of the server
+        
         url = "https://native-goat-saved.ngrok-free.app/image-generation/"
 
         # Define the headers for the request

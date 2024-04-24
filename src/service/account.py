@@ -6,9 +6,11 @@ from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from jose import JWTError, jwt
 import bcrypt
 
+import os
+
 from data import account as data
 
-from model.account import Account, Token, TokenData, PasswordReset
+from model.account import Account, Token, PasswordReset
 
 import service.email as email_service
 import service.referral as referral_service
@@ -17,9 +19,7 @@ import uuid
 
 # to get a string like this run:
 # openssl rand -hex 32
-
-# TODO: this should probably stored in env vars just like all other tokens
-SECRET_KEY = "09d25e094faa6ca2556c818166b7a9563b93f7099f6f0f4caa6cf63b88e8d3e7"
+SECRET_KEY = os.getenv('ENCRYPT_SECRET_KEY')
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 30
 
@@ -130,7 +130,8 @@ async def signup(email: str,
     except ValueError:
         raise HTTPException(status_code=404, detail="User already exists.")
 
-    # email_service.send(email, "clv9so1fa029b8k9nig3go17m", username=form_data.username)
+    # for env
+    email_service.send(email, "clv9so1fa029b8k9nig3go17m", username=form_data.username)
 
     return await login(form_data)
 
@@ -174,7 +175,8 @@ def reset_password(email: str) -> None:
 
     # TODO: this should be a link to the UI with the password reset ID -
     #       the UI should send this request when user types new password
-    password_reset_link = f"https://garfish-cute-typically.ngrok-free.app/reset-password-request/{password_reset_id}"
+
+    password_reset_link = f"{os.getenv('ROOT_DOMAIN')}/reset-password-request/{password_reset_id}"
 
     now = datetime.now()
 
@@ -189,6 +191,7 @@ def reset_password(email: str) -> None:
 
     data.create_password_reset(password_reset)
 
+    # for env
     email_service.send(email, 'clv2h2bt800bm1147nw7gtngv', password_reset_link=password_reset_link)
 
 def change_email(email: str, 

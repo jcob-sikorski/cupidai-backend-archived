@@ -2,6 +2,8 @@ from fastapi import Request, HTTPException
 
 from typing import Optional
 
+import os
+
 import csv
 
 import stripe
@@ -19,10 +21,10 @@ from data.init import stripe_account_col, referral_col
 
 # The library needs to be configured with your account's secret key.
 # Ensure the key is kept out of any version control system you might be using.
-stripe.api_key = "sk_test_51P2KoI09MTVFbataUH3MvtXza4vM1XflPRcmj2tPfVcbPCTvkOaLqA2CuQQE2rREuBFppTnPsKWzAz8I9tO5Pi1g00Ea3qEZft"
+stripe.api_key = os.getenv('STRIPE_API_KEY')
 
 # This is your Stripe CLI webhook secret for testing your endpoint locally.
-endpoint_secret = 'whsec_ZXfcjSIaktj06YiEuynVD9xl1LTbHygr'
+endpoint_secret = os.getenv('STRIPE_ENDPOINT_SECRET')
 
 
 def has_permissions(feature: str, 
@@ -62,7 +64,8 @@ async def webhook(item: Item,
                 referral_service.update_statistics(referral.host_id, session["amount_total"] / 100, False)
 
                 user = account_service.get_by_id(referral.host_id)
-                if user:                                      
+                if user:
+                    # for env   
                     email_service.send(user.email, 'clv2tl6jd00vybfeainihiu2j')
 
     elif event['type'] == 'customer.subscription.deleted':
