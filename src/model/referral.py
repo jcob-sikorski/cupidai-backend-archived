@@ -2,35 +2,36 @@ from pydantic import BaseModel
 from typing import List
 
 class PayoutRequest(BaseModel):
-    user_id: str
-    withdrawal_method: str
-    paypal_email: List[str]
-    amount: List[float]
-    scheduled_time: str
+    user_id: str | None = None
+    withdrawal_method: str | None = None
+    paypal_email: List[str] | None = None
+    amount: List[float] | None = None
+    scheduled_time: str | None = None
     # team_notes: str
-    date: str
+    date: str | None = None
 
 class PayoutHistory(BaseModel):
-    date: str
-    payment_id: str
-    user_id: str
-    amount: float
-    status: str
+    date: str | None = None
+    payment_id: str | None = None
+    user_id: str | None = None
+    amount: float | None = None
+    status: str | None = None
 
 class Earnings(BaseModel):
-    user_id: str
-    amount: float
+    user_id: str | None = None
+    amount: float | None = None
 
 class Statistics(BaseModel):
-    period: str  # This can be 'weekly', 'monthly', or 'yearly'
-    period_value: int  # This can be week number, month number, or year
-    referral_link_clicks: int
-    purchases_made: int
-    earned: float
-    user_id: str
+    period: str | None = None  # This can be 'weekly', 'monthly', or 'yearly'
+    period_value: int | None = None  # This can be week number, month number, or year
+    referral_link_signups: int | None = None
+    purchases_made: int | None = None
+    earned: float | None = None
+    user_id: str | None = None
 
 # this is for a single generated link
 # its idea is to securely map a link to the user_id
 class Referral(BaseModel):
-    referral_id: str
-    user_id: str
+    referral_id: str | None = None
+    host_id: str | None = None
+    guest_ids: List[str] | None = None

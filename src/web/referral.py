@@ -11,9 +11,8 @@ from service import referral as service
 router = APIRouter(prefix = "/referral")
 
 
-
 @router.post("/link/generate", status_code=201)  # Generates a new link
-async def generate_link(user: Annotated[Account, Depends(account_service.get_current_active_user)]) -> None:
+async def generate_link(user: Annotated[Account, Depends(account_service.get_current_active_user)]) -> str:
     return service.generate_link(user)
 
 
@@ -23,7 +22,7 @@ async def request_payout(payout_request: PayoutRequest,
     return service.request_payout(payout_request)
 
 
-@router.get("/unpaid/", status_code=200)  # Retrieves unpaid earnings
+@router.get("/unpaid", status_code=200)  # Retrieves unpaid earnings
 async def get_unpaid_earnings(user: Annotated[Account, Depends(account_service.get_current_active_user)]) -> float:
     return service.get_unpaid_earnings(user)
 

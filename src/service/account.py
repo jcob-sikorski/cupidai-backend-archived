@@ -11,6 +11,7 @@ from data import account as data
 from model.account import Account, Token, TokenData, PasswordReset
 
 import service.email as email_service
+import service.referral as referral_service
 
 import uuid
 
@@ -69,7 +70,7 @@ def create_access_token(data: dict,
     return encoded_jwt
 
 
-async def get_current_user(token: Annotated[str, Depends(oauth2_scheme)]):
+async def get_current_user(token: Annotated[str, Depends(oauth2_scheme)]) -> Account:
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
         detail="Could not validate credentials",
@@ -119,8 +120,8 @@ async def login(form_data: OAuth2PasswordRequestForm) -> Token:
 
     return Token(access_token=access_token, token_type="bearer")
 
-def signup(email: str, 
-           form_data: OAuth2PasswordRequestForm) -> None:
+async def signup(email: str, 
+           form_data: OAuth2PasswordRequestForm) -> Token:
     if not email:
         raise HTTPException(status_code=400, detail="Email cannot be empty")
 
@@ -129,12 +130,23 @@ def signup(email: str,
     except ValueError:
         raise HTTPException(status_code=404, detail="User already exists.")
 
-    email_service.send(email, "clv9so1fa029b8k9nig3go17m", username=form_data.username)
+    # email_service.send(email, "clv9so1fa029b8k9nig3go17m", username=form_data.username)
 
-    return login(form_data)
+    return await login(form_data)
 
-def signup_ref(ref: str) -> None:
-    return data.signup_ref(ref)
+async def signup_ref(referral_id: str,
+               email: str,
+               form_data: OAuth2PasswordRequestForm) -> Token:
+    jwt_token = await signup(email, form_data)
+
+    if jwt_token:
+        user = get_by_email(email)
+        try:
+            referral_service.log_referral(referral_id, user)
+        except ValueError:
+            raise HTTPException(status_code=400, detail="Referral with ID {referral_id} does not exist.")
+        finally:
+            return jwt_token
 
 def reset_password_request(password_reset_id: str, 
                            password: str) -> None:
@@ -191,7 +203,7 @@ def get_by_id(user_id: str) -> None:
 
 # TODO: all of the functions which get user should check if user was disabled
 #       btw this function does not do that
-def get_by_email(email: str) -> None:
+def get_by_email(email: str) -> Optional[Account]:
     return data.get_by_email(email)
 
 def change_profile_picture(profile_uri: str, 

@@ -45,7 +45,7 @@ def change_email(email: str, user: Account) -> bool:
         raise ValueError("Failed to change email - user does not exist.")
 
 
-def get_by_username(username: str) -> None:
+def get_by_username(username: str) -> Optional[Account]:
     print("GETTING USER DETAILS")
     result = account_col.find_one({"username": username})
 
@@ -63,7 +63,7 @@ def get_by_id(user_id: str) -> Optional[Account]:
         return account
     return None
 
-def get_by_email(email: str) -> None:
+def get_by_email(email: str) -> Optional[Account]:
     print("GETTING USER DETAILS BY EMAIL")
     result = account_col.find_one({"email": email})
 

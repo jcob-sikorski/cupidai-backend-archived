@@ -63,7 +63,7 @@ async def webhook(item: Item, request: Request) -> None:
         # Get the user_id by getting StripeAccount and check if user got here thanks to referral
         referral = referral_col.find_one({"referral_id": session.metadata['referral_id']})
         if referral:
-            referral_service.update_statistics(session.metadata['host_id'], session["amount_total"] / 100)
+            referral_service.update_statistics_amount_bought(session.metadata['host_id'], session["amount_total"] / 100)
 
             user = account_service.get_by_id(session.metadata['host_id'])
 

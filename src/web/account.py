@@ -13,13 +13,18 @@ router = APIRouter(prefix="/account")
 async def login(form_data: Annotated[OAuth2PasswordRequestForm, Depends()]) -> Token:
     return await service.login(form_data)
 
-# @router.post("/signup")
-# async def signup(form_data: Annotated[OAuth2PasswordRequestForm, Depends()]) -> Token:
-#     return await service.signup(form_data)
-
+# TODO: email and username should be unique
 @router.post("/signup")
-async def signup(email: str, form_data: Annotated[OAuth2PasswordRequestForm, Depends()]) -> Token:
+async def signup(email: str,
+                 form_data: Annotated[OAuth2PasswordRequestForm, Depends()]) -> Token:
     return await service.signup(email, form_data)
+
+
+@router.post("/signup-ref")
+async def signup_ref(referral_id: str, 
+                     email: str,
+                     form_data: Annotated[OAuth2PasswordRequestForm, Depends()]) -> Token:
+    return await service.signup_ref(referral_id, email, form_data)
 
 
 @router.post("/reset-password-request", status_code=200)
@@ -41,7 +46,7 @@ async def reset_password(email: dict) -> None:
 
 @router.post("/signup/ref", status_code=200)  # Creates new user account
 async def signup_ref(ref: str) -> None:
-    return service.signup_ref(ref)
+    return await service.signup_ref(ref)
 
 # TODO: we should do authentication of new email
 

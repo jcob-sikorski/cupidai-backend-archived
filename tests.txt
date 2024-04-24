@@ -99,14 +99,13 @@ Note: before running any tests preinstall all the models and
 REFERRALS
 
 tests:
-- generating valid link
-- removing exisiting link
-- removing non-exisiting link
-- requesting a payout
-- getting unpaid earnings
-- getting statistics
+- generating valid link ✅ 1.
+- requesting a payout ✅ 1.
+- getting unpaid earnings ✅ 1.
+- getting statistics ✅ 1.
+- getting statistics for user who does not have any stats yet ✅ 1.
 - getting payout history
-- tracking number of signups thanks to the referral
+- tracking number of signups thanks to the host's referral ✅ 1.
 - updating user's earnings when someone paid
 
 

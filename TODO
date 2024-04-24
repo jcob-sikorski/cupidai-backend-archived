@@ -4,7 +4,6 @@ tree -I 'venv'
 
 HIGH LEVEL GOALS FOR TODAY:
 - run holistic and detailed tests for every endpoint once again
-- add extensive print statements in lowercase for each tested endpoint - we must know everything
 - make the switch for production and development variables in code
 
 
