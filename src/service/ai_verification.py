@@ -1,8 +1,6 @@
 from fastapi import HTTPException
 
-from fastapi.encoders import jsonable_encoder
-
-import os
+from vars import MIDJOURNEY_TOKEN, ROOT_DOMAIN
 
 import httpx
 
@@ -16,9 +14,6 @@ import service.billing as billing_service
 import service.history as history_service
 import service.midjourney as midjourney_service
 
-MIDJOURNEY_TOKEN = os.getenv("MIDJOURNEY_TOKEN")
-
-
 async def faceswap(source_uri: str, target_uri: str, user: Account) -> None:
     if billing_service.has_permissions('ai_verification', user):
         url = "https://api.mymidjourney.ai/api/v1/midjourney/faceswap"
@@ -30,7 +25,7 @@ async def faceswap(source_uri: str, target_uri: str, user: Account) -> None:
             "source": source_uri,
             "target": target_uri,
             "ref": user.user_id,
-            "webhookOverride": f"{os.getenv('ROOT_DOMAIN')}/midjourney/webhook"
+            "webhookOverride": f"{ROOT_DOMAIN}/midjourney/webhook"
         }
 
         
@@ -83,7 +78,7 @@ async def imagine(prompt: Prompt, user: Account) -> None:
         data = {
             "prompt": create_prompt_string(prompt),
             "ref": user.user_id,
-            "webhookOverride": f"{os.getenv('ROOT_DOMAIN')}/midjourney/webhook"
+            "webhookOverride": f"{ROOT_DOMAIN}/midjourney/webhook"
         }
 
         async with httpx.AsyncClient() as client:
@@ -117,7 +112,7 @@ async def action(message_id: str, button: str, user: Account) -> None:
             "message_id": message_id,
             "button": button,
             "ref": user.user_id,
-            "webhookOverride": f"{os.getenv('ROOT_DOMAIN')}/ai-verification/webhook"
+            "webhookOverride": f"{ROOT_DOMAIN}/ai-verification/webhook"
         }
 
         async with httpx.AsyncClient() as client:
@@ -145,7 +140,7 @@ async def cancel_job(message_id: str, user: Account) -> None:
         "messageId": message_id,
         "button": "Cancel Job",
         "ref": user.user_id,
-        "webhookOverride": f"{os.getenv('ROOT_DOMAIN')}/ai-verification/webhook"
+        "webhookOverride": f"{ROOT_DOMAIN}/ai-verification/webhook"
     }
 
     async with httpx.AsyncClient() as client:

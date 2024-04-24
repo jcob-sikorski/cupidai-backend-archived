@@ -2,7 +2,7 @@ from fastapi import Request, HTTPException
 
 from typing import Optional
 
-import os
+from vars import STRIPE_API_KEY, STRIPE_ENDPOINT_SECRET
 
 import csv
 
@@ -21,10 +21,10 @@ from data.init import stripe_account_col, referral_col
 
 # The library needs to be configured with your account's secret key.
 # Ensure the key is kept out of any version control system you might be using.
-stripe.api_key = os.getenv('STRIPE_API_KEY')
+stripe.api_key = STRIPE_API_KEY
 
 # This is your Stripe CLI webhook secret for testing your endpoint locally.
-endpoint_secret = os.getenv('STRIPE_ENDPOINT_SECRET')
+endpoint_secret = STRIPE_ENDPOINT_SECRET
 
 
 def has_permissions(feature: str, 

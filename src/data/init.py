@@ -1,17 +1,15 @@
-"""Initialize MongoDB database"""
-
-import os
 from pymongo import MongoClient
+from vars import MONGODB_CREDENTIALS, MONGODB_DB
 
 def get_db():
     """Connect to MongoDB database instance"""
 
     mongoClient = MongoClient(
-        f"mongodb+srv://{os.getenv("MONGODB_CREDENTIALS")}@atlascluster.2zt2wrb.mongodb.net/",
+        f"mongodb+srv://{MONGODB_CREDENTIALS}@atlascluster.2zt2wrb.mongodb.net/",
         uuidRepresentation="standard"
     )
 
-    db = mongoClient['cupidai']
+    db = mongoClient[f'{MONGODB_DB}']
     account_col = db['Account']
     invite_col = db['Invite']
     password_reset_col = db['PasswordReset']

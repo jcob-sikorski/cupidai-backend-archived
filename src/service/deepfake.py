@@ -2,7 +2,8 @@ from fastapi import BackgroundTasks, HTTPException
 
 import re
 
-import os
+from vars import (AKOOL_CLIENT_ID, AKOOL_CLIENT_SECRET, AKOOL_ACCESS_TOKEN,
+                  UPLOADCARE_PUBLIC_KEY, UPLOADCARE_SECRET_KEY, ROOT_DOMAIN)
 
 import json
 
@@ -60,8 +61,8 @@ def status_message(status_code: int) -> str:
         return "unknown"
 
 def webhook(response: dict) -> None:
-    clientId = os.getenv('AKOOL_CLIENT_ID')
-    clientSecret = os.getenv('AKOOL_CLIENT_SECRET')
+    clientId = AKOOL_CLIENT_ID
+    clientSecret = AKOOL_CLIENT_SECRET
 
     signature = response["signature"]
     msg_encrypt = response["dataEncrypt"]
@@ -131,7 +132,7 @@ def extract_id_from_uri(uri):
         return None
 
 def get_file_format(file_id: str):
-    uploadcare = Uploadcare(public_key=os.getenv('UPLOADCARE_PUBLIC_KEY'), secret_key=os.getenv('UPLOADCARE_SECRET_KEY'))
+    uploadcare = Uploadcare(public_key=UPLOADCARE_PUBLIC_KEY, secret_key=UPLOADCARE_SECRET_KEY)
 
     file_info = uploadcare.file(file_id).info
 
@@ -165,7 +166,7 @@ def run_photo(source_uri: str,
     url = "https://openapi.akool.com/api/open/v3/faceswap/highquality/specifyimage"
 
     headers = {
-      'Authorization': f'Bearer {os.getenv('AKOOL_ACCESS_TOKEN')}',
+      'Authorization': f'Bearer {AKOOL_ACCESS_TOKEN}',
       'Content-Type': 'application/json'
     }
 
@@ -180,7 +181,7 @@ def run_photo(source_uri: str,
         },],
       "face_enhance": 1,
       "modifyImage": target_uri,
-      "webhookUrl": f"{os.getenv(os.getenv('ROOT_DOMAIN'))}/deepfake/webhook"
+      "webhookUrl": f"{ROOT_DOMAIN}/deepfake/webhook"
     }
 
     background_tasks.add_task(send_post_request,
@@ -203,7 +204,7 @@ def run_video(source_uri: str,
     url = "https://openapi.akool.com/api/open/v3/faceswap/highquality/specifyvideo"
 
     headers = {
-      'Authorization': f'Bearer {os.getenv('AKOOL_ACCESS_TOKEN')}',
+      'Authorization': f'Bearer {AKOOL_ACCESS_TOKEN}',
       'Content-Type': 'application/json'
     }
 
@@ -217,7 +218,7 @@ def run_video(source_uri: str,
             "opts": target_opts
         }],
       "modifyVideo": modify_video,
-      "webhookUrl": f"{os.getenv(os.getenv('ROOT_DOMAIN'))}/deepfake/webhook"
+      "webhookUrl": f"{ROOT_DOMAIN}/deepfake/webhook"
     }
 
     background_tasks.add_task(send_post_request,

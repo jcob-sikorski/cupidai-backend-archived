@@ -2,7 +2,7 @@ from fastapi import BackgroundTasks, HTTPException
 
 from typing import Dict, List, Optional
 
-import os
+from vars import UPLOADCARE_PUBLIC_KEY, UPLOADCARE_SECRET_KEY
 
 import re
 
@@ -229,7 +229,7 @@ async def generate(settings: Settings, uploadcare_uris: Dict[str, str], user: Ac
 
         print(image_ids)
 
-        uploadcare = Uploadcare(public_key=os.getenv('UPLOADCARE_PUBLIC_KEY'), secret_key=os.getenv('UPLOADCARE_SECRET_KEY'))
+        uploadcare = Uploadcare(public_key=UPLOADCARE_PUBLIC_KEY, secret_key=UPLOADCARE_SECRET_KEY)
 
         image_formats = {}
         for key, uploadcare_id in image_ids.items():
