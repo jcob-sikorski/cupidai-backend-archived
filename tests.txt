@@ -44,14 +44,14 @@ tests:
 - sending email to user when someone bought using his link ✅ 1.
 - checking if user paid thanks to the referral ✅ 1.
 - downloading invoice history in a well formatted csv file
-- getting billing history in a well formatted csv file
-- accepting tos by a user and saving the date he accepted it
-- getting the plan of the user who bought
-- getting the plan of the user who upgraded
+- getting billing history         (after we learn how to map customer_id to user_id probably this needs to be real payment)
+- accepting tos by a user and saving the date he accepted it ✅ 1.
+- getting the plan of the user who bought         (after we learn how to map customer_id to user_id probably this needs to be real payment)
+- getting the plan of the user who upgraded 
 - getting the plan of the user who downgraded
 - getting the plan of the user who cancelled
-- handling the error when user does not have permissions
-- checking if user has permissions - test all the plans and features
+- handling the error when user does not have permissions        (after we learn how to map customer_id to user_id probably this needs to be real payment)
+- checking if user has permissions - test all the plans and features        (after we learn how to map customer_id to user_id probably this needs to be real payment)
 
 Note: figure out stripe cli and test all the plans + add features for each plan
 

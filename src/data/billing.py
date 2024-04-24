@@ -47,6 +47,8 @@ def get_history(user_id: str) -> dict:
     if customer_id is not None:
         # Fetch invoices from Stripe
         invoices = stripe.Invoice.list(customer=customer_id)
+
+        print(f"INVOICES: {invoices}")
         
         # Prepare dictionary data
         dict_data = []
@@ -58,7 +60,7 @@ def get_history(user_id: str) -> dict:
                     'Purchase Method': line_item.type,
                     'Plan Name': line_item.description
                 })
-
+        print(f"DICT DATA: {dict_data}")
         return dict_data
     else:
         raise ValueError("There is no track record of transactions for this user.")
@@ -69,14 +71,10 @@ def accept_tos(user_id: str) -> None:
     # Get the current date and time
     now = datetime.now()
 
-    # Format the date and time in the format you prefer
-    date_accepted = now.strftime("%Y-%m-%d %H:%M:%S")
 
     # Create a new TermsOfService object
-    tos = TermsOfService(user_id=user_id, date_accepted=date_accepted)
-
-    # Insert the new TermsOfService object into the tos_col collection
-    tos_col.insert_one(tos.dict())
+    tos = TermsOfService(user_id=user_id, 
+                         date_accepted=now)
 
     result = tos_col.insert_one(tos.dict())
 

@@ -16,7 +16,6 @@ async def webhook(item: Item,
     return await service.webhook(item, request)
 
 # TODO: user need to download history in chunks
-
 @router.get("/download-history", status_code=200)  # Downloads billing history
 async def download_history(user: Annotated[Account, Depends(account_service.get_current_active_user)]) -> None:
     return service.download_history(user)

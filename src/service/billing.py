@@ -50,14 +50,20 @@ async def webhook(item: Item,
     if event['type'] == 'checkout.session.completed':
         session = event['data']['object']
 
-        referral = referral_service.get_referral(session['client_reference_id'])
+        if session['mode'] == 'payment':
+            # TODO: By default checkout.session.completed will only have a 
+            #       customer ID if the session was related to buying a subscription.
+            # Note: session['customer'] is null for not real customers
+            create_stripe_account(session['client_reference_id'], session['customer'])
 
-        if referral:
-            referral_service.update_statistics(referral.host_id, session["amount_total"] / 100, False)
+            referral = referral_service.get_referral(session['metadata']['referral_id'])
 
-            user = account_service.get_by_id(referral.host_id)
-            if user:                                      
-                email_service.send(user.email, 'clv2tl6jd00vybfeainihiu2j')
+            if referral:
+                referral_service.update_statistics(referral.host_id, session["amount_total"] / 100, False)
+
+                user = account_service.get_by_id(referral.host_id)
+                if user:                                      
+                    email_service.send(user.email, 'clv2tl6jd00vybfeainihiu2j')
 
     elif event['type'] == 'customer.subscription.deleted':
         subscription = event['data']['object']
