@@ -14,7 +14,7 @@ domain_to_index = {
     "referral": "people_referred" 
 }
 
-# TESTING DONE ✅
+
 def update(domain: str, user_id: str) -> None:
     print("UPDATING USAGE HISTORY")
     # Update history for the user
@@ -39,7 +39,7 @@ def update(domain: str, user_id: str) -> None:
     #     )
 
 
-# TESTING DONE ✅
+
 def get(user_id: str) -> History:
     # team = team_service.get_team(user_id)
 

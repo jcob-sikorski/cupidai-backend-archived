@@ -10,7 +10,7 @@ from model.billing import StripeAccount, TermsOfService, Plan
 # from .init import stripe_account_col, team_col, tos_col, plan_col
 from .init import stripe_account_col, tos_col, plan_col
 
-# TESTING DONE ✅
+
 def has_permissions(feature: str, user_id: str) -> bool:
     print("CHECKING PERMISSIONS")
     current_plan = get_current_plan(user_id)
@@ -28,7 +28,7 @@ def create_stripe_account(user_id: str, customer_id: str):
         )
         stripe_account_col.insert_one(stripe_account.dict())
 
-# TESTING DONE ✅
+
 def get_customer_id(user_id: str) -> Optional[str]:
     print("GETTING CUSTOMER ID FROM MONGODB")
 
@@ -39,7 +39,7 @@ def get_customer_id(user_id: str) -> Optional[str]:
         return stripe_account.customer_id
     return None
 
-# TESTING DONE ✅
+
 def get_history(user_id: str) -> dict:
     # Fetch customer ID
     customer_id = get_customer_id(user_id)
@@ -66,7 +66,7 @@ def get_history(user_id: str) -> dict:
         raise ValueError("There is no track record of transactions for this user.")
 
 
-# TESTING DONE ✅
+
 def accept_tos(user_id: str) -> None:
     # Get the current date and time
     now = datetime.now()
@@ -81,7 +81,7 @@ def accept_tos(user_id: str) -> None:
     if not result.inserted_id:
         raise ValueError("Failed to accept Terms of Conditions.")
 
-# TESTING DONE ✅
+
 def get_current_plan(user_id: str) -> Optional[Plan]:
     customer_id = get_customer_id(user_id)
 

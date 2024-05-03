@@ -13,7 +13,7 @@ from service import account as account_service
 
 router = APIRouter(prefix="/history")
 
-# TESTING DONE ✅
+
 
 @router.get("/", status_code=200)  # Retrieves account details
 async def get(user: Annotated[Account, Depends(account_service.get_current_active_user)]) -> History:

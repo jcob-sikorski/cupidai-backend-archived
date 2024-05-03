@@ -1,6 +1,6 @@
 import requests
-from vars import LOOPS_ACCESS_TOKEN
 
+import os
 
 def send(email: str, transactional_id: str, **data_variables):
     print("SENDING EMAIL")
@@ -13,7 +13,7 @@ def send(email: str, transactional_id: str, **data_variables):
             "dataVariables": data_variables
         },
         headers={
-            "Authorization": f"Bearer {LOOPS_ACCESS_TOKEN}",
+            "Authorization": f"Bearer {os.getenv('LOOPS_ACCESS_TOKEN')}",
             "Content-Type": "application/json"
         }
     )

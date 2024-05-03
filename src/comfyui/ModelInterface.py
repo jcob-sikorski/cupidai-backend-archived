@@ -1,6 +1,8 @@
 from typing import List, Dict, Optional
+
 import importlib
-from vars import COMFYUI_PREDEFINED_PATH
+
+import os
 
 from model.image_generation import Settings
 
@@ -305,7 +307,7 @@ def generate_workflow(settings: Settings, image_ids: Dict[str, str], image_forma
         print("INITIALIZING MODEL INTERFACE")
         model_interface = ModelInterface()
 
-        predefined_path = COMFYUI_PREDEFINED_PATH
+        predefined_path = os.getenv('COMFYUI_PREDEFINED_PATH')
 
         format_map = {"jpeg": ".jpg",
                       "heic": ".heic",

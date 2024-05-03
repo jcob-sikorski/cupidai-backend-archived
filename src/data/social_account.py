@@ -5,7 +5,7 @@ from model.social_account import SocialAccount
 from pymongo import ReturnDocument
 from .init import social_account_col
 
-# TESTING DONE ✅
+
 def create(social_account: SocialAccount, 
            user_id: str) -> None:
     social_account = social_account.dict()
@@ -15,7 +15,7 @@ def create(social_account: SocialAccount,
     if not result:
         raise ValueError("Failed to create social account.")
 
-# TESTING DONE ✅
+
 def update(social_account: SocialAccount) -> bool:
     result = social_account_col.find_one_and_update(
         {"account_id": social_account.account_id},
@@ -27,7 +27,7 @@ def update(social_account: SocialAccount) -> bool:
     if not result:
         raise ValueError("Failed to update social account.")
 
-# TESTING DONE ✅
+
 def get(user_id: str) -> Optional[List[SocialAccount]]:
     results = social_account_col.find({"user_id": user_id})
 

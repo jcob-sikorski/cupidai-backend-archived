@@ -2,7 +2,7 @@ from fastapi import BackgroundTasks, HTTPException
 
 from typing import Dict, List, Optional
 
-from vars import UPLOADCARE_PUBLIC_KEY, UPLOADCARE_SECRET_KEY
+import os
 
 import re
 
@@ -220,7 +220,7 @@ async def generate(settings: Settings, uploadcare_uris: Dict[str, str], user: Ac
     if billing_service.has_permissions('image_generation', user):
         check = check_settings(settings)
         if check is not True:
-            raise HTTPException(status_code=400, detail="Invalid workflow settings.")
+            raise HTTPException(status_code=400, detail=check)
 
         image_ids = {}
         for key, uri in uploadcare_uris.items():
@@ -229,7 +229,7 @@ async def generate(settings: Settings, uploadcare_uris: Dict[str, str], user: Ac
 
         print(image_ids)
 
-        uploadcare = Uploadcare(public_key=UPLOADCARE_PUBLIC_KEY, secret_key=UPLOADCARE_SECRET_KEY)
+        uploadcare = Uploadcare(public_key=os.getenv('UPLOADCARE_PUBLIC_KEY'), secret_key=os.getenv('UPLOADCARE_SECRET_KEY'))
 
         image_formats = {}
         for key, uploadcare_id in image_ids.items():

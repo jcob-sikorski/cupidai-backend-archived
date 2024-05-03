@@ -3,29 +3,22 @@ tree -I 'venv'
 ############################################## IMAGE GENERATION ##############################################
 
 HIGH LEVEL GOALS FOR TODAY:
-- make the switch for production and development variables in code
-- add logs
-- test akool video + mov, mp4, HEIC
-- download all comfyui folders from the shadow pc
+pass
 
-
-host image generation on runpod - use prebuild image from their site during pod config then remove it and install from github
-
-test midjourney action, imagine, faceswap after buying a plan
-
-add some parameters to make images/videos superior quality time is not key, quality and reliability is for our customers
-
-before frontend integration run holistic and detailed tests for every endpoint once again
-
-estimate which droplet we'll need to buy on digitalocean
-
-set up production step by step with this gold: https://fastapi.tiangolo.com/how-to/
 
 when it comes to frontend integration use the use reduce for managing state
 
 add greyed out components
 
 on loading something the component should show the loading button
+
+estimate which droplet we'll need to buy on digitalocean
+
+set up production step by step with this gold: https://fastapi.tiangolo.com/how-to/
+
+host image generation on runpod - use prebuild image from their site during pod config then remove it and install from github
+
+add some parameters to make images/videos superior quality time is not key, quality and reliability is for our customers
 
 
 
@@ -34,7 +27,22 @@ The URL to redirect your customer back to after they authenticate or cancel thei
 on successful payment set up the success url with current jwt? https://docs.stripe.com/payments/checkout/custom-success-page
 
 
-update the discord link in each loops email
 
 
-invitation + acceptance
+TBD V2:
+
+TEAMS:
+- invitation + acceptance
+
+MIDJOURNEY:
+- doing faceswap on source (source must be from mymidjourney imagine) and target image from uploadcare
+- cancelling job which does not run (existed or never existed)
+- cancelling job while it's doing
+
+DEEPFAKE WITH AKOOL
+- akool video + mov, mp4, HEIC
+
+
+
+🥰 HIGH LEVEL PLANS 🥰:
+figure out how to make image generation much more reliable and faster - probably we need some 

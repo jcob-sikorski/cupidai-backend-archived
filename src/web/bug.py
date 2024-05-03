@@ -9,7 +9,7 @@ from service import bug as service
 
 router = APIRouter(prefix="/bug")
 
-# TESTING DONE ✅
+
 
 @router.post("/", status_code=201)  # Creates a bug report
 async def create(description: dict, 

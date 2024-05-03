@@ -4,7 +4,7 @@ import data.bug as data
 
 from model.account import Account
 
-# TESTING DONE ✅
+
 def create(description: str, 
            user: Account) -> None:
     try:

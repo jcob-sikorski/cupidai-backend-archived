@@ -5,10 +5,14 @@ from data.midjourney import Message
 
 from model.account import Account
 
-# TESTING DONE ✅
+
 def webhook(message: Message) -> None:
     data.update(message)
 
-# TESTING DONE ✅
+def valid_button(messageId: str, 
+                 button: str) -> bool:
+    return data.valid_button(messageId, 
+                             button)
+
 def get_history(user: Account) -> List[Message]:
     return data.get_history(user.user_id)

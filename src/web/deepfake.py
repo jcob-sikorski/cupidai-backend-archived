@@ -38,7 +38,7 @@ async def generate(req: GenerateRequest,
                             background_tasks)
 
 
-# TESTING DONE ✅
+
 
 @router.get("/history", status_code=200)  # Retrieves history
 async def get_history(user: Annotated[Account, Depends(account_service.get_current_active_user)]) -> None:

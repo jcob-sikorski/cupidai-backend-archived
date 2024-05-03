@@ -25,13 +25,13 @@ async def download_history(user: Annotated[Account, Depends(account_service.get_
 async def get_history(user: Annotated[Account, Depends(account_service.get_current_active_user)]) -> dict:
     return service.get_history(user)
 
-# TESTING DONE ✅
+
 
 @router.post("/terms-of-service", status_code=201)  # Accepts terms of service for billing
 async def accept_tos(user: Annotated[Account, Depends(account_service.get_current_active_user)]) -> None:
     return service.accept_tos(user)
 
-# TESTING DONE ✅
+
 
 @router.get("/current-plan", status_code=200)  # Retrieves current billing plan
 async def get_current_plan(user: Annotated[Account, Depends(account_service.get_current_active_user)]) -> Optional[Plan]:

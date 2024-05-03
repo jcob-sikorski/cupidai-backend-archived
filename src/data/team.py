@@ -37,7 +37,7 @@
 
 #     return True
 
-# # TESTING DONE ✅
+# 
 # def update_permissions(permissions: List[str], member_id: str, user_id: str) -> bool:
 #     # Fetch the team that the user owns
 #     team = team_col.find_one({"owner": user_id})
@@ -62,7 +62,7 @@
 #     return result is not None
 
 
-# # TESTING DONE ✅
+# 
 # def delete(member_id: str, user_id: str) -> bool:
 #     # Fetch the team that the user owns
 #     team = team_col.find_one({"owner": user_id})
@@ -90,7 +90,7 @@
 #     return True
 
 
-# # TESTING DONE ✅
+# 
 # def transfer_ownership(member_id: str, user_id: str) -> bool:
 #     # Fetch the team that the user owns
 #     team = team_col.find_one({"owner": user_id})
@@ -113,7 +113,7 @@
 #     return result is not None
 
 
-# # TESTING DONE ✅
+# 
 # def get_members(user_id: str) -> None:
 #     # Fetch the team that the user belongs to
 #     team = team_col.find_one({"members": {"$in": [user_id]}})
@@ -133,7 +133,7 @@
 #         return team.name
 #     return None
 
-# # TESTING DONE ✅
+# 
 # def disband(user_id: str) -> bool:
 #     # Fetch the team that the user owns
 #     team = team_col.find_one({"owner": user_id})
@@ -152,7 +152,7 @@
 #     return False
 
 
-# # TESTING DONE ✅
+# 
 # def create(team: Team, user_id: str) -> bool:
 #     # Fetch the team that the user is a member of
 #     existing_team = team_col.find_one({"members": {"$in": [user_id]}})
@@ -181,7 +181,7 @@
 #     return result.inserted_id is not None
 
 
-# # TESTING DONE ✅
+# 
 # def leave(user_id: str) -> bool:
 #     # Fetch the team that the user is a member of
 #     team = team_col.find_one({"members": {"$in": [user_id]}})
@@ -210,7 +210,7 @@
 #     return False
 
 
-# # TESTING DONE ✅
+# 
 # def owner(user_id: str) -> None:
 #     # Fetch the team that the user is a member of
 #     team = team_col.find_one({"members": {"$in": [user_id]}})
@@ -219,7 +219,7 @@
 #         # Return the owner of the team
 #         return team["owner"]
     
-# # TESTING DONE ✅
+# 
 # def get_team(user_id: str) -> None:
 #     result = team_col.find_one({"members": {"$in": [user_id]}})
 #     if result is not None:

@@ -1,9 +1,8 @@
 from fastapi import BackgroundTasks, HTTPException
 
-import re
+import os
 
-from vars import (AKOOL_CLIENT_ID, AKOOL_CLIENT_SECRET, AKOOL_ACCESS_TOKEN,
-                  UPLOADCARE_PUBLIC_KEY, UPLOADCARE_SECRET_KEY, ROOT_DOMAIN)
+import re
 
 import json
 
@@ -61,8 +60,8 @@ def status_message(status_code: int) -> str:
         return "unknown"
 
 def webhook(response: dict) -> None:
-    clientId = AKOOL_CLIENT_ID
-    clientSecret = AKOOL_CLIENT_SECRET
+    clientId = os.getenv('AKOOL_CLIENT_ID')
+    clientSecret = os.getenv('AKOOL_CLIENT_SECRET')
 
     signature = response["signature"]
     msg_encrypt = response["dataEncrypt"]
@@ -132,7 +131,7 @@ def extract_id_from_uri(uri):
         return None
 
 def get_file_format(file_id: str):
-    uploadcare = Uploadcare(public_key=UPLOADCARE_PUBLIC_KEY, secret_key=UPLOADCARE_SECRET_KEY)
+    uploadcare = Uploadcare(public_key=os.getenv('UPLOADCARE_PUBLIC_KEY'), secret_key=os.getenv('UPLOADCARE_SECRET_KEY'))
 
     file_info = uploadcare.file(file_id).info
 
@@ -157,31 +156,31 @@ def run_face_detection(uploadcare_uri: str):
 
     return landmarks_str
 
-def run_photo(source_uri: str, 
-              target_uri: str, 
-              source_opts: str, 
-              target_opts: str,
+def run_photo(source_uri: str, # photo of the old face from the photo
+              target_uri: str, # photo of the new face for the photo
+              source_opts: str, # some params for the old face
+              target_opts: str, # some params for the new face
               user_id: str,
               background_tasks: BackgroundTasks):
     url = "https://openapi.akool.com/api/open/v3/faceswap/highquality/specifyimage"
 
     headers = {
-      'Authorization': f'Bearer {AKOOL_ACCESS_TOKEN}',
+      'Authorization': f"Bearer {os.getenv('AKOOL_ACCESS_TOKEN')}",
       'Content-Type': 'application/json'
     }
 
     payload = {
-      "sourceImage": [{
+      "sourceImage": [{ # array of new faces
             "path": source_uri,
             "opts": source_opts
         },],
-      "targetImage": [{
+      "targetImage": [{ # array of old faces
             "path": target_uri,
             "opts": target_opts
         },],
       "face_enhance": 1,
-      "modifyImage": target_uri,
-      "webhookUrl": f"{ROOT_DOMAIN}/deepfake/webhook"
+      "modifyImage": target_uri, # photo to modify
+      "webhookUrl": f"{os.getenv('ROOT_DOMAIN')}/deepfake/webhook"
     }
 
     background_tasks.add_task(send_post_request,
@@ -193,32 +192,37 @@ def run_photo(source_uri: str,
                               None,
                               user_id)
 
+# TODO: we're providing to small amount of faces for the video - because there's a change it will interpret the video as multiface with even single face
+# there's a possiblity that we should provide the url to the run face detection and check the mutliface to true
+# get the array and pass it to the run_video
+
 # TODO: figure out how to fix the "failed" error from the API
-def run_video(source_uri: str,
-              target_uri: str,
-              source_opts: str,
-              target_opts: str,
-              modify_video: str,
+def run_video(source_uri: str, # photo of the old face from the photo
+              target_uri: str, # photo of the new face for the photo
+              source_opts: str, # some params for the old face
+              target_opts: str, # some params for the new face
+              modify_video: str, # video to modify
               user_id: str,
               background_tasks: BackgroundTasks):
     url = "https://openapi.akool.com/api/open/v3/faceswap/highquality/specifyvideo"
 
     headers = {
-      'Authorization': f'Bearer {AKOOL_ACCESS_TOKEN}',
+      'Authorization': f"Bearer {os.getenv('AKOOL_ACCESS_TOKEN')}",
       'Content-Type': 'application/json'
     }
 
     payload = {
-      "sourceImage": [{
+      "sourceImage": [{ # array of new faces
             "path": source_uri,
             "opts": source_opts
         }],
-      "targetImage": [{
+      "targetImage": [{ # array of old faces
             "path": target_uri,
             "opts": target_opts
         }],
-      "modifyVideo": modify_video,
-      "webhookUrl": f"{ROOT_DOMAIN}/deepfake/webhook"
+      "face_enhance": 1,
+      "modifyVideo": modify_video, # video to modify
+      "webhookUrl": f"{os.getenv('ROOT_DOMAIN')}/deepfake/webhook"
     }
 
     background_tasks.add_task(send_post_request,
@@ -246,7 +250,6 @@ def generate(source_uri: str,
         source_format = get_file_format(source_id)
 
         target_id = extract_id_from_uri(target_uri)
-
         target_format = get_file_format(target_id)
 
         if source_format not in ['jpeg', 'png', 'heic'] or \
@@ -261,7 +264,7 @@ def generate(source_uri: str,
 
             if video_format not in ['mov', 'mp4', 'quicktime']:
                 raise HTTPException(status_code=400, detail="Invalid video format. Valid ones are mov, mp4, quicktime.")
-            
+
             source_opts = run_face_detection(source_uri)
             target_opts = run_face_detection(target_uri)
         

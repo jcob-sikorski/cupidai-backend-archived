@@ -6,7 +6,7 @@ from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from jose import JWTError, jwt
 import bcrypt
 
-from vars import ENCRYPT_SECRET_KEY, ROOT_DOMAIN
+import os
 
 from data import account as data
 
@@ -19,7 +19,7 @@ import uuid
 
 # to get a string like this run:
 # openssl rand -hex 32
-SECRET_KEY = ENCRYPT_SECRET_KEY 
+SECRET_KEY = os.getenv('ENCRYPT_SECRET_KEY')
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 30
 
@@ -176,7 +176,7 @@ def reset_password(email: str) -> None:
     # TODO: this should be a link to the UI with the password reset ID -
     #       the UI should send this request when user types new password
 
-    password_reset_link = f"{ROOT_DOMAIN}/reset-password-request/{password_reset_id}"
+    password_reset_link = f"{os.getenv('ROOT_DOMAIN')}/reset-password-request/{password_reset_id}"
 
     now = datetime.now()
 

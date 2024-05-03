@@ -2,6 +2,8 @@ from fastapi import APIRouter, Depends, HTTPException
 
 from typing import Annotated, List
 
+from pydantic import BaseModel
+
 from model.account import Account
 from model.ai_verification import Prompt
 from model.midjourney import Message
@@ -11,22 +13,23 @@ from service import ai_verification as service
 
 router = APIRouter(prefix="/ai-verification")
 
-# TODO: we should test this out once we buy a plan
+# class FaceswapRequest(BaseModel):
+#     source_uri: str
+#     target_uri: str
 
-@router.post("/faceswap", status_code=201)  # Initiates a face swap
-async def faceswap(source_uri: str, 
-                   target_uri: str, 
-                   user: Annotated[Account, Depends(account_service.get_current_active_user)]) -> None:
-    return await service.faceswap(source_uri, target_uri, user)
+# @router.post("/faceswap", status_code=201)  # Initiates a face swap
+# async def faceswap(req: FaceswapRequest, 
+#                    user: Annotated[Account, Depends(account_service.get_current_active_user)]) -> None:
+#     return await service.faceswap(req.source_uri,
+#                                   req.target_uri,
+#                                   user)
 
-# TODO: we should test this out once we buy a plan
 
 @router.post("/imagine", status_code=201)  # Initiates an imagination process
 async def imagine(prompt: Prompt, 
                   user: Annotated[Account, Depends(account_service.get_current_active_user)]) -> None:
     return await service.imagine(prompt, user)
 
-# TESTING DONE ✅
 
 @router.get("/history", status_code=200)  # Retrieves job history
 async def get_history(user: Annotated[Account, Depends(account_service.get_current_active_user)]) -> List[Message]:
@@ -35,17 +38,20 @@ async def get_history(user: Annotated[Account, Depends(account_service.get_curre
         raise HTTPException(status_code=404, detail="History not found")
     return history
 
-# TODO: we should test this out once we buy a plan
+
+class ActionRequest(BaseModel):
+    messageId: str
+    button: str
 
 @router.post("/action", status_code=201)  # Initiates a specific action
-async def action(message_id: str, 
-                 button: str, 
+async def action(req: ActionRequest, 
                  user: Annotated[Account, Depends(account_service.get_current_active_user)]) -> None:
-    return await service.action(message_id, button, user)
+    return await service.action(req.messageId, 
+                                req.button, 
+                                user)
 
-# TODO: we should test this out once we buy a plan
 
-@router.delete("/message/{message_id}", status_code=204)  # Cancels a specific job, status 204 for No Content
-async def cancel_job(message_id: str, 
-                     user: Annotated[Account, Depends(account_service.get_current_active_user)]) -> None:
-    return await service.cancel_job(message_id, user)
+# @router.delete("/message/{messageId}", status_code=204)  # Cancels a specific job, status 204 for No Content
+# async def cancel_job(messageId: str, 
+#                      user: Annotated[Account, Depends(account_service.get_current_active_user)]) -> None:
+#     return await service.cancel_job(messageId, user)

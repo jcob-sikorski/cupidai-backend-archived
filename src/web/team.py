@@ -18,25 +18,25 @@
 # async def invite(email: str, user_id: str) -> None:
 #     return service.invite(email, user_id)
 
-# # TESTING DONE ✅
+# 
 # 
 # @router.patch("/members/{member_id}/permissions", status_code=200)  # Updates permissions of a member
 # async def update_permissions(permissions: List[str], member_id: str, user_id: str) -> None:
 #     return service.update_permissions(permissions, member_id, user_id)
 
-# # TESTING DONE ✅
+# 
 # 
 # @router.delete("/members/{member_id}", status_code=204)  # Removes a member, status 204 for No Content
 # async def delete(member_id: str, user_id: str) -> None:
 #     return service.delete(member_id, user_id)
 
-# # TESTING DONE ✅
+# 
 # 
 # @router.patch("/ownership", status_code=200)  # Transfers ownership, status 200 for successful update
 # async def transfer_ownership(member_id: str, user_id: str) -> None:
 #     return service.transfer_ownership(member_id, user_id)
 
-# # TESTING DONE ✅
+# 
 # 
 # @router.get("/members", status_code=200)  # Lists members, status 200 for OK
 # async def get_members(user_id: str) -> None:
@@ -47,19 +47,19 @@
 # async def get_activity(user_id: str) -> None:
 #     return service.get_activity(user_id)
 
-# # TESTING DONE ✅
+# 
 # 
 # @router.delete("/disband", status_code=204)  # Disbands the group, status 204 for No Content
 # async def disband(user_id: str) -> None:
 #     return service.disband(user_id)
 
-# # TESTING DONE ✅
+# 
 # 
 # @router.post("/create", status_code=200)  # Creates a group, status 200 for OK
 # async def create(team: Team, user_id: str) -> None:
 #     return service.create(team, user_id)
 
-# # TESTING DONE ✅
+# 
 # 
 # @router.post("/leave", status_code=200)  # Member initiates leave, status 200 for OK
 # async def leave(user_id: str) -> None:
@@ -68,7 +68,7 @@
 #     except Exception as e:
 #         return str(e)
 
-# # TESTING DONE ✅
+# 
 # 
 # @router.get("/owner", status_code=200)  # Gets the group owner, status 200 for OK
 # async def owner(user_id: str) -> None:

@@ -1,15 +1,20 @@
 from pymongo import MongoClient
-from vars import MONGODB_CREDENTIALS, MONGODB_DB
+
+from dotenv import load_dotenv
+
+import os
+
+load_dotenv()
 
 def get_db():
     """Connect to MongoDB database instance"""
 
     mongoClient = MongoClient(
-        f"mongodb+srv://{MONGODB_CREDENTIALS}@atlascluster.2zt2wrb.mongodb.net/",
+        f"mongodb+srv://{os.getenv('MONGODB_CREDENTIALS')}@atlascluster.2zt2wrb.mongodb.net/",
         uuidRepresentation="standard"
     )
 
-    db = mongoClient[f'{MONGODB_DB}']
+    db = mongoClient[f"{os.getenv('MONGODB_DB')}"]
     account_col = db['Account']
     invite_col = db['Invite']
     password_reset_col = db['PasswordReset']

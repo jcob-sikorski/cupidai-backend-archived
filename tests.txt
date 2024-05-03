@@ -22,15 +22,12 @@ ACCOUNT
 MIDJOURNEY
 
 tests:
-- doing faceswap on uploaded on source and target images from uploadcare ✅ 0.
-- receiving event on webhook and updating prompt history
-- doing imagine with valid custom settings
-- doing imagine with invalid custom settings
-- getting history of midjourney prompts
-- using all the buttons to make action on the image
-- using non-existent button to make action on the image
-- cancelling job which does not run (existed or never existed)
-- cancelling job while it's doing
+- receiving event on webhook and updating prompt history ✅ 1.
+- doing imagine with valid custom settings ✅ 1.
+- doing imagine with invalid custom settings ✅ 1.
+- getting history of midjourney prompts ✅ 1.
+- using all the buttons to make action on the image ✅ 1.
+- using non-existent button to make action on the image ✅ 1.
 
 Note: before running any tests buy a plan to do this
 
@@ -64,7 +61,7 @@ tests:
 DEEPFAKE WITH AKOOL
 
 tests:
-- generating a deepfake for source and target photos of a single face
+- generating a deepfake for source and target photos of a single face ✅ 1.
 - generating a deepfake for source and target photos of multiple faces
 - generating a deepfake for source, target photos of single face and modify_video
 - generating a deepfake for source, target photos of multiple faces and modify_video
