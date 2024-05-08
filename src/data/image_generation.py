@@ -21,7 +21,7 @@ def update_message(user_id: str, status: Optional[str] = None, uploadcare_uris: 
 
     # Only update created_at when status is 'started'
     if status == 'started':
-        message.created_at = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        message.created_at = datetime.now()
 
     update_fields = {key: value for key, value in message.dict().items() if value is not None}
 

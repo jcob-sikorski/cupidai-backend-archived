@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, BackgroundTasks, HTTPException
+from fastapi import APIRouter, Depends, HTTPException
 
 from pydantic import BaseModel
 
@@ -25,20 +25,15 @@ class GenerateRequest(BaseModel):
     target_uri: str
     modify_video: str
 
-
 @router.post("/generate", status_code=201)
 async def generate(req: GenerateRequest,
-                   user: Annotated[Account, Depends(account_service.get_current_active_user)], 
-                   background_tasks: BackgroundTasks) -> None:
-
-    return service.generate(req.source_uri, 
-                            req.target_uri, 
-                            req.modify_video, 
-                            user, 
-                            background_tasks)
-
-
-
+                   user: Annotated[Account, Depends(account_service.get_current_active_user)]) -> None:
+    job_id = service.generate(req.source_uri, 
+                              req.target_uri, 
+                              req.modify_video, 
+                              user)
+    
+    return {"job_id": job_id}
 
 @router.get("/history", status_code=200)  # Retrieves history
 async def get_history(user: Annotated[Account, Depends(account_service.get_current_active_user)]) -> None:

@@ -1,5 +1,7 @@
-from typing import List, Dict, Optional
 from pydantic import BaseModel
+
+from typing import List, Dict, Optional
+from datetime import datetime
 
 
 class Settings(BaseModel):
@@ -62,7 +64,7 @@ class Message(BaseModel):
     user_id: Optional[str] = None
     status: Optional[str] = None
     uploadcare_uris: Optional[Dict[str, str]] = None
-    created_at: Optional[str] = None
+    created_at: datetime | None = None
     message_id: Optional[str] = None
     settings_id: Optional[str] = None
     s3_uris: Optional[List[str]] = None

@@ -3,8 +3,7 @@ tree -I 'venv'
 ############################################## IMAGE GENERATION ##############################################
 
 HIGH LEVEL GOALS FOR TODAY:
-pass
-
+- billing, referalls
 
 when it comes to frontend integration use the use reduce for managing state
 

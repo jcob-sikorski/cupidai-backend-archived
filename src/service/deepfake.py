@@ -1,4 +1,4 @@
-from fastapi import BackgroundTasks, HTTPException
+from fastapi import HTTPException
 
 import os
 
@@ -93,7 +93,7 @@ def send_post_request(url: str,
                       source_uri: str,
                       target_uri: str,
                       modify_video: str,
-                      user_id: str) -> None:
+                      user_id: str) -> str:
     response = requests.post(url, headers=headers, json=payload)
 
     response_data = response.json()  # Convert response to JSON
@@ -119,8 +119,10 @@ def send_post_request(url: str,
                         job_id=job_id,
                         output_url=output_url)
         
-    if code == 1000:
-        history_service.update('deepfake', user_id)
+    
+    history_service.update('deepfake', user_id)
+
+    return job_id
 
 def extract_id_from_uri(uri):
     # Use regex to extract the UUID from the URI
@@ -160,8 +162,7 @@ def run_photo(source_uri: str, # photo of the old face from the photo
               target_uri: str, # photo of the new face for the photo
               source_opts: str, # some params for the old face
               target_opts: str, # some params for the new face
-              user_id: str,
-              background_tasks: BackgroundTasks):
+              user_id: str) -> str:
     url = "https://openapi.akool.com/api/open/v3/faceswap/highquality/specifyimage"
 
     headers = {
@@ -183,14 +184,18 @@ def run_photo(source_uri: str, # photo of the old face from the photo
       "webhookUrl": f"{os.getenv('ROOT_DOMAIN')}/deepfake/webhook"
     }
 
-    background_tasks.add_task(send_post_request,
-                              url,
-                              headers,
-                              payload,
-                              source_uri,
-                              target_uri,
-                              None,
-                              user_id)
+    try:
+        job_id = send_post_request(url,
+                                   headers,
+                                   payload,
+                                   source_uri,
+                                   target_uri,
+                                   None,
+                                   user_id)
+        
+        return job_id
+    except ValueError:
+        raise HTTPException(status_code=400, detail="Failed to generate a deepfake.")
 
 # TODO: we're providing to small amount of faces for the video - because there's a change it will interpret the video as multiface with even single face
 # there's a possiblity that we should provide the url to the run face detection and check the mutliface to true
@@ -202,8 +207,7 @@ def run_video(source_uri: str, # photo of the old face from the photo
               source_opts: str, # some params for the old face
               target_opts: str, # some params for the new face
               modify_video: str, # video to modify
-              user_id: str,
-              background_tasks: BackgroundTasks):
+              user_id: str) -> str:
     url = "https://openapi.akool.com/api/open/v3/faceswap/highquality/specifyvideo"
 
     headers = {
@@ -225,14 +229,18 @@ def run_video(source_uri: str, # photo of the old face from the photo
       "webhookUrl": f"{os.getenv('ROOT_DOMAIN')}/deepfake/webhook"
     }
 
-    background_tasks.add_task(send_post_request,
-                              url,
-                              headers,
-                              payload,
-                              source_uri,
-                              target_uri,
-                              modify_video,
-                              user_id)
+    try:
+        job_id = send_post_request(url,
+                                   payload,
+                                   headers,
+                                   source_uri,
+                                   target_uri,
+                                   modify_video,
+                                   user_id)
+        
+        return job_id
+    except ValueError:
+        raise HTTPException(status_code=400, detail="Failed to generate a deepfake.")
 
 # TODO: if the uploaded file is a video there must be toggle button
 # if the video is running then there are three areas to drag and drop:
@@ -242,8 +250,7 @@ def run_video(source_uri: str, # photo of the old face from the photo
 def generate(source_uri: str,
              target_uri: str,
              modify_video: str,
-             user: Account,
-             background_tasks: BackgroundTasks) -> None:
+             user: Account) -> None:
     
     if billing_service.has_permissions('deepfake', user):
         source_id = extract_id_from_uri(source_uri)
@@ -267,24 +274,32 @@ def generate(source_uri: str,
 
             source_opts = run_face_detection(source_uri)
             target_opts = run_face_detection(target_uri)
-        
-            run_video(source_uri,
-                      target_uri,
-                      source_opts,
-                      target_opts,
-                      modify_video,
-                      user.user_id,
-                      background_tasks)
+
+            try:
+                job_id = run_video(source_uri,
+                                   target_uri,
+                                   source_opts,
+                                   target_opts,
+                                   modify_video,
+                                   user.user_id)
+                
+                return job_id
+            except ValueError:
+                raise HTTPException(status_code=400, detail="Failed to generate a deepfake.")
         else:            
             source_opts = run_face_detection(source_uri)
             target_opts = run_face_detection(target_uri)
-        
-            run_photo(source_uri,
-                      target_uri,
-                      source_opts,
-                      target_opts,
-                      user.user_id,
-                      background_tasks)
+          
+            try:
+                job_id = run_photo(source_uri,
+                                   target_uri,
+                                   source_opts,
+                                   target_opts,
+                                   user.user_id)
+
+                return job_id
+            except ValueError:
+                raise HTTPException(status_code=400, detail="Failed to generate a deepfake.")
     else:
         raise HTTPException(status_code=403, detail="Upgrade your plan to unlock permissions.")
 

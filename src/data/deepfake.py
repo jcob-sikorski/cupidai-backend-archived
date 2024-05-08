@@ -1,5 +1,7 @@
 from typing import List, Optional
 
+from datetime import datetime
+
 from model.deepfake import Message
 
 from pymongo import ReturnDocument
@@ -14,6 +16,8 @@ def create_message(user_id: Optional[str] = None,
            job_id: Optional[str] = None,
            output_url: Optional[str] = None) -> None:
     
+    now = datetime.now()
+    
     message = Message(
         user_id=user_id,
         status=status,
@@ -21,7 +25,8 @@ def create_message(user_id: Optional[str] = None,
         target_uri=target_uri,
         modify_video=modify_video,
         job_id=job_id,
-        output_url=output_url
+        output_url=output_url,
+        created_at=now
     )
     
     print("ADDING DEEPFAKE MESSAGE TO THE COLLECTION")

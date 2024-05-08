@@ -4,6 +4,8 @@ from typing import Optional
 
 # TODO: add quality parameter in v2
 
+# TODO: add social_account_id because each social account is associated with the prompt
+
 class Prompt(BaseModel):
     prompt: str # ✅
     # generation_speed: Optional[str]
