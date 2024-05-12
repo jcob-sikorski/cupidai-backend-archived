@@ -103,6 +103,14 @@ async def get_current_active_user(
     
     return current_user
 
+async def update_session(user: Account) -> Token:
+    access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+    access_token = create_access_token(
+        data={"sub": user.username}, expires_delta=access_token_expires
+    )
+
+    return Token(access_token=access_token, token_type="bearer")
+
 async def login(form_data: OAuth2PasswordRequestForm) -> Token:
     user = authenticate_user(form_data.username, form_data.password)
 
@@ -150,7 +158,7 @@ async def signup_ref(referral_id: str,
             return jwt_token
 
 def change_password(password_reset_id: str, 
-                           password: str) -> None:
+                    password: str) -> None:
     password_reset = data.get_password_reset(password_reset_id)
     
     if password_reset:

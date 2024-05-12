@@ -9,6 +9,10 @@ from service import account as service
 
 router = APIRouter(prefix="/account")
 
+@router.post("/update-session")
+async def update_session(user: Annotated[Account, Depends(service.get_current_active_user)]) -> Token:
+    return await service.update_session(user)
+
 @router.post("/login")
 async def login(form_data: Annotated[OAuth2PasswordRequestForm, Depends()]) -> Token:
     return await service.login(form_data)
@@ -26,6 +30,13 @@ async def signup_ref(referral_id: str,
                      form_data: Annotated[OAuth2PasswordRequestForm, Depends()]) -> Token:
     return await service.signup_ref(referral_id, email, form_data)
 
+# TODO: this should be run to map the referral id to the new user_id
+#       then in the webhook we update the referral model
+
+@router.post("/signup/ref", status_code=200)  # Creates new user account
+async def signup_ref(ref: str) -> None:
+    return await service.signup_ref(ref)
+
 
 @router.post("/change-password", status_code=200)
 async def change_password(password_reset_id: str, 
@@ -40,13 +51,6 @@ async def request_one_time_link(email: dict) -> None:
         raise HTTPException(status_code=400, detail="Email field is required")
     
     return service.request_one_time_link(email)
-
-# TODO: this should be run to map the referral id to the new user_id
-#       then in the webhook we update the referral model
-
-@router.post("/signup/ref", status_code=200)  # Creates new user account
-async def signup_ref(ref: str) -> None:
-    return await service.signup_ref(ref)
 
 # TODO: we should do authentication of new email
 
