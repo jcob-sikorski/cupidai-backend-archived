@@ -1,10 +1,10 @@
 from typing import Optional
 
-from model.history import History
+from model.usage_history import History
 
 from pymongo import ReturnDocument
 
-from .init import history_col
+from .init import usage_history_col
 
 domain_to_index = {
     "image_generation": "images_generated",
@@ -18,7 +18,7 @@ domain_to_index = {
 def update(domain: str, user_id: str) -> None:
     print("UPDATING USAGE HISTORY")
     # Update history for the user
-    result = history_col.find_one_and_update(
+    result = usage_history_col.find_one_and_update(
         {"user_id": user_id},
         {"$inc": {domain_to_index[domain]: 1}},
         upsert=True,
@@ -31,7 +31,7 @@ def update(domain: str, user_id: str) -> None:
     # # Update history for the team if the user is in a team
     # team = team_service.get_team(user_id)
     # if team:
-    #     history_col.find_one_and_update(
+    #     usage_history_col.find_one_and_update(
     #         {"owner": team.owner},
     #         {"$inc": {domain_to_index[domain]: 1}},
     #         upsert=True,
@@ -44,10 +44,10 @@ def get(user_id: str) -> History:
     # team = team_service.get_team(user_id)
 
     # if team and user_id in team.members:
-    #     result = history_col.find_one({"team_id": team.team_id})
+    #     result = usage_history_col.find_one({"team_id": team.team_id})
     # else:
-        # result = history_col.find_one({"user_id": user_id})
-    result = history_col.find_one({"user_id": user_id})
+        # result = usage_history_col.find_one({"user_id": user_id})
+    result = usage_history_col.find_one({"user_id": user_id})
 
     if result is not None:
         return History(**result)

@@ -1,18 +1,15 @@
 from fastapi import APIRouter, Depends
 
-# TODO: this should be renamed to usage_history
-
 from typing import Annotated
 
-import data.history as data
+import data.usage_history as data
 
 from model.account import Account
-from model.history import History
+from model.usage_history import History
 
 from service import account as account_service
 
-router = APIRouter(prefix="/history")
-
+router = APIRouter(prefix="/usage-history")
 
 
 @router.get("/", status_code=200)  # Retrieves account details

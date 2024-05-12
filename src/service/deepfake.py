@@ -21,7 +21,7 @@ from model.account import Account
 from model.deepfake import Message
 
 import service.billing as billing_service
-import service.history as history_service
+import service.usage_history as usage_history_service
 
 # Generate signature
 def generate_msg_signature(client_id, 
@@ -120,7 +120,7 @@ def send_post_request(url: str,
                         output_url=output_url)
         
     
-    history_service.update('deepfake', user_id)
+    usage_history_service.update('deepfake', user_id)
 
     return job_id
 

@@ -11,7 +11,7 @@ from model.ai_verification import Prompt
 from model.midjourney import Message, Response
 
 import service.billing as billing_service
-import service.history as history_service
+import service.usage_history as usage_history_service
 import service.midjourney as midjourney_service
 
 # TODO: you can make one request every 3 seconds - so we have to have some queue for the users
@@ -39,7 +39,7 @@ import service.midjourney as midjourney_service
 #             response_data = Response.parse_raw(resp.text)
 
 #         if response_data.success:
-#             history_service.update('ai_verification', user.user_id)
+#             usage_history_service.update('ai_verification', user.user_id)
 
 #         if resp.status_code != 200 or response_data.error:
 #             raise HTTPException(status_code=500, detail="Faceswap failed")
@@ -158,7 +158,7 @@ async def imagine(prompt: Prompt,
             response_data = Response.parse_raw(resp.text)
 
             if response_data.success:
-                history_service.update('ai_verification', user.user_id)
+                usage_history_service.update('ai_verification', user.user_id)
 
             if resp.status_code != 200 or response_data.error:
                 raise HTTPException(status_code=500, detail="Prompt execution failed.")
@@ -201,7 +201,7 @@ async def action(messageId: str,
         response_data = Response.parse_raw(resp.text)
 
     if response_data.success:
-        history_service.update('ai_verification', user.user_id)
+        usage_history_service.update('ai_verification', user.user_id)
 
     if resp.status_code != 200 or response_data.error:
         raise HTTPException(status_code=400, detail="Action failed")

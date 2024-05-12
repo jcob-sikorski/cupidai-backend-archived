@@ -18,7 +18,7 @@ from model.account import Account
 from model.image_generation import Settings, Message
 
 import service.billing as billing_service
-import service.history as history_service
+import service.usage_history as usage_history_service
 
 def webhook(message: Message) -> None:
     print(message)
@@ -28,7 +28,7 @@ def webhook(message: Message) -> None:
                    s3_uris=message.s3_uris)
 
     if message.status == 'in progress':
-        history_service.update('image_generation', message.user_id)
+        usage_history_service.update('image_generation', message.user_id)
 
 def check_settings(settings: Settings):
     samplers = [

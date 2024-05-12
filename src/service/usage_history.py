@@ -2,10 +2,10 @@ from fastapi import HTTPException
 
 from typing import Optional
 
-import data.history as data
+import data.usage_history as data
 
 from model.account import Account
-from model.history import History
+from model.usage_history import History
 
 
 def update(domain: str, user_id: str) -> None:
