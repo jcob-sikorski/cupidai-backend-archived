@@ -72,7 +72,7 @@ def check_settings(settings: Settings):
         'realisticVisionV51_v51VAE.safetensors', 
         'stablegramUSEuropean_v21.safetensors', 
         'uberRealisticPornMerge_urpmv13.safetensors', 
-        'v1-5-pruned-emaonly.ckpt'
+        'v1-5-pruned-emaonly.ckpt' # TODO: to be removed
     ]
 
     ipa_models = [
@@ -135,7 +135,7 @@ def check_settings(settings: Settings):
     if settings.ipa_1_model and settings.ipa_1_model not in ipa_models:
         return f"Error: ipa_1_model must be one of {ipa_models}"
 
-    if settings.ipa_1_weight and settings.ipa_1_weight > 1.0:
+    if settings.ipa_1_weight and settings.ipa_1_weight > 1.0: # TODO: weight is -1 to 3
         return "Error: ipa_1_weight must be less than or equal to 1.0"
     
     if settings.ipa_1_noise and settings.ipa_1_noise > 1.0:

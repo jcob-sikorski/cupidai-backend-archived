@@ -27,19 +27,19 @@ async def signup_ref(referral_id: str,
     return await service.signup_ref(referral_id, email, form_data)
 
 
-@router.post("/reset-password-request", status_code=200)
-async def reset_password_request(password_reset_id: str, 
-                                 password: str) -> None:
-    return service.reset_password_request(password_reset_id, password)
+@router.post("/change-password", status_code=200)
+async def change_password(password_reset_id: str, 
+                          password: str) -> None:
+    return service.change_password(password_reset_id, password)
 
 
-@router.post("/reset-password", status_code=200)
-async def reset_password(email: dict) -> None:
+@router.post("/request-one-time-link", status_code=200)
+async def request_one_time_link(email: dict) -> None:
     email = email.get("email")
     if not email:
         raise HTTPException(status_code=400, detail="Email field is required")
     
-    return service.reset_password(email)
+    return service.request_one_time_link(email)
 
 # TODO: this should be run to map the referral id to the new user_id
 #       then in the webhook we update the referral model

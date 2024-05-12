@@ -3,13 +3,11 @@ tree -I 'venv'
 ############################################## IMAGE GENERATION ##############################################
 
 HIGH LEVEL GOALS FOR TODAY:
-- billing, referalls
+- ai verification + half of image generator
 
-when it comes to frontend integration use the use reduce for managing state
+frontend integration
 
-add greyed out components
-
-on loading something the component should show the loading button
+billing, referalls
 
 estimate which droplet we'll need to buy on digitalocean
 

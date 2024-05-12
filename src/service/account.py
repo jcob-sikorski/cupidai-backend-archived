@@ -149,7 +149,7 @@ async def signup_ref(referral_id: str,
         finally:
             return jwt_token
 
-def reset_password_request(password_reset_id: str, 
+def change_password(password_reset_id: str, 
                            password: str) -> None:
     password_reset = data.get_password_reset(password_reset_id)
     
@@ -160,13 +160,13 @@ def reset_password_request(password_reset_id: str,
         if password_reset.is_used == False and now <= expiry_time:
             if data.set_new_password(get_password_hash(password), password_reset.user_id) \
                 and data.disable_password_reset(password_reset_id):
-
+                
                 return
     raise HTTPException(status_code=400, detail="Failed to reset password.")
     
                 
 
-def reset_password(email: str) -> None:
+def request_one_time_link(email: str) -> None:
     user = get_by_email(email)
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
@@ -176,7 +176,8 @@ def reset_password(email: str) -> None:
     # TODO: this should be a link to the UI with the password reset ID -
     #       the UI should send this request when user types new password
 
-    password_reset_link = f"{os.getenv('ROOT_DOMAIN')}/reset-password-request/{password_reset_id}"
+    # password_reset_link = f"{os.getenv('ROOT_DOMAIN')}/forgot-password/{password_reset_id}"
+    password_reset_link = f"http://localhost:3000/forgot-password/{password_reset_id}"
 
     now = datetime.now()
 
