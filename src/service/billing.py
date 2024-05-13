@@ -11,7 +11,7 @@ import stripe
 import data.billing as data
 
 from model.account import Account
-from model.billing import Item, StripeAccount, Plan
+from model.billing import Item, Plan, CreateCheckoutSessionRequest
 
 import service.account as account_service
 import service.email as email_service
@@ -33,35 +33,21 @@ def has_permissions(feature: str,
     # return data.has_permissions(feature, user.user_id)
     return True
 
-async def create_checkout_session(referral_id: str, 
-                                  user: Account) -> None:
-    
-    session = await stripe.checkout.Session.create(
+def create_checkout_session(create_checkout_session_request: CreateCheckoutSessionRequest,
+                            user: Account) -> str:
+    session = stripe.checkout.Session.create(
         success_url="https://deep-safe-spaniel.ngrok-free.app/dashboard",
         cancel_url="https://deep-safe-spaniel.ngrok-free.app/billing",
         line_items=[
             {
-                "price": "price_1P2ZR509MTVFbatacp2Bps8R", 
-                "quantity": 1
-            },
-            {
-                "price": "price_1P2ZTc09MTVFbata42n2Hqup", 
-                "quantity": 1
-            },
-            {
-                "price": "price_1P2ZUI09MTVFbatarjRaJvMH", 
-                "quantity": 1
-            },
-            {
-                "price": "price_1P2ZV609MTVFbataKtHmKS3z", 
+                "price": create_checkout_session_request.price_id, 
                 "quantity": 1
             },
         ],
         mode="subscription",
         client_reference_id=user.user_id,
-        referral_id=referral_id,
         metadata={
-            "referral_id": referral_id
+            "referral_id": create_checkout_session_request.referral_id
         }
     )
 
@@ -87,23 +73,20 @@ async def webhook(item: Item,
 
     if event['type'] == 'checkout.session.completed':
         session = event['data']['object']
-
-        # TODO: By default checkout.session.completed will only have a 
-        #       customer ID if the session was related to buying a subscription.
-        # if session['mode'] == 'payment':
+        
+        if session['mode'] == 'subscription':
             # Note: session['customer'] is null for not real customers
 
-            # create_stripe_account(session['client_reference_id'], session['customer'])
+            create_stripe_account(session['client_reference_id'], session['customer'])
 
-            # referral = referral_service.get_referral(session['metadata']['referral_id'])
+            referral = referral_service.get_referral(session['metadata']['referral_id'])
 
-            # if referral:
-            #     referral_service.update_statistics(referral.host_id, session["amount_total"] / 100, False)
+            if referral:
+                referral_service.update_statistics(referral.host_id, session["amount_total"] / 100, False)
 
-            #     user = account_service.get_by_id(referral.host_id)
-            #     if user:
-            #         # for env   
-            #         email_service.send(user.email, 'clv2tl6jd00vybfeainihiu2j')
+                user = account_service.get_by_id(referral.host_id)
+                if user:
+                    email_service.send(user.email, 'clv2tl6jd00vybfeainihiu2j')
 
     elif event['type'] == 'customer.subscription.deleted':
         subscription = event['data']['object']
@@ -206,12 +189,13 @@ def get_available_plans() -> Optional[List[Plan]]:
             price = stripe.Price.retrieve(default_price_id)["unit_amount"]   
 
             product_info = {
+                "price_id": default_price_id,
                 "product_id": product["id"],
                 "name": product["name"],
                 "tag": product["metadata"].get("tag"),
                 "description": product["description"],
                 "features": [feature["name"] for feature in product["features"]],
-                "default_price": f"{price/100}$",
+                "price": f"{price/100}$",
             }
             product_list.append(product_info)
 
@@ -229,12 +213,13 @@ def get_product(product_id: str) -> Optional[Plan]:
         price = stripe.Price.retrieve(default_price_id)["unit_amount"]
 
         product_info = {
+            "price_id": default_price_id,
             "product_id": product["id"],
             "name": product["name"],
             "tag": product["metadata"].get("tag"),
             "description": product["description"],
             "features": [feature["name"] for feature in product["features"]],
-            "default_price": f"${price / 100}$",
+            "price": f"${price / 100}$",
         }
 
         return product_info
