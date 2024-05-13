@@ -29,10 +29,13 @@ async def download_history(user: Annotated[Account, Depends(account_service.get_
     return service.download_history(user)
 
 
-@router.get("/history", status_code=200)  # Retrieves billing history
-async def get_history(user: Annotated[Account, Depends(account_service.get_current_active_user)]) -> dict:
-    return service.get_history(user)
-
+@router.get("/payment-intents", status_code=200)  # Retrieves payment intent history
+async def get_payment_intents(starting_after: int,
+                              limit: int,
+                              user: Annotated[Account, Depends(account_service.get_current_active_user)]) -> List[dict]:
+    return service.get_payment_intents(limit,
+                                       starting_after,
+                                       user)
 
 
 @router.post("/terms-of-service", status_code=201)  # Accepts terms of service for billing
@@ -40,13 +43,20 @@ async def accept_tos(user: Annotated[Account, Depends(account_service.get_curren
     return service.accept_tos(user)
 
 
-
 @router.get("/current-plan", status_code=200)  # Retrieves current billing plan
 async def get_current_plan(user: Annotated[Account, Depends(account_service.get_current_active_user)]) -> Optional[Plan]:
     return service.get_current_plan(user)
+
 
 @router.get("/available-plans", status_code=200)  # Retrieves all available plans
 async def get_available_plans(user: Annotated[Account, Depends(account_service.get_current_active_user)]) -> Optional[List[Plan]]:
     product_list = service.get_available_plans()
 
     return product_list
+
+@router.get("/product", status_code=200)  # Retrieves all available plans
+async def get_product(product_id: str,
+                      user: Annotated[Account, Depends(account_service.get_current_active_user)]) -> Optional[Plan]:
+    product = service.get_product(product_id)
+
+    return product

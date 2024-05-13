@@ -4,6 +4,8 @@ from typing import List, Optional
 
 import os
 
+from datetime import datetime
+
 import stripe
 
 import data.billing as data
@@ -146,11 +148,36 @@ def download_history(user: Account) -> None:
         raise HTTPException(status_code=404, detail="No purchase history found.")
 
 
-def get_history(user: Account) -> dict:
+def get_payment_intents(starting_after: int, 
+                        limit: int, 
+                        user: Account) -> List[dict]:
     try:
-        return data.get_history(user.user_id)
-    except ValueError:
-        raise HTTPException(status_code=404, detail="There is no track record of transactions for this user.")
+        customer_id = data.get_customer_id(user.user_id)
+
+        transaction_history = []
+
+        if customer_id:
+            payment_intents = stripe.PaymentIntent.list(customer=customer_id,
+                                                        starting_after=starting_after, 
+                                                        limit=limit)
+
+            for intent in payment_intents.data:
+                date = datetime.fromtimestamp(intent.created).strftime("%Y-%m-%d %H:%M:%S")
+                plan = intent.description  # Assuming description contains the plan information
+                status = intent.status
+
+                # Creating transaction dictionary
+                transaction = {
+                    "date": date,
+                    "plan": plan,
+                    "status": status
+                }
+                transaction_history.append(transaction)
+
+        return transaction_history
+
+    except stripe.error.InvalidRequestError as e:
+        raise HTTPException(status_code=404, detail="There is no track record of payment intents for this user.")
 
 
 def accept_tos(user: Account) -> None:
@@ -166,6 +193,7 @@ def get_current_plan(user: Account) -> Optional[Plan]:
     except ValueError:
         raise HTTPException(status_code=404, detail="There is no track record of transactions for this user.")
     
+
 def get_available_plans() -> Optional[List[Plan]]:
     try:
         products = stripe.Product.list(limit=4, active=True)
@@ -178,8 +206,9 @@ def get_available_plans() -> Optional[List[Plan]]:
             price = stripe.Price.retrieve(default_price_id)["unit_amount"]   
 
             product_info = {
+                "product_id": product["id"],
                 "name": product["name"],
-                "tag": product["metadata"]["tag"],
+                "tag": product["metadata"].get("tag"),
                 "description": product["description"],
                 "features": [feature["name"] for feature in product["features"]],
                 "default_price": f"{price/100}$",
@@ -189,3 +218,31 @@ def get_available_plans() -> Optional[List[Plan]]:
         return product_list
     except ValueError:
         raise HTTPException(status_code=404, detail="There are no available plans at the moment.")
+    
+
+def get_product(product_id: str) -> Optional[Plan]:
+    try:
+        product = stripe.Product.retrieve(product_id)
+
+        default_price_id = product["default_price"]
+
+        price = stripe.Price.retrieve(default_price_id)["unit_amount"]
+
+        product_info = {
+            "product_id": product["id"],
+            "name": product["name"],
+            "tag": product["metadata"].get("tag"),
+            "description": product["description"],
+            "features": [feature["name"] for feature in product["features"]],
+            "default_price": f"${price / 100}$",
+        }
+
+        return product_info
+
+    except stripe.error.StripeError as e:
+        error_message = f"Error retrieving product information from Stripe: {e}"
+        raise HTTPException(status_code=500, detail=error_message)
+
+    except Exception as e:
+        error_message = f"An unexpected error occurred: {e}"
+        raise HTTPException(status_code=500, detail=error_message)
