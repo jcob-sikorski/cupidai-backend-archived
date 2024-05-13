@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, Request
 
-from typing import Annotated, List, Optional
+from typing import Annotated, List, Tuple, Optional
 
 from model.account import Account
 from model.billing import Item, Plan, CreateCheckoutSessionRequest
@@ -31,13 +31,15 @@ async def download_history(user: Annotated[Account, Depends(account_service.get_
     return service.download_history(user)
 
 
-@router.get("/payment-intents", status_code=200)  # Retrieves payment intent history
-async def get_payment_intents(starting_after: int,
-                              limit: int,
-                              user: Annotated[Account, Depends(account_service.get_current_active_user)]) -> List[dict]:
-    return service.get_payment_intents(limit,
-                                       starting_after,
-                                       user)
+# @router.get("/transaction-history", status_code=200)  # Retrieves payment intent history
+# async def get_transaction_history(last_object_id: str,
+#                                   limit: str,
+#                                   user: Annotated[Account, Depends(account_service.get_current_active_user)]) -> Tuple[List[dict], Optional[str], bool]:
+#     transaction_history, last_object_id, has_more = service.get_transaction_history(last_object_id,
+#                                                                           limit,
+#                                                                           user)
+
+#     return transaction_history, last_object_id, has_more
 
 
 @router.post("/terms-of-service", status_code=201)  # Accepts terms of service for billing

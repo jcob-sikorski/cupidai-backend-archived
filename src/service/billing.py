@@ -1,6 +1,6 @@
 from fastapi import Request, HTTPException
 
-from typing import List, Optional
+from typing import List, Tuple, Optional
 
 import os
 
@@ -131,36 +131,43 @@ def download_history(user: Account) -> None:
         raise HTTPException(status_code=404, detail="No purchase history found.")
 
 
-def get_payment_intents(starting_after: int, 
-                        limit: int, 
-                        user: Account) -> List[dict]:
-    try:
-        customer_id = data.get_customer_id(user.user_id)
+# def get_transaction_history(last_object_id: str, 
+#                             limit: str, 
+#                             user: Account) -> Tuple[List[dict], Optional[str], bool]:
+#     try:
+#         customer_id = data.get_customer_id(user.user_id)
 
-        transaction_history = []
+#         transaction_history = []
+#         has_more = False
 
-        if customer_id:
-            payment_intents = stripe.PaymentIntent.list(customer=customer_id,
-                                                        starting_after=starting_after, 
-                                                        limit=limit)
+#         if customer_id:
+#             payment_intents = stripe.PaymentIntent.list(customer=customer_id,
+#                                                         starting_after=last_object_id if last_object_id else None,
+#                                                         limit=int(limit))
+            
+#             print("PAYMENT INTENTS: ", payment_intents)
 
-            for intent in payment_intents.data:
-                date = datetime.fromtimestamp(intent.created).strftime("%Y-%m-%d %H:%M:%S")
-                plan = intent.description  # Assuming description contains the plan information
-                status = intent.status
+#             for intent in payment_intents.data:
+#                 date = datetime.fromtimestamp(intent.created).strftime("%Y-%m-%d %H:%M:%S")
 
-                # Creating transaction dictionary
-                transaction = {
-                    "date": date,
-                    "plan": plan,
-                    "status": status
-                }
-                transaction_history.append(transaction)
+#                 # Creating transaction dictionary
+#                 transaction = {
+#                     "date": date,
+#                     "id": intent.id,
+#                     "description": intent.description,
+#                     "status": intent.status
+#                 }
+#                 transaction_history.append(transaction)
 
-        return transaction_history
+#             # Extract the ID of the last object for pagination
+#             if payment_intents.data:
+#                 last_object_id = payment_intents.data[-1].id
+#                 has_more = payment_intents.has_more
 
-    except stripe.error.InvalidRequestError as e:
-        raise HTTPException(status_code=404, detail="There is no track record of payment intents for this user.")
+#         return transaction_history, last_object_id, has_more
+
+#     except stripe.error.InvalidRequestError as e:
+#         raise HTTPException(status_code=404, detail="There is no track record of payment intents for this user.")
 
 
 def accept_tos(user: Account) -> None:
