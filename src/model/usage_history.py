@@ -6,5 +6,5 @@ class History(BaseModel):
     images_generated: Optional[int] = None
     deepfakes_generated: Optional[int] = None
     ai_verification_generated: Optional[int] = None
-    content_utilities_uses: Optional[int] = None
+    content_utilities_used: Optional[int] = None
     people_referred: Optional[int] = None

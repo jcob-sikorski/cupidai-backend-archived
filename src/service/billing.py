@@ -1,6 +1,6 @@
 from fastapi import Request, HTTPException
 
-from typing import Optional
+from typing import List, Optional
 
 import os
 
@@ -31,6 +31,40 @@ def has_permissions(feature: str,
     # return data.has_permissions(feature, user.user_id)
     return True
 
+async def create_checkout_session(referral_id: str, 
+                                  user: Account) -> None:
+    
+    session = await stripe.checkout.Session.create(
+        success_url="https://deep-safe-spaniel.ngrok-free.app/dashboard",
+        cancel_url="https://deep-safe-spaniel.ngrok-free.app/billing",
+        line_items=[
+            {
+                "price": "price_1P2ZR509MTVFbatacp2Bps8R", 
+                "quantity": 1
+            },
+            {
+                "price": "price_1P2ZTc09MTVFbata42n2Hqup", 
+                "quantity": 1
+            },
+            {
+                "price": "price_1P2ZUI09MTVFbatarjRaJvMH", 
+                "quantity": 1
+            },
+            {
+                "price": "price_1P2ZV609MTVFbataKtHmKS3z", 
+                "quantity": 1
+            },
+        ],
+        mode="subscription",
+        client_reference_id=user.user_id,
+        referral_id=referral_id,
+        metadata={
+            "referral_id": referral_id
+        }
+    )
+
+    return session.url
+
 async def webhook(item: Item, 
                   request: Request) -> None:
     event = None
@@ -46,25 +80,28 @@ async def webhook(item: Item,
     except stripe.error.SignatureVerificationError as e:
         print(e)
         raise HTTPException(status_code=400, detail="Invalid signature")
+    
+    print("EVENT: ", event)
 
     if event['type'] == 'checkout.session.completed':
         session = event['data']['object']
 
-        if session['mode'] == 'payment':
-            # TODO: By default checkout.session.completed will only have a 
-            #       customer ID if the session was related to buying a subscription.
+        # TODO: By default checkout.session.completed will only have a 
+        #       customer ID if the session was related to buying a subscription.
+        # if session['mode'] == 'payment':
             # Note: session['customer'] is null for not real customers
-            create_stripe_account(session['client_reference_id'], session['customer'])
 
-            referral = referral_service.get_referral(session['metadata']['referral_id'])
+            # create_stripe_account(session['client_reference_id'], session['customer'])
 
-            if referral:
-                referral_service.update_statistics(referral.host_id, session["amount_total"] / 100, False)
+            # referral = referral_service.get_referral(session['metadata']['referral_id'])
 
-                user = account_service.get_by_id(referral.host_id)
-                if user:
-                    # for env   
-                    email_service.send(user.email, 'clv2tl6jd00vybfeainihiu2j')
+            # if referral:
+            #     referral_service.update_statistics(referral.host_id, session["amount_total"] / 100, False)
+
+            #     user = account_service.get_by_id(referral.host_id)
+            #     if user:
+            #         # for env   
+            #         email_service.send(user.email, 'clv2tl6jd00vybfeainihiu2j')
 
     elif event['type'] == 'customer.subscription.deleted':
         subscription = event['data']['object']
@@ -128,3 +165,27 @@ def get_current_plan(user: Account) -> Optional[Plan]:
         return data.get_current_plan(user.user_id)
     except ValueError:
         raise HTTPException(status_code=404, detail="There is no track record of transactions for this user.")
+    
+def get_available_plans() -> Optional[List[Plan]]:
+    try:
+        products = stripe.Product.list(limit=4, active=True)
+
+        product_list = []
+
+        for product in products["data"]:
+            default_price_id = product["default_price"]
+
+            price = stripe.Price.retrieve(default_price_id)["unit_amount"]   
+
+            product_info = {
+                "name": product["name"],
+                "tag": product["metadata"]["tag"],
+                "description": product["description"],
+                "features": [feature["name"] for feature in product["features"]],
+                "default_price": f"{price/100}$",
+            }
+            product_list.append(product_info)
+
+        return product_list
+    except ValueError:
+        raise HTTPException(status_code=404, detail="There are no available plans at the moment.")

@@ -10,7 +10,7 @@ domain_to_index = {
     "image_generation": "images_generated",
     "deepfake": "deepfakes_generated",
     "ai_verification": "ai_verification_generated",
-    "content_utilities": "content_utilities_uses",
+    "content_utilities": "content_utilities_used",
     "referral": "people_referred" 
 }
 
@@ -56,5 +56,5 @@ def get(user_id: str) -> History:
                        images_generated=0,
                        deepfakes_generated=0,
                        ai_verification_generated=0,
-                       content_utilities_uses=0,
+                       content_utilities_used=0,
                        people_referred=0)

@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, Request
 
-from typing import Annotated, Optional
+from typing import Annotated, List, Optional
 
 from model.account import Account
 from model.billing import Item, Plan
@@ -14,6 +14,14 @@ router = APIRouter(prefix="/billing")
 async def webhook(item: Item, 
                   request: Request) -> None:
     return await service.webhook(item, request)
+
+@router.post('/create-checkout-session')
+async def create_checkout_session(referral_id: str, 
+                                  user: Annotated[Account, Depends(account_service.get_current_active_user)]
+                                  ) -> None:
+    session_url = await service.create_checkout_session(referral_id, user)
+
+    return {"session_url": session_url}
 
 # TODO: user need to download history in chunks
 @router.get("/download-history", status_code=200)  # Downloads billing history
@@ -36,3 +44,9 @@ async def accept_tos(user: Annotated[Account, Depends(account_service.get_curren
 @router.get("/current-plan", status_code=200)  # Retrieves current billing plan
 async def get_current_plan(user: Annotated[Account, Depends(account_service.get_current_active_user)]) -> Optional[Plan]:
     return service.get_current_plan(user)
+
+@router.get("/available-plans", status_code=200)  # Retrieves all available plans
+async def get_available_plans(user: Annotated[Account, Depends(account_service.get_current_active_user)]) -> Optional[List[Plan]]:
+    product_list = service.get_available_plans()
+
+    return product_list

@@ -16,5 +16,8 @@ class TermsOfService(BaseModel):
     date_accepted: datetime | None = None
 
 class Plan(BaseModel):
-    plan_id: str
-    features: List[str]
+    name: str | None = None
+    tag: str | None = None
+    description: Optional[str] = None
+    features: List[str] | None = None
+    default_price: str | None = None
