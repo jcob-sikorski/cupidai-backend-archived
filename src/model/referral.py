@@ -23,7 +23,7 @@ class Earnings(BaseModel):
 
 class Statistics(BaseModel):
     period: str | None = None  # This can be 'weekly', 'monthly', or 'yearly'
-    period_value: int | None = None  # This can be week number, month number, or year
+    referral_link_clicks: int | None = None
     referral_link_signups: int | None = None
     purchases_made: int | None = None
     earned: float | None = None

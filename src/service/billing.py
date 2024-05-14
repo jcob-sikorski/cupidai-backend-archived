@@ -84,7 +84,7 @@ async def webhook(item: Item,
             referral = referral_service.get_referral(session['metadata']['referral_id'])
 
             if referral:
-                referral_service.update_statistics(referral.host_id, session["amount_total"] / 100, False)
+                referral_service.update_statistics(referral.host_id, session["amount_total"] / 100, False, False)
 
                 user = account_service.get_by_id(referral.host_id)
                 if user:

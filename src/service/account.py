@@ -133,7 +133,9 @@ async def signup(form_data: OAuth2PasswordRequestForm) -> Token:
         raise HTTPException(status_code=400, detail="Email cannot be empty")
 
     try:
-        data.signup(form_data.email, form_data.username, get_password_hash(form_data.password))
+        user = data.signup(form_data.email, form_data.username, get_password_hash(form_data.password))
+        
+        referral_service.generate_link(user)
     except ValueError:
         raise HTTPException(status_code=404, detail="User already exists.")
 
@@ -149,7 +151,7 @@ async def signup_ref(referral_id: str,
     if jwt_token:
         user = get_by_email(form_data.email)
         try:
-            referral_service.log_referral(referral_id, user)
+            referral_service.log_signup_ref(referral_id, user)
         except ValueError:
             raise HTTPException(status_code=400, detail="Referral with ID {referral_id} does not exist.")
         finally:

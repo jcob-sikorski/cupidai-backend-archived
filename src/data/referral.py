@@ -4,6 +4,8 @@ from model.referral import Referral, Earnings, Statistics, PayoutRequest, Payout
 
 from .init import referral_col, payout_request_col, earnings_col, statistics_col, payout_history_col
 
+from pymongo import DESCENDING
+
 from uuid import uuid4
 
 from datetime import datetime, timedelta
@@ -45,6 +47,16 @@ def request_payout(payout_request: PayoutRequest) -> None:
 
     payout_request_col.insert_one(payout_request.dict())
 
+def get_newest_link(user_id: str) -> Optional[str]:
+    referral = referral_col.find_one({"host_id": user_id})
+
+    print(referral)
+
+    if referral:
+        return referral["referral_id"]
+
+    return None
+
 def get_unpaid_earnings(user_id: str) -> float:
     earnings = earnings_col.find_one({"user_id": user_id})
 
@@ -61,7 +73,7 @@ def get_referral(referral_id: str) -> Optional[Referral]:
 
     return None
 
-def update_statistics(user_id: str, amount_bought: float, signup_ref: bool):
+def update_statistics(user_id: str, amount_bought: float, clicked: bool, signup_ref: bool):
     print("UPDATIG STATISTICS")
     now = datetime.now()
     week_start = (now - timedelta(days=now.weekday())).replace(hour=0, minute=0, second=0, microsecond=0)  # Monday at midnight
@@ -76,27 +88,77 @@ def update_statistics(user_id: str, amount_bought: float, signup_ref: bool):
 
     print(f"PERIODS: {periods}")
 
-    for period, start_date in periods.items():
-        updates = {
-            '$inc': {
-                'purchases_made': 1, 'earned': amount_bought * 0.4
-            } if not signup_ref else {
-                'referral_link_signups': 1
+    if clicked:
+        for period, start_date in periods.items():
+            updates = {
+                '$inc': {
+                    'referral_link_clicks': 1
+                }
             }
-        }
-        print(f"UPDATES: {updates}")
+            print(f"UPDATES: {updates}")
 
-        result = statistics_col.find_one_and_update(
-            {"user_id": user_id, "period": period, "period_date": start_date},
-            updates,
-            upsert=True
-        )
-        print(f"RESULT: {result}")
+            result = statistics_col.find_one_and_update(
+                {"user_id": user_id, "period": period, "period_date": start_date},
+                updates,
+                upsert=True
+            )
+            print(f"RESULT: {result}")
+    else:
+        for period, start_date in periods.items():
+            updates = {
+                '$inc': {
+                    'purchases_made': 1, 'earned': amount_bought * 0.4
+                } if not signup_ref else {
+                    'referral_link_signups': 1
+                }
+            }
+            print(f"UPDATES: {updates}")
 
-def get_statistics(user_id: str) -> None:
-    results = statistics_col.find({"user_id": user_id})
+            result = statistics_col.find_one_and_update(
+                {"user_id": user_id, "period": period, "period_date": start_date},
+                updates,
+                upsert=True
+            )
+            print(f"RESULT: {result}")
 
-    statistics = [Statistics(**result) for result in results]
+def get_statistics(user_id: str) -> List[Statistics]:
+    # Group the sorted results by period and select the document with the maximum period_value within each group
+    pipeline = [
+        {"$match": {"user_id": user_id}},
+        {"$sort": {"period_value": DESCENDING}},
+        {"$group": {"_id": "$period", "latest_statistic": {"$first": "$$ROOT"}}}
+    ]
+
+    aggregated_results = statistics_col.aggregate(pipeline)
+
+    # Convert the aggregated results to Statistics objects
+    statistics = [Statistics(**result["latest_statistic"]) for result in aggregated_results]
+
+    # If no statistics found, create default Statistics objects for each period type
+    if not statistics:
+        statistics = [
+            Statistics(period="weekly", 
+                       period_value=0, 
+                       referral_link_clicks=0, 
+                       referral_link_signups=0, 
+                       purchases_made=0, 
+                       earned=0, 
+                       user_id=user_id),
+
+            Statistics(period="monthly", 
+                       period_value=0, 
+                       referral_link_clicks=0, 
+                       purchases_made=0, 
+                       earned=0, 
+                       user_id=user_id),
+
+            Statistics(period="yearly", 
+                       period_value=0, 
+                       referral_link_clicks=0, 
+                       purchases_made=0, 
+                       earned=0, 
+                       user_id=user_id)
+        ]
 
     return statistics
 

@@ -16,7 +16,7 @@ def link_clicked(referral_id: str) -> None:
         referral = get_referral(referral_id)
 
         print(f"REFERRAL: {referral.dict()}")
-        update_statistics(referral.host_id, amount=0, signup_ref=True)
+        update_statistics(referral.host_id, amount=0, clicked=True, signup_ref=False)
     except ValueError:
         raise ValueError(f"Referral with ID {referral_id} does not exist.")
 
@@ -28,6 +28,9 @@ def request_payout(payout_request: PayoutRequest) -> None:
         data.request_payout(payout_request)
     except ValueError:
         raise HTTPException(status_code=404, detail="Payout not available.")
+    
+def get_newest_link(user: Account) -> Optional[str]:
+    return data.get_newest_link(user.user_id)
 
 def get_unpaid_earnings(user: Account) -> float:
     return data.get_unpaid_earnings(user.user_id)
@@ -35,10 +38,10 @@ def get_unpaid_earnings(user: Account) -> float:
 def get_referral(referral_id: str) -> Optional[Referral]:
     return data.get_referral(referral_id)
 
-def update_statistics(user_id: str, amount: float, signup_ref: bool):
-    return data.update_statistics(user_id, amount, signup_ref)
+def update_statistics(user_id: str, amount: float, clicked: bool, signup_ref: bool):
+    return data.update_statistics(user_id, amount, clicked, signup_ref)
 
-def log_referral(referral_id: str,
+def log_signup_ref(referral_id: str,
                  user: Account) -> None:
     print("LOGGING REFERRAL")
     try:
@@ -47,7 +50,7 @@ def log_referral(referral_id: str,
         referral = get_referral(referral_id)
 
         print(f"REFERRAL: {referral.dict()}")
-        update_statistics(referral.host_id, amount=0, signup_ref=True)
+        update_statistics(referral.host_id, amount=0, clicked=False, signup_ref=True)
     except ValueError:
         raise ValueError(f"Referral with ID {referral_id} does not exist.")
 
