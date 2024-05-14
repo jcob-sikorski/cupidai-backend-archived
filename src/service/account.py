@@ -128,28 +128,26 @@ async def login(form_data: OAuth2PasswordRequestForm) -> Token:
 
     return Token(access_token=access_token, token_type="bearer")
 
-async def signup(email: str, 
-           form_data: OAuth2PasswordRequestForm) -> Token:
-    if not email:
+async def signup(form_data: OAuth2PasswordRequestForm) -> Token:
+    if not form_data.email:
         raise HTTPException(status_code=400, detail="Email cannot be empty")
 
     try:
-        data.signup(email, form_data.username, get_password_hash(form_data.password))
+        data.signup(form_data.email, form_data.username, get_password_hash(form_data.password))
     except ValueError:
         raise HTTPException(status_code=404, detail="User already exists.")
 
     # for env
-    email_service.send(email, "clv9so1fa029b8k9nig3go17m", username=form_data.username)
+    email_service.send(form_data.email, "clv9so1fa029b8k9nig3go17m", username=form_data.username)
 
     return await login(form_data)
 
 async def signup_ref(referral_id: str,
-               email: str,
-               form_data: OAuth2PasswordRequestForm) -> Token:
-    jwt_token = await signup(email, form_data)
+                     form_data: OAuth2PasswordRequestForm) -> Token:
+    jwt_token = await signup(form_data.email, form_data)
 
     if jwt_token:
-        user = get_by_email(email)
+        user = get_by_email(form_data.email)
         try:
             referral_service.log_referral(referral_id, user)
         except ValueError:

@@ -16,6 +16,11 @@ async def generate_link(user: Annotated[Account, Depends(account_service.get_cur
     return service.generate_link(user)
 
 
+@router.post("/link-clicked", status_code=201)
+async def link_clicked(referral_id: str) -> None:
+    return await service.link_clicked(referral_id)
+
+
 @router.post("/payout/request", status_code=201)  # Requests a payout
 async def request_payout(payout_request: PayoutRequest, 
                          _: Annotated[Account, Depends(account_service.get_current_active_user)]) -> None:

@@ -8,6 +8,8 @@ from datetime import datetime
 
 import stripe
 
+from stripe.error import InvalidRequestError
+
 import data.billing as data
 
 from model.account import Account
@@ -177,13 +179,47 @@ def accept_tos(user: Account) -> None:
         raise HTTPException(status_code=400, detail="Failed to accept Terms of Conditions.")
 
 
-def get_current_plan(user: Account) -> Optional[Plan]:
-    try:
-        return data.get_current_plan(user.user_id)
-    except ValueError:
-        raise HTTPException(status_code=404, detail="There is no track record of transactions for this user.")
-    
+def get_current_plan(user: Account) -> Optional[str]:
+    customer_id = data.get_customer_id(user.user_id)
 
+    if customer_id:
+        try:
+            customer = stripe.Customer.retrieve(customer_id, expand=['subscriptions'])
+            if 'subscriptions' in customer:
+                subscriptions = customer.subscriptions.data  # Access the list of subscriptions
+    
+                for subscription in subscriptions:  # Iterate over each subscription
+                    plan_id = subscription.plan.id  # Access the plan ID for each subscription
+                    return plan_id
+        except InvalidRequestError as e:
+            # Handle the case where the customer does not exist or there was an error retrieving their data
+            print(f"Error retrieving customer {customer_id}: {e}")
+            return None
+        
+
+def cancel_plan(user: Account) -> bool:
+    customer_id = data.get_customer_id(user.user_id)
+
+    if customer_id:
+        try:
+            customer = stripe.Customer.retrieve(customer_id, expand=['subscriptions'])
+            if 'subscriptions' in customer:
+                subscriptions = customer.subscriptions.data  # Access the list of subscriptions
+    
+                for subscription in subscriptions:  # Iterate over each subscription
+                    subscription_id = subscription.id  # Access the plan ID for each subscription
+                    
+                    stripe.Subscription.cancel(subscription_id)
+
+                    return True
+        except InvalidRequestError as e:
+            # Handle the case where the customer does not exist or there was an error retrieving their data
+            print(f"Error cancellling subscription: {e}")
+            return False
+
+    return False
+
+        
 def get_available_plans() -> Optional[List[Plan]]:
     try:
         products = stripe.Product.list(limit=4, active=True)

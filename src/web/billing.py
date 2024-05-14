@@ -47,9 +47,14 @@ async def accept_tos(user: Annotated[Account, Depends(account_service.get_curren
     return service.accept_tos(user)
 
 
-@router.get("/current-plan", status_code=200)  # Retrieves current billing plan
-async def get_current_plan(user: Annotated[Account, Depends(account_service.get_current_active_user)]) -> Optional[Plan]:
+@router.get("/current-plan", status_code=200)  # Retrieves current plan of the user
+async def get_current_plan(user: Annotated[Account, Depends(account_service.get_current_active_user)]) -> Optional[str]:
     return service.get_current_plan(user)
+
+
+@router.post("/cancel-plan", status_code=201)  # Attempts to cancel current plan of the user
+async def cancel_plan(user: Annotated[Account, Depends(account_service.get_current_active_user)]) -> bool:
+    return service.cancel_plan(user)
 
 
 @router.get("/available-plans", status_code=200)  # Retrieves all available plans

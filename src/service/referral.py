@@ -10,6 +10,16 @@ from model.referral import PayoutRequest, Referral
 def generate_link(user: Account) -> str:
     return data.generate_link(user.user_id)
 
+def link_clicked(referral_id: str) -> None:
+    print("LINK CLICKED")
+    try:
+        referral = get_referral(referral_id)
+
+        print(f"REFERRAL: {referral.dict()}")
+        update_statistics(referral.host_id, amount=0, signup_ref=True)
+    except ValueError:
+        raise ValueError(f"Referral with ID {referral_id} does not exist.")
+
 def remove_link(user: Account) -> None:
     return data.remove_link(user.user_id)
 
