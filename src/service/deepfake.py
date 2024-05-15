@@ -1,5 +1,7 @@
 from fastapi import HTTPException
 
+from typing import List, Optional
+
 import os
 
 import re
@@ -250,7 +252,7 @@ def run_video(source_uri: str, # photo of the old face from the photo
 def generate(source_uri: str,
              target_uri: str,
              modify_video: str,
-             user: Account) -> None:
+             user: Account) -> Optional[str]:
     
     if billing_service.has_permissions('deepfake', user):
         source_id = extract_id_from_uri(source_uri)
@@ -303,6 +305,8 @@ def generate(source_uri: str,
     else:
         raise HTTPException(status_code=403, detail="Upgrade your plan to unlock permissions.")
 
+def get_message(job_id: str) -> Optional[Message]:
+    return data.get_message(job_id)
 
-def get_history(user: Account) -> None:
+def get_history(user: Account) -> Optional[List[Message]]:
     return data.get_history(user.user_id)

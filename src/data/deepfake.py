@@ -77,7 +77,16 @@ def update_message(user_id: Optional[str] = None,
         return message_id
 
 
-def get_history(user_id: str) -> List[Message]:
+def get_message(job_id: str) -> Optional[Message]:
+    print("GETTING MESSAGE")
+    result = deepfake_col.find_one({"job_id": job_id})
+
+    if result is not None:
+        message = Message(**result)
+        return message
+    return None
+
+def get_history(user_id: str) -> Optional[List[Message]]:
     print("GETTING DEEPFAKE HISTORY")
     results = deepfake_col.find({"user_id": user_id})
 
