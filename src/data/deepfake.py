@@ -4,7 +4,7 @@ from datetime import datetime
 
 from model.deepfake import Message
 
-from pymongo import ReturnDocument
+from pymongo import ReturnDocument, DESCENDING
 from .init import deepfake_col
 
 
@@ -90,7 +90,7 @@ def get_message(job_id: str) -> Optional[Message]:
 
 def get_history(user_id: str) -> Optional[List[Message]]:
     print("GETTING DEEPFAKE HISTORY")
-    results = deepfake_col.find({"user_id": user_id})
+    results = deepfake_col.find({"user_id": user_id}).sort("created_at", DESCENDING)
 
     messages = [Message(**result) for result in results]
 
