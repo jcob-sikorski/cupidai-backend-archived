@@ -23,9 +23,11 @@ def link_clicked(referral_id: str) -> None:
 def remove_link(user: Account) -> None:
     return data.remove_link(user.user_id)
 
-def request_payout(payout_request: PayoutRequest) -> None:
+def request_payout(payout_request: PayoutRequest, 
+                   user: Account) -> None:
     try:
-        data.request_payout(payout_request)
+        data.request_payout(payout_request,
+                            user.user_id)
     except ValueError:
         raise HTTPException(status_code=404, detail="Payout not available.")
     

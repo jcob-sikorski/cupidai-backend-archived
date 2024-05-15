@@ -20,11 +20,14 @@ async def generate_link(user: Annotated[Account, Depends(account_service.get_cur
 async def link_clicked(referral_id: str) -> None:
     service.link_clicked(referral_id)
 
+# TODO: we need to implement endpoint for substraction of earnings 
+#       in the earning_col by the specifed amount
 
-@router.post("/payout/request", status_code=201)  # Requests a payout
+@router.post("/request-payout", status_code=201)  # Requests a payout
 async def request_payout(payout_request: PayoutRequest, 
-                         _: Annotated[Account, Depends(account_service.get_current_active_user)]) -> None:
-    return service.request_payout(payout_request)
+                         user: Annotated[Account, Depends(account_service.get_current_active_user)]) -> None:
+    return service.request_payout(payout_request,
+                                  user)
 
 @router.get("/link", status_code=200)  # Generates a new link
 async def get_link(user: Annotated[Account, Depends(account_service.get_current_active_user)]) -> Optional[str]:

@@ -39,8 +39,9 @@ def add_link_user(referral_id: str,
     if result.modified_count == 0:
         raise ValueError(f"Referral with ID {referral_id} does not exist.")
 
-def request_payout(payout_request: PayoutRequest) -> None:
-    earnings = earnings_col.find_one({"user_id": payout_request.user_id})
+def request_payout(payout_request: PayoutRequest, 
+                   user_id: str) -> None:
+    earnings = earnings_col.find_one({"user_id": user_id})
 
     if earnings is None or earnings.get('amount', 0) <= payout_request.amount:
         raise ValueError("Payout not available.")
@@ -95,14 +96,12 @@ def update_statistics(user_id: str, amount_bought: float, clicked: bool, signup_
                     'referral_link_clicks': 1
                 }
             }
-            print(f"UPDATES: {updates}")
-
-            result = statistics_col.find_one_and_update(
+            statistics_col.find_one_and_update(
                 {"user_id": user_id, "period": period, "period_date": start_date},
                 updates,
                 upsert=True
             )
-            print(f"RESULT: {result}")
+            
     else:
         for period, start_date in periods.items():
             updates = {
@@ -112,14 +111,24 @@ def update_statistics(user_id: str, amount_bought: float, clicked: bool, signup_
                     'referral_link_signups': 1
                 }
             }
-            print(f"UPDATES: {updates}")
 
-            result = statistics_col.find_one_and_update(
+            statistics_col.find_one_and_update(
                 {"user_id": user_id, "period": period, "period_date": start_date},
                 updates,
                 upsert=True
             )
-            print(f"RESULT: {result}")
+
+            updates = {
+                '$inc': {
+                    'amount': amount_bought * 0.4
+                }
+            }
+
+            earnings_col.find_one_and_update(
+                {"user_id": user_id},
+                updates,
+                upsert=True
+            )
 
 def get_statistics(user_id: str) -> List[Statistics]:
     # Group the sorted results by period and select the document with the maximum period_value within each group
