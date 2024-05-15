@@ -14,7 +14,7 @@ def create_message(user_id: Optional[str] = None,
            target_uri: Optional[str] = None,
            modify_video: Optional[str] = None,
            job_id: Optional[str] = None,
-           output_url: Optional[str] = None) -> None:
+           output_url: Optional[str] = None) -> Optional[Message]:
     
     now = datetime.now()
     
@@ -33,6 +33,8 @@ def create_message(user_id: Optional[str] = None,
     result = deepfake_col.insert_one(message.dict())
     if not result.inserted_id:
         raise ValueError("Failed to create message.")
+    
+    return message
 
 
 

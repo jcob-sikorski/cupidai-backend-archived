@@ -30,7 +30,7 @@ class GenerateRequest(BaseModel):
 # TODO:~accept array of target uris and return an array of job_ids?? how would this work?
 @router.post("/generate", status_code=201)
 async def generate(req: GenerateRequest,
-                   user: Annotated[Account, Depends(account_service.get_current_active_user)]) -> Optional[str]:
+                   user: Annotated[Account, Depends(account_service.get_current_active_user)]) -> Optional[Message]:
     return service.generate(req.source_uri, 
                             req.target_uri, 
                             req.modify_video, 

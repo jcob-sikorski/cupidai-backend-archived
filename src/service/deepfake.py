@@ -95,7 +95,7 @@ def send_post_request(url: str,
                       source_uri: str,
                       target_uri: str,
                       modify_video: str,
-                      user_id: str) -> str:
+                      user_id: str) -> Optional[Message]:
     response = requests.post(url, headers=headers, json=payload)
 
     response_data = response.json()  # Convert response to JSON
@@ -113,7 +113,7 @@ def send_post_request(url: str,
 
     output_url = response_data.get("url")
 
-    data.create_message(user_id=user_id,
+    message = data.create_message(user_id=user_id,
                         status='in progress' if code == 1000 else 'failed',
                         source_uri=source_uri,
                         target_uri=target_uri,
@@ -124,7 +124,7 @@ def send_post_request(url: str,
     
     usage_history_service.update('deepfake', user_id)
 
-    return job_id
+    return message
 
 def extract_id_from_uri(uri):
     # Use regex to extract the UUID from the URI
@@ -164,7 +164,7 @@ def run_photo(source_uri: str, # photo of the old face from the photo
               target_uri: str, # photo of the new face for the photo
               source_opts: str, # some params for the old face
               target_opts: str, # some params for the new face
-              user_id: str) -> str:
+              user_id: str) -> Optional[Message]:
     url = "https://openapi.akool.com/api/open/v3/faceswap/highquality/specifyimage"
 
     headers = {
@@ -187,7 +187,7 @@ def run_photo(source_uri: str, # photo of the old face from the photo
     }
 
     try:
-        job_id = send_post_request(url,
+        message = send_post_request(url,
                                    headers,
                                    payload,
                                    source_uri,
@@ -195,7 +195,7 @@ def run_photo(source_uri: str, # photo of the old face from the photo
                                    None,
                                    user_id)
         
-        return job_id
+        return message
     except ValueError:
         raise HTTPException(status_code=400, detail="Failed to generate a deepfake.")
 
@@ -209,7 +209,7 @@ def run_video(source_uri: str, # photo of the old face from the photo
               source_opts: str, # some params for the old face
               target_opts: str, # some params for the new face
               modify_video: str, # video to modify
-              user_id: str) -> str:
+              user_id: str) -> Optional[Message]:
     url = "https://openapi.akool.com/api/open/v3/faceswap/highquality/specifyvideo"
 
     headers = {
@@ -232,7 +232,7 @@ def run_video(source_uri: str, # photo of the old face from the photo
     }
 
     try:
-        job_id = send_post_request(url,
+        message = send_post_request(url,
                                    payload,
                                    headers,
                                    source_uri,
@@ -240,7 +240,7 @@ def run_video(source_uri: str, # photo of the old face from the photo
                                    modify_video,
                                    user_id)
         
-        return job_id
+        return message
     except ValueError:
         raise HTTPException(status_code=400, detail="Failed to generate a deepfake.")
 
@@ -252,7 +252,7 @@ def run_video(source_uri: str, # photo of the old face from the photo
 def generate(source_uri: str,
              target_uri: str,
              modify_video: str,
-             user: Account) -> Optional[str]:
+             user: Account) -> Optional[Message]:
     
     if billing_service.has_permissions('deepfake', user):
         source_id = extract_id_from_uri(source_uri)
@@ -278,14 +278,14 @@ def generate(source_uri: str,
             target_opts = run_face_detection(target_uri)
 
             try:
-                job_id = run_video(source_uri,
+                message = run_video(source_uri,
                                    target_uri,
                                    source_opts,
                                    target_opts,
                                    modify_video,
                                    user.user_id)
                 
-                return job_id
+                return message
             except ValueError:
                 raise HTTPException(status_code=400, detail="Failed to generate a deepfake.")
         else:            
@@ -293,13 +293,13 @@ def generate(source_uri: str,
             target_opts = run_face_detection(target_uri)
           
             try:
-                job_id = run_photo(source_uri,
+                message = run_photo(source_uri,
                                    target_uri,
                                    source_opts,
                                    target_opts,
                                    user.user_id)
 
-                return job_id
+                return message
             except ValueError:
                 raise HTTPException(status_code=400, detail="Failed to generate a deepfake.")
     else:
