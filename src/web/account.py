@@ -17,16 +17,21 @@ async def update_session(user: Annotated[Account, Depends(service.get_current_ac
 async def login(form_data: Annotated[OAuth2PasswordRequestForm, Depends()]) -> Token:
     return await service.login(form_data)
 
-# TODO: email and username should be unique
+
 @router.post("/signup")
-async def signup(form_data: Annotated[OAuth2PasswordRequestForm, Depends()]) -> Token:
-    return await service.signup(form_data)
+async def signup(email: str,
+                 form_data: Annotated[OAuth2PasswordRequestForm, Depends()]) -> Token:
+    return await service.signup(email, 
+                                form_data)
 
 
 @router.post("/signup-ref")
-async def signup_ref(referral_id: str,
+async def signup_ref(email: str,
+                     referral_id: str,
                      form_data: Annotated[OAuth2PasswordRequestForm, Depends()]) -> Token:
-    return await service.signup_ref(referral_id, form_data)
+    return await service.signup_ref(email, 
+                                    referral_id, 
+                                    form_data)
 
 @router.post("/change-password", status_code=200)
 async def change_password(password_reset_id: str, 

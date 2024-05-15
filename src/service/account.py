@@ -103,6 +103,7 @@ async def get_current_active_user(
     
     return current_user
 
+
 async def update_session(user: Account) -> Token:
     access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
     access_token = create_access_token(
@@ -110,6 +111,7 @@ async def update_session(user: Account) -> Token:
     )
 
     return Token(access_token=access_token, token_type="bearer")
+
 
 async def login(form_data: OAuth2PasswordRequestForm) -> Token:
     user = authenticate_user(form_data.username, form_data.password)
@@ -128,34 +130,43 @@ async def login(form_data: OAuth2PasswordRequestForm) -> Token:
 
     return Token(access_token=access_token, token_type="bearer")
 
-async def signup(form_data: OAuth2PasswordRequestForm) -> Token:
-    if not form_data.email:
+
+async def signup(email: str, 
+                 form_data: OAuth2PasswordRequestForm) -> Token:
+    if not email:
         raise HTTPException(status_code=400, detail="Email cannot be empty")
 
     try:
-        user = data.signup(form_data.email, form_data.username, get_password_hash(form_data.password))
+        user = data.signup(email, 
+                           form_data.username, 
+                           get_password_hash(form_data.password))
         
         referral_service.generate_link(user)
     except ValueError:
         raise HTTPException(status_code=404, detail="User already exists.")
 
-    # for env
-    email_service.send(form_data.email, "clv9so1fa029b8k9nig3go17m", username=form_data.username)
+    email_service.send(email, 
+                       "clv9so1fa029b8k9nig3go17m", 
+                       username=form_data.username)
 
     return await login(form_data)
 
-async def signup_ref(referral_id: str,
+
+async def signup_ref(email: str,
+                     referral_id: str,
                      form_data: OAuth2PasswordRequestForm) -> Token:
-    jwt_token = await signup(form_data.email, form_data)
+    jwt_token = await signup(email, form_data)
 
     if jwt_token:
-        user = get_by_email(form_data.email)
+        user = get_by_email(email)
         try:
-            referral_service.log_signup_ref(referral_id, user)
+            referral_service.log_signup_ref(referral_id, 
+                                            user)
         except ValueError:
             raise HTTPException(status_code=400, detail="Referral with ID {referral_id} does not exist.")
         finally:
             return jwt_token
+
 
 def change_password(password_reset_id: str, 
                     password: str) -> None:

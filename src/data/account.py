@@ -7,12 +7,18 @@ from model.account import Account, Invite, PasswordReset
 from pymongo import ReturnDocument
 from .init import account_col, invite_col, password_reset_col
 
-def signup(email: str, username: str, password_hash: str) -> None:
-    # Check if account with the given user_id already exists
-    existing_account = account_col.find_one({"username": username})
-    if existing_account:
-        # Account already exists, return an error
-        raise ValueError("Account already exists for this user ID")
+def signup(email: str, 
+           username: str, 
+           password_hash: str) -> None:
+    # Check if an account with the provided username exists
+    existing_username_account = account_col.find_one({"username": username})
+    if existing_username_account:
+        raise ValueError("Username already exists")
+    
+    # Check if an account with the provided email exists
+    existing_email_account = account_col.find_one({"email": email})
+    if existing_email_account:
+        raise ValueError("Email already exists")
 
     # Create a new account
     account = Account(user_id=str(ObjectId()), email=email, username=username, password_hash=password_hash)
@@ -20,13 +26,6 @@ def signup(email: str, username: str, password_hash: str) -> None:
 
     # Optionally, return the newly created account
     return account
-
-
-def signup_ref(ref: str) -> None:
-    # TODO: make this work the same as team invite
-    # although we need the email of the user signing up
-
-    pass
 
 
 def create_invite(invite: Invite):
