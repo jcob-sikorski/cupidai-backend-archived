@@ -41,29 +41,62 @@ async def action(req: ActionRequest,
                                 req.button, 
                                 user)
 
+class AddAccountRequest(BaseModel):
+      profile_uri: str
+      name: str
+      platform: str
+      note: str
+      prompt: str
+      engineVersion: str
+      style: str
+      width: str
+      height: str
+      stop: str
+      stylize: str
+      seed: str
+
 @router.post("/add-account", status_code=201)  # Adds new account with a prompt
-async def add_account(social_account: SocialAccount,
-                      prompt: Prompt,
+async def add_account(req: AddAccountRequest,
                       user: Annotated[Account, Depends(account_service.get_current_active_user)]) -> Optional[Tuple[SocialAccount, Prompt]]:
+    
+    social_account = SocialAccount(
+        profile_uri=req.profile_uri,
+        name=req.name,
+        platform=req.platform,
+        note=req.note
+    )
+
+    prompt = Prompt(
+        prompt=req.prompt,
+        engineVersion=req.engineVersion,
+        style=req.style,
+        width=req.width,
+        height=req.height,
+        stop=req.stop,
+        stylize=req.stylize,
+        seed=req.seed
+    )
+
     return service.add_account(social_account,
                                prompt,
                                user)
 
 
-@router.patch("/account", status_code=200)  # Updates social account information
+@router.patch("/social-account", status_code=200)  # Updates social account information
 async def update(social_account: SocialAccount,
                  _: Annotated[Account, Depends(account_service.get_current_active_user)]) -> None:
     return service.update_account(social_account)
 
 
-@router.get("/accounts", status_code=200)  # Retrieves all social accounts
+@router.get("/social-accounts", status_code=200)  # Retrieves all social accounts
 async def get(user: Annotated[Account, Depends(account_service.get_current_active_user)]) -> Optional[List[SocialAccount]]:
-    return service.get_account(user)
+    return service.get_accounts(user)
 
 
 @router.patch("/prompt", status_code=200)  # Updates prompt information
 async def update_prompt(prompt: Prompt,
                         _: Annotated[Account, Depends(account_service.get_current_active_user)]) -> None:
+    # print("UPDATING PROMPT")
     return service.update_prompt(prompt)
 
 

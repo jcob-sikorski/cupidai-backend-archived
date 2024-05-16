@@ -3,7 +3,7 @@ import uvicorn
 
 from web import (
     account, ai_verification, billing, bug, deepfake,
-    image_generation, midjourney, referral, social_account, usage_history
+    image_generation, midjourney, referral, usage_history
     # team
 )
 
@@ -18,7 +18,6 @@ app.include_router(usage_history.router)
 app.include_router(image_generation.router)
 app.include_router(midjourney.router)
 app.include_router(referral.router)
-app.include_router(social_account.router)
 # app.include_router(team.router)
 
 if __name__ == "__main__":
