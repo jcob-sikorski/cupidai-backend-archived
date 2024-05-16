@@ -1,11 +1,11 @@
 from fastapi import APIRouter, Depends, HTTPException
 
-from typing import Annotated, Optional, List
+from typing import Annotated, Optional, List, Tuple
 
 from pydantic import BaseModel
 
 from model.account import Account
-from model.ai_verification import Prompt
+from model.ai_verification import Prompt, SocialAccount
 from model.midjourney import Message
 
 from service import account as account_service
@@ -41,11 +41,24 @@ async def action(req: ActionRequest,
                                 req.button, 
                                 user)
 
-@router.post("/prompt", status_code=201)  # Creates a new prompt
-async def create_prompt(prompt: Prompt,
-                        user: Annotated[Account, Depends(account_service.get_current_active_user)]) -> Optional[Prompt]:
-    return service.create_prompt(prompt, 
-                                 user)
+@router.post("/add-account", status_code=201)  # Adds new account with a prompt
+async def add_account(social_account: SocialAccount,
+                      prompt: Prompt,
+                      user: Annotated[Account, Depends(account_service.get_current_active_user)]) -> Optional[Tuple[SocialAccount, Prompt]]:
+    return service.add_account(social_account,
+                               prompt,
+                               user)
+
+
+@router.patch("/account", status_code=200)  # Updates social account information
+async def update(social_account: SocialAccount,
+                 _: Annotated[Account, Depends(account_service.get_current_active_user)]) -> None:
+    return service.update_account(social_account)
+
+
+@router.get("/accounts", status_code=200)  # Retrieves all social accounts
+async def get(user: Annotated[Account, Depends(account_service.get_current_active_user)]) -> Optional[List[SocialAccount]]:
+    return service.get_account(user)
 
 
 @router.patch("/prompt", status_code=200)  # Updates prompt information

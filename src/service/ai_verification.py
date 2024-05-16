@@ -4,12 +4,12 @@ import os
 
 import httpx
 
-from typing import Optional, List
+from typing import Optional, List, Tuple
 
 import data.ai_verification as data
 
 from model.account import Account
-from model.ai_verification import Prompt
+from model.ai_verification import Prompt, SocialAccount
 from model.midjourney import Message, Response
 
 import service.billing as billing_service
@@ -208,13 +208,26 @@ async def action(messageId: str,
     print(response_data)
 
 
-def create_prompt(prompt: Prompt,
-                  user: Account) -> Optional[Prompt]:
+def add_account(social_account: SocialAccount,
+                prompt: Prompt,
+                user: Account) -> Optional[Tuple[SocialAccount, Prompt]]:
     try:
-        return data.create_prompt(prompt,
-                                  user.user_id)
+        return data.add_account(social_account, 
+                                prompt,
+                                user.user_id)
     except ValueError:
-        raise HTTPException(status_code=500, detail="Failed to create prompt")
+        raise HTTPException(status_code=500, detail="Failed to add account")
+
+
+def update_account(social_account: SocialAccount) -> None:
+    try:
+        data.update_account(social_account)
+    except ValueError:
+        raise HTTPException(status_code=500, detail="Failed to update social account")
+
+
+def get_accounts(user: Account) -> Optional[List[SocialAccount]]:
+    return data.get_accounts(user.user_id)
 
 
 def update_prompt(prompt: Prompt) -> None:

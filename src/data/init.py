@@ -6,13 +6,13 @@ import os
 
 load_dotenv()
 
+mongoClient = MongoClient(
+    f"mongodb+srv://{os.getenv('MONGODB_CREDENTIALS')}@atlascluster.2zt2wrb.mongodb.net/",
+    uuidRepresentation="standard"
+)
+
 def get_db():
     """Connect to MongoDB database instance"""
-
-    mongoClient = MongoClient(
-        f"mongodb+srv://{os.getenv('MONGODB_CREDENTIALS')}@atlascluster.2zt2wrb.mongodb.net/",
-        uuidRepresentation="standard"
-    )
 
     db = mongoClient[f"{os.getenv('MONGODB_DB')}"]
     account_col = db['Account']
