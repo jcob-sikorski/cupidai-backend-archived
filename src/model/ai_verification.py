@@ -8,6 +8,7 @@ from typing import Optional
 
 class Prompt(BaseModel):
     prompt: str # ✅
+    account_id: str
     # generation_speed: Optional[str]
     version: Optional[str] # ✅ 1.
     style: Optional[str] # ✅ 1.
@@ -15,5 +16,6 @@ class Prompt(BaseModel):
     stop: Optional[str] # ✅ 1.
     stylize: Optional[str] # ✅ 1.
     seed: Optional[str] # ✅ 1.
+    user_id: str | None = None
 
 # Note: 1. means tested as one parameter without others

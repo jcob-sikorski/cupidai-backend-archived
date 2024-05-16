@@ -18,12 +18,10 @@ async def create(social_account: SocialAccount,
     return service.create(social_account, user)
 
 
-
 @router.patch("/", status_code=200)  # Updates social account information
 async def update(social_account: SocialAccount,
                  _: Annotated[Account, Depends(account_service.get_current_active_user)]) -> None:
     return service.update(social_account)
-
 
 
 @router.get("/", status_code=200)  # Retrieves all social accounts

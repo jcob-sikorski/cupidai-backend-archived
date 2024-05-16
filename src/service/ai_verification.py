@@ -4,7 +4,9 @@ import os
 
 import httpx
 
-from typing import List
+from typing import Optional, List
+
+import data.ai_verification as data
 
 from model.account import Account
 from model.ai_verification import Prompt
@@ -171,9 +173,6 @@ async def imagine(prompt: Prompt,
         raise HTTPException(status_code=403, detail="Upgrade your plan to unlock permissions.")
 
 
-def get_history(user: Account) -> List[Message]:
-    return midjourney_service.get_history(user)
-
 async def action(messageId: str, 
                  button: str, 
                  user: Account) -> None:
@@ -207,6 +206,30 @@ async def action(messageId: str,
         raise HTTPException(status_code=400, detail="Action failed")
 
     print(response_data)
+
+
+def create_prompt(prompt: Prompt,
+                  user: Account) -> Optional[Prompt]:
+    try:
+        return data.create_prompt(prompt,
+                                  user.user_id)
+    except ValueError:
+        raise HTTPException(status_code=500, detail="Failed to create prompt")
+
+
+def update_prompt(prompt: Prompt) -> None:
+    try:
+        data.update_prompt(prompt)
+    except ValueError:
+        raise HTTPException(status_code=500, detail="Failed to update prompt")
+
+
+def get_prompts(user: Account) -> Optional[List[Prompt]]:
+    return data.get_prompts(user.user_id)
+
+
+def get_history(user: Account) -> List[Message]:
+    return midjourney_service.get_history(user)
 
 # async def cancel_job(messageId: str,
 #                      user: Account) -> None:

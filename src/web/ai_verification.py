@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException
 
-from typing import Annotated, List
+from typing import Annotated, Optional, List
 
 from pydantic import BaseModel
 
@@ -24,19 +24,10 @@ router = APIRouter(prefix="/ai-verification")
 #                                   req.target_uri,
 #                                   user)
 
-
 @router.post("/imagine", status_code=201)  # Initiates an imagination process
 async def imagine(prompt: Prompt, 
                   user: Annotated[Account, Depends(account_service.get_current_active_user)]) -> None:
     return await service.imagine(prompt, user)
-
-
-@router.get("/history", status_code=200)  # Retrieves job history
-async def get_history(user: Annotated[Account, Depends(account_service.get_current_active_user)]) -> List[Message]:
-    history = service.get_history(user)
-    if history is None:
-        raise HTTPException(status_code=404, detail="History not found")
-    return history
 
 
 class ActionRequest(BaseModel):
@@ -49,6 +40,28 @@ async def action(req: ActionRequest,
     return await service.action(req.messageId, 
                                 req.button, 
                                 user)
+
+@router.post("/prompt", status_code=201)  # Creates a new prompt
+async def create_prompt(prompt: Prompt,
+                        user: Annotated[Account, Depends(account_service.get_current_active_user)]) -> Optional[Prompt]:
+    return service.create_prompt(prompt, 
+                                 user)
+
+
+@router.patch("/prompt", status_code=200)  # Updates prompt information
+async def update_prompt(prompt: Prompt,
+                        _: Annotated[Account, Depends(account_service.get_current_active_user)]) -> None:
+    return service.update_prompt(prompt)
+
+
+@router.get("/prompts", status_code=200)  # Retrieves all prompts
+async def get_prompts(user: Annotated[Account, Depends(account_service.get_current_active_user)]) -> Optional[List[Prompt]]:
+    return service.get_prompts(user)
+
+
+@router.get("/history", status_code=200)  # Retrieves history
+async def get_history(user: Annotated[Account, Depends(account_service.get_current_active_user)]) -> List[Message]:
+    return service.get_history(user)
 
 
 # @router.delete("/message/{messageId}", status_code=204)  # Cancels a specific job, status 204 for No Content
