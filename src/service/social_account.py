@@ -9,9 +9,9 @@ from model.social_account import SocialAccount
 
 
 def create(social_account: SocialAccount, 
-           user: Account) -> None:
+           user: Account) -> Optional[SocialAccount]:
     try:
-        data.create(social_account, user.user_id)
+        return data.create(social_account, user.user_id)
     except ValueError:
         raise HTTPException(status_code=500, detail="Failed to create social account")
 

@@ -14,14 +14,14 @@ router = APIRouter(prefix="/social-account")
 
 @router.post("/", status_code=201)  # Creates a new social account
 async def create(social_account: SocialAccount,
-                 user: Annotated[Account, Depends(account_service.get_current_active_user)]) -> None:
+                 user: Annotated[Account, Depends(account_service.get_current_active_user)]) -> Optional[SocialAccount]:
     return service.create(social_account, user)
 
 
 
-@router.patch("/{account_id}", status_code=200)  # Updates social account information
-async def update(social_account: SocialAccount, 
-                 user: Annotated[Account, Depends(account_service.get_current_active_user)]) -> None:
+@router.patch("/", status_code=200)  # Updates social account information
+async def update(social_account: SocialAccount,
+                 _: Annotated[Account, Depends(account_service.get_current_active_user)]) -> None:
     return service.update(social_account)
 
 

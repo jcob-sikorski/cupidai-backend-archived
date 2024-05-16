@@ -10,7 +10,7 @@ class SocialAccount(BaseModel):
     account_id: str | None = None
     profile_uri: str | None = None
     passed: bool | None = None
-    attempts: bool | None = None
+    attempts: str | None = None
     name: str | None = None
     platform: str | None = None
     note: str | None = None
