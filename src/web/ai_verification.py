@@ -47,7 +47,7 @@ class AddAccountRequest(BaseModel):
       platform: str
       note: str
       prompt: str
-      engineVersion: str
+      version: str
       style: str
       width: str
       height: str
@@ -68,7 +68,7 @@ async def add_account(req: AddAccountRequest,
 
     prompt = Prompt(
         prompt=req.prompt,
-        engineVersion=req.engineVersion,
+        version=req.version,
         style=req.style,
         width=req.width,
         height=req.height,
@@ -103,6 +103,12 @@ async def update_prompt(prompt: Prompt,
 @router.get("/prompts", status_code=200)  # Retrieves all prompts
 async def get_prompts(user: Annotated[Account, Depends(account_service.get_current_active_user)]) -> Optional[List[Prompt]]:
     return service.get_prompts(user)
+
+
+@router.get("/message", status_code=200)  # Retrieves history
+async def get_message(messageId: str,
+                      _: Annotated[Account, Depends(account_service.get_current_active_user)]) -> Optional[Message]:
+    return service.get_message(messageId)
 
 
 @router.get("/history", status_code=200)  # Retrieves history

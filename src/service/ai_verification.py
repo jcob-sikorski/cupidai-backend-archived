@@ -109,10 +109,15 @@ def check_prompt(prompt: Prompt):
 
 
 def create_prompt_string(prompt: Prompt) -> str:
-    # attributes = ["generation_speed", "version", "style", "aspect", "stop", "stylize", "seed"]
-    attributes = ["version", "style", "aspect", "stop", "stylize", "seed"]
+    attributes = ["version", "style", "stop", "stylize", "seed"]
+
+    prompt_string = " ".join([f" --{attr} {getattr(prompt, attr)}" for attr in attributes if getattr(prompt, attr) is not None and getattr(prompt, attr) != ""])
+
     prompt_string = f"{prompt.prompt}"
-    prompt_string += " ".join([f" --{attr} {getattr(prompt, attr)}" for attr in attributes if getattr(prompt, attr) is not None and getattr(prompt, attr) != ""])
+
+    if prompt.width is not None and prompt.height is not None:
+        prompt_string += f" --aspect {prompt.width}:{prompt.height}"
+
     return prompt_string
 
 
@@ -168,7 +173,7 @@ async def imagine(prompt: Prompt,
             print(response_data)
             
             # # Serialize response data using jsonable_encoder
-            # return jsonable_encoder(response_data)
+            return response_data
     else:
         raise HTTPException(status_code=403, detail="Upgrade your plan to unlock permissions.")
 
@@ -239,6 +244,10 @@ def update_prompt(prompt: Prompt) -> None:
 
 def get_prompts(user: Account) -> Optional[List[Prompt]]:
     return data.get_prompts(user.user_id)
+
+
+def get_message(messageId: str) -> Optional[Message]:
+    return midjourney_service.get_message(messageId)
 
 
 def get_history(user: Account) -> List[Message]:

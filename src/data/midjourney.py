@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Optional
 
 from model.midjourney import Message
 
@@ -26,10 +26,19 @@ def valid_button(messageId: str,
     
     return False
 
+def get_message(messageId: str) -> Optional[Message]:
+    print("GETTING MESSAGE")
+    result =  midjourney_col.find_one({"messageId": messageId})
+
+    if result is not None:
+        message = Message(**result)
+        return message
+    return None
+
 def get_history(user_id: str) -> List[Message]:
     results = midjourney_col.find({"ref": user_id})
 
     messages = [Message(**result) for result in results]
     print(messages)
 
-    return messages
+    return messages[::-1]
