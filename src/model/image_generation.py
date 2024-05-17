@@ -26,6 +26,7 @@ class Settings(BaseModel):
     ipa_1_reference_image: Optional[str] = None
     ipa_1_weight: Optional[float] = None # max is 1.0
     ipa_1_noise: Optional[float] = None  # max is 1.0
+    ipa_1_weight_type: Optional[str] = None
     ipa_1_start_at: Optional[float] = None # max is 1.0
     ipa_1_end_at: Optional[float] = None # max is 1.0
 
@@ -35,6 +36,7 @@ class Settings(BaseModel):
     ipa_2_reference_image: Optional[str] = None
     ipa_2_weight: Optional[float] = None # max is 1.0
     ipa_2_noise: Optional[float] = None  # max is 1.0
+    ipa_2_weight_type: Optional[str] = None
     ipa_2_start_at: Optional[float] = None # max is 1.0
     ipa_2_end_at: Optional[float] = None # max is 1.0
 

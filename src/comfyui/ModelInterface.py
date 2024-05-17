@@ -208,7 +208,7 @@ class ModelInterface():
             self.ksampler_efficient1["229"]["inputs"]["model"] = ["206", 0]
 
 
-    def connect_ip_adapter_1(self, image_path: str, model: str, weight: int = 1, noise: int = 0, start_at: int = 0, end_at: int = 1):
+    def connect_ip_adapter_1(self, image_path: str, model: str, weight: int = 1, noise: int = 0, weight_type: str = "original", start_at: int = 0, end_at: int = 1):
         """
         ################# CONNECT IP ADAPTER 1 #################
         (Optional) Provide configuration for ip adapter 1, connect it to the KSamplerEfficient
@@ -225,6 +225,7 @@ class ModelInterface():
         # set parameters
         self.ipa1["278"]["inputs"]["weight"] = weight
         self.ipa1["278"]["inputs"]["noise"] = noise
+        self.ipa2["278"]["inputs"]["weight_type"] = weight_type
         self.ipa1["278"]["inputs"]["start_at"] = start_at
         self.ipa1["278"]["inputs"]["end_at"] = end_at
 
@@ -347,13 +348,13 @@ def generate_workflow(settings: Settings, image_ids: Dict[str, str], image_forma
             print("IPA 1 ENABLED")
             file_extension = format_map[image_formats["ipa_1_reference_image"]]
             settings.ipa_1_reference_image = predefined_path + "\\" + image_ids["ipa_1_reference_image"] + file_extension
-            model_interface.connect_ip_adapter_1(image_path=settings.ipa_1_reference_image, model=settings.ipa_1_model, weight=settings.ipa_1_weight, noise=settings.ipa_1_noise, start_at=settings.ipa_1_start_at, end_at=settings.ipa_1_end_at)
+            model_interface.connect_ip_adapter_1(image_path=settings.ipa_1_reference_image, model=settings.ipa_1_model, weight=settings.ipa_1_weight, noise=settings.ipa_1_noise, weight_type=settings.ipa_1_weight_type, start_at=settings.ipa_1_start_at, end_at=settings.ipa_1_end_at)
 
         if settings.ipa_2_enabled:
             print("IPA 2 ENABLED") 
             file_extension = format_map[image_formats["ipa_2_reference_image"]]
             settings.ipa_2_reference_image = predefined_path + "\\" + image_ids["ipa_2_reference_image"] + file_extension
-            model_interface.connect_ip_adapter_2(image_path=settings.ipa_2_reference_image, model=settings.ipa_2_model, weight=settings.ipa_2_weight, noise=settings.ipa_2_noise, start_at=settings.ipa_2_start_at, end_at=settings.ipa_2_end_at)
+            model_interface.connect_ip_adapter_2(image_path=settings.ipa_2_reference_image, model=settings.ipa_2_model, weight=settings.ipa_2_weight, noise=settings.ipa_2_noise, weight_type=settings.ipa_2_weight_type, start_at=settings.ipa_2_start_at, end_at=settings.ipa_2_end_at)
 
         final_json = model_interface.finalize()
 
