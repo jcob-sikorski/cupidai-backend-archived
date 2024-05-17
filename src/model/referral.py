@@ -1,14 +1,16 @@
 from pydantic import BaseModel
 from typing import List
 
-class PayoutRequest(BaseModel):
+from datetime import datetime
+
+class PayoutSubmission(BaseModel):
     user_id: str | None = None
-    withdrawal_method: str | None = None
-    paypal_email: List[str] | None = None
-    amount: List[float] | None = None
+    # withdrawal_method: str | None = None
+    paypal_email: str | None = None
+    amount: float | None = None
     scheduled_time: str | None = None
     # team_notes: str
-    date: str | None = None
+    date: datetime | None = None
 
 class PayoutHistory(BaseModel):
     date: str | None = None

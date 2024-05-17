@@ -1,8 +1,8 @@
 from typing import Optional, List
 
-from model.referral import Referral, Earnings, Statistics, PayoutRequest, PayoutHistory
+from model.referral import Referral, Earnings, Statistics, PayoutSubmission, PayoutHistory
 
-from .init import referral_col, payout_request_col, earnings_col, statistics_col, payout_history_col
+from .init import referral_col, payout_submission_col, earnings_col, statistics_col, payout_history_col
 
 from pymongo import DESCENDING
 
@@ -39,14 +39,24 @@ def add_link_user(referral_id: str,
     if result.modified_count == 0:
         raise ValueError(f"Referral with ID {referral_id} does not exist.")
 
-def request_payout(payout_request: PayoutRequest, 
+def request_payout(paypal_email: str,
+                   amount: float,
+                   scheduled_time: str,
                    user_id: str) -> None:
     earnings = earnings_col.find_one({"user_id": user_id})
 
-    if earnings is None or earnings.get('amount', 0) <= payout_request.amount:
+    if earnings is None or earnings.get('amount', 0) <= amount:
         raise ValueError("Payout not available.")
+    
+    payout_submission = PayoutSubmission(
+        user_id=user_id,
+        paypal_email=paypal_email,
+        amount=amount,
+        scheduled_time=scheduled_time,
+        date=datetime.now()
+    )
 
-    payout_request_col.insert_one(payout_request.dict())
+    payout_submission_col.insert_one(payout_submission.dict())
 
 def get_newest_link(user_id: str) -> Optional[str]:
     referral = referral_col.find_one({"host_id": user_id})

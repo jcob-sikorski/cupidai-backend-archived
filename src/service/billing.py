@@ -238,7 +238,7 @@ def get_available_plans() -> Optional[List[Plan]]:
                 "tag": product["metadata"].get("tag"),
                 "description": product["description"],
                 "features": [feature["name"] for feature in product["features"]],
-                "price": f"{price/100}$",
+                "price": f"£{price/100}",
             }
             product_list.append(product_info)
 

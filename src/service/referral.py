@@ -5,7 +5,7 @@ from typing import Optional
 from data import referral as data
 
 from model.account import Account
-from model.referral import PayoutRequest, Referral
+from model.referral import PayoutSubmission, Referral
 
 def generate_link(user: Account) -> str:
     return data.generate_link(user.user_id)
@@ -23,10 +23,14 @@ def link_clicked(referral_id: str) -> None:
 def remove_link(user: Account) -> None:
     return data.remove_link(user.user_id)
 
-def request_payout(payout_request: PayoutRequest, 
+def request_payout(paypal_email: str,
+                   amount: float,
+                   scheduled_time: str,
                    user: Account) -> None:
     try:
-        data.request_payout(payout_request,
+        data.request_payout(paypal_email,
+                            amount,
+                            scheduled_time,
                             user.user_id)
     except ValueError:
         raise HTTPException(status_code=404, detail="Payout not available.")
