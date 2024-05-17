@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, BackgroundTasks
 
-from typing import Annotated, Dict
+from typing import Annotated, Dict, Optional
 
 from model.account import Account
 from model.image_generation import Settings, Message
@@ -16,9 +16,15 @@ async def webhook(message: Message) -> None:
     print("COMFYUI WEBHOOK ACTIVATED")
     return service.webhook(message)
 
+
 @router.post("/", status_code=201)
 async def generate(settings: Settings, 
                    uploadcare_uris: Dict[str, str], 
                    user: Annotated[Account, Depends(account_service.get_current_active_user)], 
                    background_tasks: BackgroundTasks) -> None:
     return await service.generate(settings, uploadcare_uris, user, background_tasks)
+
+
+@router.get("/batch", status_code=200)  # Retrieves most recent batch
+async def get_batch(user: Annotated[Account, Depends(account_service.get_current_active_user)]) -> Optional[Message]:
+    return service.get_batch(user)

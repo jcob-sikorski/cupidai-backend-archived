@@ -105,7 +105,7 @@ async def get_prompts(user: Annotated[Account, Depends(account_service.get_curre
     return service.get_prompts(user)
 
 
-@router.get("/message", status_code=200)  # Retrieves history
+@router.get("/message", status_code=200)  # Retrieves specific message
 async def get_message(messageId: str,
                       _: Annotated[Account, Depends(account_service.get_current_active_user)]) -> Optional[Message]:
     return service.get_message(messageId)

@@ -275,3 +275,6 @@ async def generate(settings: Settings, uploadcare_uris: Dict[str, str], user: Ac
         background_tasks.add_task(send_post_request, url, headers, payload)
     else:
         raise HTTPException(status_code=403, detail="Upgrade your plan to unlock permissions.")
+    
+def get_batch(user: Account) -> Optional[Message]:
+    return data.get_batch(user.user_id)
