@@ -18,11 +18,12 @@ async def webhook(message: Message) -> None:
 
 
 @router.post("/", status_code=201)
-async def generate(settings: Settings, 
-                   uploadcare_uris: Dict[str, str], 
+async def generate(settings: Settings,
                    user: Annotated[Account, Depends(account_service.get_current_active_user)], 
                    background_tasks: BackgroundTasks) -> None:
-    return await service.generate(settings, uploadcare_uris, user, background_tasks)
+    return await service.generate(settings, 
+                                  user, 
+                                  background_tasks)
 
 
 @router.get("/batch", status_code=200)  # Retrieves most recent batch

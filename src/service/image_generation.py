@@ -2,6 +2,8 @@ from fastapi import BackgroundTasks, HTTPException
 
 from typing import Dict, List, Optional
 
+from uuid import uuid4
+
 import os
 
 import re
@@ -216,35 +218,39 @@ def extract_id_from_uri(uri):
 def send_post_request(url: str, headers: dict, payload: dict) -> None:
     requests.post(url, headers=headers, json=payload)
 
-async def generate(settings: Settings, uploadcare_uris: Dict[str, str], user: Account, background_tasks: BackgroundTasks) -> None:
+async def generate(settings: Settings, 
+                   user: Account, 
+                   background_tasks: BackgroundTasks) -> None:
     if billing_service.has_permissions('image_generation', user):
         check = check_settings(settings)
         if check is not True:
             raise HTTPException(status_code=400, detail=check)
 
-        image_ids = {}
-        for key, uri in uploadcare_uris.items():
-            if uri is not None:
-                image_ids[key] = extract_id_from_uri(uri)
-
-        print(image_ids)
-
         uploadcare = Uploadcare(public_key=os.getenv('UPLOADCARE_PUBLIC_KEY'), secret_key=os.getenv('UPLOADCARE_SECRET_KEY'))
 
-        image_formats = {}
-        for key, uploadcare_id in image_ids.items():
-            if uploadcare_id is not None:
-                image_formats[key] = uploadcare.file(uploadcare_id).info['mime_type'].split('/')[1]
+        uploadcare_uris = [settings.ipa_1_reference_image, settings.ipa_2_reference_image, settings.controlnet_reference_image]
+
+        image_formats = []
+        image_ids = []
+        for i in range(3):
+            if uploadcare_uris[i]:
+                uploadcare_id = extract_id_from_uri(uploadcare_uris[i])
+                
+                image_formats.append(uploadcare.file(uploadcare_id).info['mime_type'].split('/')[1])
+
+                image_ids.append(uploadcare_id)
             else:
-                image_formats[key] = None
+                image_formats.append(None)
+                image_ids.append(None)
 
         print("IMAGE FORMATS")
-        print(image_formats.values())
+        print(image_formats)
 
-        if any(ext and ext not in ['jpeg', 'png', 'heic'] for ext in image_formats.values()):
+        if any(ext and ext not in ['jpeg', 'png', 'heic'] for ext in image_formats):
             raise HTTPException(status_code=400, detail="Invalid image format. Valid ones are jpeg, png, heic.")
 
-        settings_id = save_settings(settings)
+        # settings_id = save_settings(settings)
+        settings_id = uuid4()
 
         message_id = update_message(user.user_id, "started", uploadcare_uris, None, settings_id, None)
 
@@ -254,7 +260,7 @@ async def generate(settings: Settings, uploadcare_uris: Dict[str, str], user: Ac
             update_message(user.user_id, message_id, "failed")
             raise HTTPException(status_code=500, detail="Error while processing the workflow.")
         
-        url = "https://native-goat-saved.ngrok-free.app/image-generation/"
+        url = "https://deep-safe-spaniel.ngrok-free.app/image-generation/"
 
         # Define the headers for the request
         headers = {
