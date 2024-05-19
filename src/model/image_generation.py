@@ -11,7 +11,7 @@ class Settings(BaseModel):
     basic_pos_text_prompt: str
     basic_neg_text_prompt: str
     basic_sampling_steps: int # max is 120
-    basic_sampler_method: str # methods from comfy
+    basic_sampler_method: str # in samplers
     basic_model: str # in checkpoint models
     basic_width: int
     basic_height: int
@@ -22,7 +22,7 @@ class Settings(BaseModel):
 
     # IPA 1 settings (optional)
     ipa_1_enabled: bool = False
-    ipa_1_model: Optional[str] = None # in sampler models
+    ipa_1_model: Optional[str] = None # in ipa models
     ipa_1_reference_image: Optional[str] = None # uploadcare uri
     ipa_1_weight: Optional[float] = None # max is 1.0
     ipa_1_noise: Optional[float] = None  # max is 1.0
@@ -32,7 +32,7 @@ class Settings(BaseModel):
 
     # IPA 2 settings (optional)
     ipa_2_enabled: bool = False
-    ipa_2_model: Optional[str] = None # in sampler models
+    ipa_2_model: Optional[str] = None # in ipa models
     ipa_2_reference_image: Optional[str] = None # uploadcare uri
     ipa_2_weight: Optional[float] = None # max is 1.0
     ipa_2_noise: Optional[float] = None  # max is 1.0
@@ -46,7 +46,7 @@ class Settings(BaseModel):
     refinement_steps: Optional[int] = None # max is 120
     refinement_cfg_scale: Optional[float] = None # max is 100
     refinement_denoise: Optional[float] = None # max is 1.0
-    refinement_sampler: Optional[str] = None # in checkpoint models
+    refinement_sampler: Optional[str] = None # in sampler models
 
     # Lora settings (optional)
     lora_count: Optional[int] = None # range is 1-4
@@ -55,7 +55,7 @@ class Settings(BaseModel):
     lora_enabled: List[bool] = [False, False, False, False]
 
     civitai_enabled: bool = False
-    civitai_model: Optional[str] = None
+    civitai_model: Optional[str] = None # in checkpoint models
 
 class Message(BaseModel):
     user_id: Optional[str] = None

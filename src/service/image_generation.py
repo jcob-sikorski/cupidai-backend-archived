@@ -85,6 +85,8 @@ def check_settings(settings: Settings):
         'ip-adapter_sdxl_vit-h.bin'
     ]
 
+    controlnet_models = []
+
     lora_models = [
         "add_detail.safetensors",
         "age_slider_v20.safetensors",
@@ -185,18 +187,9 @@ def check_settings(settings: Settings):
 
     if settings.lora_strengths and any(map(lambda x: x > 10.0, settings.lora_strengths)):
         return "Error: All values in lora_strengths must be greater than 10.0"
-
-    if settings.controlnet_model and settings.controlnet_model not in checkpoint_models:
-        return f"Error: controlnet_model must be one of {checkpoint_models}"
-
-    if settings.controlnet_strength and settings.controlnet_strength > 10.0:
-        return "Error: controlnet_strength must be less than or equal to 10.0"
-
-    if settings.controlnet_start_percent and not (settings.controlnet_start_percent < 100.0):
-        return "Error: controlnet_start_percent must be less than 100.0"
-
-    if settings.controlnet_end_percent and not (settings.controlnet_end_percent <= 100.0):
-        return "Error: controlnet_end_percent must be less than or equal to 100.0"
+    
+    if settings.civitai_model and settings.civitai_model not in checkpoint_models:
+        return f"Error: civitai_model must be one of {checkpoint_models}"
     
     return True
 
@@ -228,7 +221,7 @@ async def generate(settings: Settings,
 
         uploadcare = Uploadcare(public_key=os.getenv('UPLOADCARE_PUBLIC_KEY'), secret_key=os.getenv('UPLOADCARE_SECRET_KEY'))
 
-        uploadcare_uris = [settings.ipa_1_reference_image, settings.ipa_2_reference_image, settings.controlnet_reference_image]
+        uploadcare_uris = [settings.ipa_1_reference_image, settings.ipa_2_reference_image]
         print("UPLOADCARE URIS", uploadcare_uris)
 
         image_formats = []
@@ -250,7 +243,7 @@ async def generate(settings: Settings,
         if any(ext and ext not in ['jpeg', 'png', 'heic'] for ext in image_formats):
             raise HTTPException(status_code=400, detail="Invalid image format. Valid ones are jpeg, png, heic.")
 
-        settings_id = save_settings(settings)
+        # settings_id = save_settings(settings)
         settings_id = str(uuid4())
 
         message_id = update_message(user.user_id, "started", uploadcare_uris, None, settings_id, None)
@@ -259,29 +252,29 @@ async def generate(settings: Settings,
 
         print(workflow_json)
 
-        # if workflow_json is None:
-        #     update_message(user.user_id, message_id, "failed")
-        #     raise HTTPException(status_code=500, detail="Error while processing the workflow.")
+        if workflow_json is None:
+            update_message(user.user_id, message_id, "failed")
+            raise HTTPException(status_code=500, detail="Error while processing the workflow.")
         
-        # url = "https://deep-safe-spaniel.ngrok-free.app/image-generation/"
+        url = "https://deep-safe-spaniel.ngrok-free.app/image-generation/"
 
-        # # Define the headers for the request
-        # headers = {
-        #     'Content-Type': 'application/json'
-        # }
+        # Define the headers for the request
+        headers = {
+            'Content-Type': 'application/json'
+        }
 
-        # # Define the payload for the request
-        # payload = {
-        #     'workflow': workflow_json,
-        #     'uploadcare_uris': uploadcare_uris,
-        #     'image_ids': image_ids,
-        #     'image_formats': image_formats,
-        #     'message_id': message_id,
-        #     'settings_id': settings_id,
-        #     'user_id': user.user_id
-        # }
+        # Define the payload for the request
+        payload = {
+            'workflow': workflow_json,
+            'uploadcare_uris': uploadcare_uris,
+            'image_ids': image_ids,
+            'image_formats': image_formats,
+            'message_id': message_id,
+            'settings_id': settings_id,
+            'user_id': user.user_id
+        }
 
-        # background_tasks.add_task(send_post_request, url, headers, payload)
+        background_tasks.add_task(send_post_request, url, headers, payload)
     else:
         raise HTTPException(status_code=403, detail="Upgrade your plan to unlock permissions.")
     
