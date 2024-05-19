@@ -226,7 +226,7 @@ async def generate(settings: Settings,
 
         image_formats = []
         image_ids = []
-        for i in range(3):
+        for i in range(2):
             if uploadcare_uris[i]:
                 uploadcare_id = extract_id_from_uri(uploadcare_uris[i])
                 

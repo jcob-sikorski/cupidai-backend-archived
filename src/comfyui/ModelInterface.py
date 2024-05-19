@@ -102,7 +102,7 @@ class ModelInterface():
         (Optional) Connect lora to Efficient Loader
         1. Connect lora to lora_stack in Efficient Loader
         """
-        if count:
+        if any(enabled):
             # Connect Lora to the lora_stack in efficient loader
             self.lora_stacker["207"]["inputs"]["lora_count"] = count
 
@@ -112,7 +112,7 @@ class ModelInterface():
                     self.lora_stacker["207"]["inputs"][f"lora_name_{index}"] = models[i]
                     self.lora_stacker["207"]["inputs"][f"model_str_{index}"] = strengths[i]
 
-        self.used_components.add("lora_stacker")
+            self.used_components.add("lora_stacker")
 
     def connect_random_prompts(self, 
                                positive_prompt: str):
@@ -130,7 +130,7 @@ class ModelInterface():
                                 ckpt_name: str, 
                                 negative_prompt: str, 
                                 batch_size: int,
-                                lora_enabled: bool = False,
+                                lora_enabled: List[bool],
                                 random_prompts_enabled: bool = True):
         """
         ################# SET UP EFFICIENT LOADER #################
@@ -155,7 +155,7 @@ class ModelInterface():
         if random_prompts_enabled:
             self.efficient_loader["206"]["inputs"]["positive"] = ["222", 0]
 
-        if lora_enabled:
+        if any(lora_enabled):
             self.efficient_loader["206"]["inputs"]["lora_stack"] = ["207", 0]
 
     def connect_ksampler_efficient1(self,
