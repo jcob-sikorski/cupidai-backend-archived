@@ -291,12 +291,13 @@ class ModelInterface():
     def connect_ip_adapter_2(self, 
                              image_path: str, 
                              ipa_model: str, 
-                             ckpt_model: str, 
+                             civitai_model: str = "", 
                              weight: int = 1, 
                              noise: int = 0, 
                              weight_type: str = "original", 
                              start_at: int = 0, 
-                             end_at: int = 1):
+                             end_at: int = 1,
+                             civitai_enabled: bool = False):
         """
         ################# CONNECT IP ADAPTER 2 #################
         (Optional) Provide configuration for ip adapter 2, connect it to the KSamplerEfficient
@@ -328,7 +329,7 @@ class ModelInterface():
         self.used_components.add("ipa2")
 
         if civitai_enabled:
-            self.ipa2["251"]["inputs"]["ckpt_name"] = ckpt_model
+            self.ipa2["251"]["inputs"]["ckpt_name"] = civitai_model
 
             self.ipa2["284"]["inputs"]["model"] = ["251", 0]
         else:
@@ -379,53 +380,57 @@ def generate_workflow(settings: Settings,
                                          enabled=settings.lora_enabled)
 
         if settings.pos_prompt_enabled:
-            print("POS PROMPT ENABLED")
+            print("CONNECTING RANDOM PROMPTS")
             model_interface.connect_random_prompts(positive_prompt=settings.basic_pos_text_prompt)
 
-        # print("SETTING UP EFFICIENT LOADER")
-        # model_interface.set_up_efficient_loader(negative_prompt=settings.basic_neg_text_prompt, 
-        #                                         ckpt_name=settings.basic_model, 
-        #                                         batch_size=settings.basic_batch_size)
+        print("CONNECTING EFFICIENT LOADER")
+        model_interface.connect_efficient_loader(ckpt_name=settings.basic_model,
+                                                 negative_prompt=settings.basic_neg_text_prompt,
+                                                 batch_size=settings.basic_batch_size)
+        
+        if settings.ipa_1_enabled:
+            print("CONNECTING IPA 1")
 
-        # print("KSAMPLER EFFICIENT 1")
-        # model_interface.set_up_ksampler_efficient1(steps=settings.basic_sampling_steps,
-        #                                            sampler=settings.basic_sampler_method, 
-        #                                            cfg_scale=settings.basic_cfg_scale, 
-        #                                            denoise=settings.basic_denoise)
+            file_extension = format_map[image_formats[0]]
+            settings.ipa_1_reference_image = predefined_path + "/" + image_ids[0] + file_extension
 
-        # if settings.ipa_1_enabled:
-        #     print("IPA 1 ENABLED")
-        #     file_extension = format_map[image_formats[0]]
-        #     settings.ipa_1_reference_image = predefined_path + "/" + image_ids[0] + file_extension
-        #     model_interface.connect_ip_adapter_1(image_path=settings.ipa_1_reference_image, 
-        #                                          model=settings.ipa_1_model, 
-        #                                          weight=settings.ipa_1_weight, 
-        #                                          noise=settings.ipa_1_noise, 
-        #                                          weight_type=settings.ipa_1_weight_type, 
-        #                                          start_at=settings.ipa_1_start_at, 
-        #                                          end_at=settings.ipa_1_end_at)
+            model_interface.connect_ip_adapter_1(image_path=settings.ipa_1_reference_image,
+                                                 model=settings.ipa_1_model,
+                                                 weight=settings.ipa_1_weight,
+                                                 noise=settings.ipa_1_noise,
+                                                 weight_type=settings.ipa_1_weight_type,
+                                                 start_at=settings.ipa_1_start_at,
+                                                 end_at=settings.ipa_1_end_at)
+            
 
-        # if settings.refinement_enabled:
-        #     print("KSAMPLER EFFICIENT 2")
-        #     model_interface.connect_ksampler_efficient2(seed=settings.refinement_seed, 
-        #                                                 sampler=settings.refinement_sampler, 
-        #                                                 steps=settings.refinement_steps, 
-        #                                                 cfg_scale=settings.refinement_cfg_scale, 
-        #                                                 denoise=settings.refinement_denoise)
+        model_interface.connect_ksampler_efficient1(steps=settings.basic_sampling_steps,
+                                                    cfg_scale=settings.basic_cfg_scale,
+                                                    denoise=settings.basic_denoise,
+                                                    sampler=settings.basic_sampler_method,
+                                                    ipa1_enabled=settings.ipa_1_enabled)
+        
+        if settings.refinement_enabled:
+            if settings.ipa_2_enabled: # TODO: actually ipa_2_reference_image is not required becuase we check for that here
+                if settings.ipa_2_reference_image:
+                    file_extension = format_map[image_formats[1]]
+                    settings.ipa_2_reference_image = predefined_path + "/" + image_ids[1] + file_extension
 
+                model_interface.connect_ip_adapter_2(image_path=settings.ipa_2_reference_image,
+                                                     ipa_model=settings.ipa_2_model,
+                                                     civitai_model=settings.civitai_model,
+                                                     weight=settings.ipa_2_weight,
+                                                     noise=settings.ipa_2_noise,
+                                                     weight_type=settings.ipa_2_weight_type,
+                                                     start_at=settings.ipa_2_start_at,
+                                                     end_at=settings.ipa_2_end_at,
+                                                     civitai_enabled=settings.civitai_enabled)
 
-            # if settings.ipa_2_enabled:
-            #     print("IPA 2 ENABLED") 
-            #     file_extension = format_map[image_formats[1]]
-            #     settings.ipa_2_reference_image = predefined_path + "/" + image_ids[1] + file_extension
-            #     model_interface.connect_ip_adapter_2(image_path=settings.ipa_2_reference_image, 
-            #                                          ipa_model=settings.ipa_2_model, 
-            #                                          ckpt_model=settings.refinement_civitai_model, 
-            #                                          weight=settings.ipa_2_weight, 
-            #                                          noise=settings.ipa_2_noise, 
-            #                                          weight_type=settings.ipa_2_weight_type, 
-            #                                          start_at=settings.ipa_2_start_at, 
-            #                                          end_at=settings.ipa_2_end_at)
+            model_interface.connect_ksampler_efficient2(seed=settings.refinement_seed,
+                                                        steps=settings.refinement_steps,
+                                                        cfg_scale=settings.refinement_cfg_scale,
+                                                        denoise=settings.refinement_denoise,
+                                                        sampler=settings.refinement_sampler,
+                                                        ipa2_enabled=settings.ipa_2_enabled)
 
         print("CONNECTING PREVIEW IMAGE")
         model_interface.connect_preview_image(settings.refinement_enabled)
