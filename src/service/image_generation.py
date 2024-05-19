@@ -196,8 +196,18 @@ def check_settings(settings: Settings):
 def save_settings(settings: Settings):
     return data.save_settings(settings)
 
-def update_message(user_id: str, status: Optional[str] = None, uploadcare_uris: Optional[List[str]] = None, message_id: Optional[str] = None, settings_id: Optional[str] = None, s3_uris: Optional[List[str]] = None):
-    return data.update_message(user_id, status, uploadcare_uris, message_id, settings_id, s3_uris)
+def update_message(user_id: str, 
+                   status: Optional[str] = None, 
+                   uploadcare_uris: Optional[List[str]] = None, 
+                   message_id: Optional[str] = None, 
+                   settings_id: Optional[str] = None, 
+                   s3_uris: Optional[List[str]] = None):
+    return data.update_message(user_id, 
+                               status, 
+                               uploadcare_uris, 
+                               message_id, 
+                               settings_id, 
+                               s3_uris)
 
 def extract_id_from_uri(uri):
     # Use regex to extract the UUID from the URI
@@ -216,13 +226,13 @@ async def generate(settings: Settings,
     if billing_service.has_permissions('image_generation', user):
         check = check_settings(settings)
         if check is not True:
-            print("CHECK: ", check)
+            # print("CHECK: ", check)
             raise HTTPException(status_code=400, detail=check)
 
         uploadcare = Uploadcare(public_key=os.getenv('UPLOADCARE_PUBLIC_KEY'), secret_key=os.getenv('UPLOADCARE_SECRET_KEY'))
 
         uploadcare_uris = [settings.ipa_1_reference_image, settings.ipa_2_reference_image]
-        print("UPLOADCARE URIS", uploadcare_uris)
+        # print("UPLOADCARE URIS", uploadcare_uris)
 
         image_formats = []
         image_ids = []
@@ -237,8 +247,8 @@ async def generate(settings: Settings,
                 image_formats.append('')
                 image_ids.append('')
 
-        print("IMAGE IDS", image_ids)
-        print("IMAGE FORMATS", image_formats)
+        # print("IMAGE IDS", image_ids)
+        # print("IMAGE FORMATS", image_formats)
 
         if any(ext and ext not in ['jpeg', 'png', 'heic'] for ext in image_formats):
             raise HTTPException(status_code=400, detail="Invalid image format. Valid ones are jpeg, png, heic.")
@@ -246,11 +256,16 @@ async def generate(settings: Settings,
         # settings_id = save_settings(settings)
         settings_id = str(uuid4())
 
-        message_id = update_message(user.user_id, "started", uploadcare_uris, None, settings_id, None)
+        message_id = update_message(user_id=user.user_id, 
+                                    status="started", 
+                                    uploadcare_uris=uploadcare_uris, 
+                                    message_id=None, 
+                                    settings_id=settings_id, 
+                                    s3_uris=None)
 
         workflow_json = generate_workflow(settings, image_ids, image_formats)
 
-        print(workflow_json)
+        # print(workflow_json)
 
         if workflow_json is None:
             update_message(user.user_id, message_id, "failed")

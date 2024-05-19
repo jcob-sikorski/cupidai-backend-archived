@@ -9,7 +9,12 @@ from model.image_generation import Settings, Message
 from pymongo import ReturnDocument, DESCENDING
 from .init import comfyui_col, settings_col
 
-def update_message(user_id: str, status: Optional[str] = None, uploadcare_uris: Optional[List[str]] = None, message_id: Optional[str] = None, settings_id: Optional[str] = None, s3_uris: Optional[List[str]] = None) -> None:
+def update_message(user_id: str, 
+                   status: Optional[str] = None, 
+                   uploadcare_uris: Optional[List[str]] = None, 
+                   message_id: Optional[str] = None, 
+                   settings_id: Optional[str] = None, 
+                   s3_uris: Optional[List[str]] = None) -> None:
     message = Message(
         user_id=user_id,
         status=status,
@@ -47,12 +52,10 @@ def save_settings(settings: Settings) -> None:
 
 
 def get_batch(user_id: str) -> Optional[Message]:
-    # Find the most recent message for the given user_id
     result = comfyui_col.find_one({"user_id": user_id}, sort=[("created_at", DESCENDING)])
 
     if result:
         message = Message(**result)
-        print(message)
         return message
     else:
         return None

@@ -29,6 +29,6 @@ async def generate(settings: Settings,
                                   background_tasks)
 
 
-@router.get("/batch", status_code=200)  # Retrieves most recent batch
+@router.get("/recent-batch", status_code=200)  # Retrieves most recent batch
 async def get_batch(user: Annotated[Account, Depends(account_service.get_current_active_user)]) -> Optional[Message]:
     return service.get_batch(user)
