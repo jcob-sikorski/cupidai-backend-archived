@@ -676,18 +676,18 @@ preview_image2 = {
 }
 
 ipa2 = {
-  # "251": {
-  #   "inputs": {
-  #     "ckpt_air": "{model_id}@{model_version}",
-  #     "ckpt_name": "realisticVisionV51_v51VAE.safetensors",
-  #     "download_chunks": 4,
-  #     "download_path": "models\\checkpoints"
-  #   },
-  #   "class_type": "CivitAI_Checkpoint_Loader",
-  #   "_meta": {
-  #     "title": "Civitait Checkpoint Loader #2"
-  #   }
-  # },
+  "251": {
+    "inputs": {
+      "ckpt_air": "{model_id}@{model_version}",
+      "ckpt_name": "realisticVisionV51_v51VAE.safetensors",
+      "download_chunks": 4,
+      "download_path": "models\\checkpoints"
+    },
+    "class_type": "CivitAI_Checkpoint_Loader",
+    "_meta": {
+      "title": "Civitait Checkpoint Loader #2"
+    }
+  },
   "284": {
     "inputs": {
       "weight": 1,
@@ -709,7 +709,7 @@ ipa2 = {
         0
       ],
       "model": [
-        "229",
+        "251",
         0
       ]
     },

@@ -11,16 +11,19 @@ import service.image_generation as service
 router = APIRouter(prefix="/image-generation")
 
 
-@router.post("/webhook", status_code=201)
+@router.post("/webhook", status_code=200)
 async def webhook(message: Message) -> None:
     print("COMFYUI WEBHOOK ACTIVATED")
     return service.webhook(message)
 
 
-@router.post("/", status_code=201)
+@router.post("/generate", status_code=201)
 async def generate(settings: Settings,
                    user: Annotated[Account, Depends(account_service.get_current_active_user)], 
                    background_tasks: BackgroundTasks) -> None:
+    
+    print("SETTINGS PASSED FROM FRONTEND", settings)
+
     return await service.generate(settings, 
                                   user, 
                                   background_tasks)

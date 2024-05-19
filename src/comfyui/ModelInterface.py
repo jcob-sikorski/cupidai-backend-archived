@@ -1,4 +1,4 @@
-from typing import List, Dict, Optional
+from typing import List, Optional
 
 import importlib
 
@@ -26,7 +26,8 @@ class ModelInterface():
 
         self.used_components = set()
 
-    def load_json(self, unit_name: str):
+    def load_json(self, 
+                  unit_name: str):
         # Import the JSON dictionary directly without decoding
         try:
             # Assuming all JSON data is stored in the JSONEngine module
@@ -59,7 +60,12 @@ class ModelInterface():
 
         return combined_json_sorted
 
-    def connect_control_net(self, unit: int, image_path: str, strength: float = 1.0, start_percent: float = 0.0, end_percent: float = 1.0):
+    def connect_control_net(self, 
+                            unit: int, 
+                            image_path: str, 
+                            strength: float = 1.0, 
+                            start_percent: float = 0.0, 
+                            end_percent: float = 1.0):
         """
         ################# CHOOSE CONTROLNET #################
         (Optional) Enable and choose ControlNet
@@ -105,7 +111,10 @@ class ModelInterface():
         # Connect ControlNet to the cnet_stack in efficient loader
         self.efficient_loader["206"]["inputs"]["cnet_stack"] = [keys[1], 0]
 
-    def choose_output_size(self, int1: int, int2: int, image_path: str = ""):
+    def choose_output_size(self, 
+                           int1: int, 
+                           int2: int, 
+                           image_path: str = ""):
         """
         ################# CHOOSE OUTPUT SIZE #################
         (Optional) Choose image for size reference
@@ -137,7 +146,11 @@ class ModelInterface():
         self.efficient_loader["206"]["inputs"]["empty_latent_height"][0] = "325" if image_path else "327"
         self.efficient_loader["206"]["inputs"]["empty_latent_height"][1] = 1 if image_path else 0
 
-    def connect_lora(self, count: int, models: List[str], strengths: List[str], enabled: List[bool]):
+    def connect_lora(self, 
+                     count: int, 
+                     models: List[str], 
+                     strengths: List[str], 
+                     enabled: List[bool]):
         """
         ################# CONNECT LORA #################
         (Optional) Connect lora to Efficient Loader
@@ -156,7 +169,8 @@ class ModelInterface():
         self.efficient_loader["206"]["inputs"]["lora_stack"] = ["207", 0]
         self.used_components.add("lora_stacker")
 
-    def connect_random_prompts(self, positive_prompt: str):
+    def connect_random_prompts(self, 
+                               positive_prompt: str):
         """
         ################# CONNECT RANDOM PROMPTS #################
         (Optional) Connect random prompts to the efficient loader
@@ -170,7 +184,10 @@ class ModelInterface():
         # Connect RandomPrompts to the efficient_loader
         self.efficient_loader["206"]["inputs"]["positive"] = ["222", 0]
 
-    def set_up_efficient_loader(self, ckpt_name: str, negative_prompt: str, batch_size: int):
+    def connect_efficient_loader(self, 
+                                ckpt_name: str, 
+                                negative_prompt: str, 
+                                batch_size: int):
         """
         ################# SET UP EFFICIENT LOADER #################
         (Default) Provide a configuration for the efficient loader
@@ -191,7 +208,12 @@ class ModelInterface():
 
         self.used_components.add("efficient_loader")
 
-    def set_up_ksampler_efficient1(self, steps: int, cfg_scale: float, denoise: float, sampler: str, ipa1_enabled: bool = False):
+    def connect_ksampler_efficient1(self,
+                                    steps: int, 
+                                    cfg_scale: float, 
+                                    denoise: float, 
+                                    sampler: str, 
+                                    ipa1_enabled: bool = False):
         """
         ################# CONNECT KSAMPLER EFFICENT 2 #################
         """
@@ -203,12 +225,21 @@ class ModelInterface():
 
         self.used_components.add("ksampler_efficient1")
 
-        if not ipa1_enabled:
-            # (Default) connect model to Efficient Loader model
+        if ipa1_enabled:
+            self.ksampler_efficient1["229"]["inputs"]["model"] = ["278", 0]
+        else:
             self.ksampler_efficient1["229"]["inputs"]["model"] = ["206", 0]
+            
 
 
-    def connect_ip_adapter_1(self, image_path: str, model: str, weight: int = 1, noise: int = 0, weight_type: str = "original", start_at: int = 0, end_at: int = 1):
+    def connect_ip_adapter_1(self, 
+                             image_path: str, 
+                             model: str, 
+                             weight: int = 1, 
+                             noise: int = 0, 
+                             weight_type: str = "original", 
+                             start_at: int = 0, 
+                             end_at: int = 1):
         """
         ################# CONNECT IP ADAPTER 1 #################
         (Optional) Provide configuration for ip adapter 1, connect it to the KSamplerEfficient
@@ -233,10 +264,13 @@ class ModelInterface():
 
         self.used_components.add("ipa1")
 
-        # connect apply ipadapter model to ksampler_efficient1 model
-        self.ksampler_efficient1["229"]["inputs"]["model"] = ["278", 0]
-
-    def connect_ksampler_efficient2(self, seed: int, steps: int, cfg_scale: float, denoise: float, sampler: str, ipa2_enabled: bool = True):
+    def connect_ksampler_efficient2(self, 
+                                    seed: int, 
+                                    steps: int, 
+                                    cfg_scale: float, 
+                                    denoise: float, 
+                                    sampler: str, 
+                                    ipa2_enabled: bool = True):
         """
         ################# CONNECT KSAMPLER EFFICENT 2 #################
         """
@@ -249,13 +283,20 @@ class ModelInterface():
 
         self.used_components.add("ksampler_efficient2")
 
-        if not ipa2_enabled:
-            # (Default) connect model to the KSampler (Efficient) 1
-            self.ksampler_efficient2["246"]["inputs"]["model"] = ["229", 0]
-        else:
+        if ipa2_enabled:
             self.ksampler_efficient2["246"]["inputs"]["model"] = ["284", 0]
+        else:
+            self.ksampler_efficient2["246"]["inputs"]["model"] = ["229", 0]
 
-    def connect_ip_adapter_2(self, image_path: str, model: str, weight: int = 1, noise: int = 0, weight_type: str = "original", start_at: int = 0, end_at: int = 1):
+    def connect_ip_adapter_2(self, 
+                             image_path: str, 
+                             ipa_model: str, 
+                             ckpt_model: str, 
+                             weight: int = 1, 
+                             noise: int = 0, 
+                             weight_type: str = "original", 
+                             start_at: int = 0, 
+                             end_at: int = 1):
         """
         ################# CONNECT IP ADAPTER 2 #################
         (Optional) Provide configuration for ip adapter 2, connect it to the KSamplerEfficient
@@ -275,8 +316,7 @@ class ModelInterface():
             # disconnect the second image loader from apply ip adapter and connect the first one
             self.ipa2["284"]["inputs"]["image"] = ["390", 0]
 
-
-        self.ipa2["285"]["inputs"]["ipadapter_file"] = model
+        self.ipa2["285"]["inputs"]["ipadapter_file"] = ipa_model
         
         # set parameters
         self.ipa2["284"]["inputs"]["weight"] = weight
@@ -287,74 +327,108 @@ class ModelInterface():
 
         self.used_components.add("ipa2")
 
-        # set the civitai model
-        # self.ipa2["251"]["inputs"]["ckpt_air"] = "{model_id}@{model_version}"
+        if civitai_enabled:
+            self.ipa2["251"]["inputs"]["ckpt_name"] = ckpt_model
 
-        # connect applyipadapter2 model to ksamplerefficient2 model
-        self.ksampler_efficient2["246"]["inputs"]["model"] = ["284", 0]
+            self.ipa2["284"]["inputs"]["model"] = ["251", 0]
+        else:
+            self.ipa2["284"]["inputs"]["model"] = ["229", 0]
 
     def connect_preview_image(self, refinement_enabled: bool = False):
         """
         ################# CONNECT PREVIEW IMAGE #################
         """
 
-        if not refinement_enabled:
-            self.used_components.add("preview_image1")
-        else:
+        if refinement_enabled:
             self.used_components.add("preview_image2")
+        else:
+            self.used_components.add("preview_image1")
 
-def generate_workflow(settings: Settings, image_ids: List[str], image_formats: Dict[str, str]) -> Optional[dict]:
+def generate_workflow(settings: Settings, 
+                      image_ids: List[str], 
+                      image_formats: List[str]) -> Optional[dict]:
     try:
         print("INITIALIZING MODEL INTERFACE")
         model_interface = ModelInterface()
 
         predefined_path = os.getenv('COMFYUI_PREDEFINED_PATH')
 
-        format_map = {"jpeg": ".jpg",
+        format_map = {"jpeg": ".jpeg",
                       "heic": ".heic",
                       "png": ".png"}
 
         if settings.controlnet_enabled:
             print("CONTROLNET ENABLED")
             file_extension = format_map[image_formats[2]]
-            settings.controlnet_reference_image = predefined_path + "\\" + image_ids[2] + file_extension
-            model_interface.connect_control_net(unit=settings.controlnet_model, image_path=settings.controlnet_reference_image, strength=settings.controlnet_strength, start_percent=settings.controlnet_start_percent, end_percent=settings.controlnet_end_percent)
+            settings.controlnet_reference_image = predefined_path + "/" + image_ids[2] + file_extension
+            model_interface.connect_control_net(unit=settings.controlnet_model, 
+                                                image_path=settings.controlnet_reference_image, 
+                                                strength=settings.controlnet_strength, 
+                                                start_percent=settings.controlnet_start_percent, 
+                                                end_percent=settings.controlnet_end_percent)
 
         print("CHOOSING OUTPUT SIZE")
-        model_interface.choose_output_size(int1=settings.basic_width, int2=settings.basic_height)
+        model_interface.choose_output_size(int1=settings.basic_width, 
+                                           int2=settings.basic_height)
 
         if any(settings.lora_enabled):
             print("CONNECTING LORA")
-            model_interface.connect_lora(count=settings.lora_count, models=settings.lora_models, strengths=settings.lora_strengths, enabled=settings.lora_enabled)
+            model_interface.connect_lora(count=settings.lora_count, 
+                                         models=settings.lora_models, 
+                                         strengths=settings.lora_strengths, 
+                                         enabled=settings.lora_enabled)
 
         if settings.pos_prompt_enabled:
             print("POS PROMPT ENABLED")
-            model_interface.connect_random_prompts(positive_prompt=settings.basic_pos_text_prompt)  # Optional
+            model_interface.connect_random_prompts(positive_prompt=settings.basic_pos_text_prompt)
 
-        print("SETTING UP EFFICIENT LOADER")
-        model_interface.set_up_efficient_loader(negative_prompt=settings.basic_neg_text_prompt, ckpt_name=settings.basic_model, batch_size=settings.basic_batch_size)
+        # print("SETTING UP EFFICIENT LOADER")
+        # model_interface.set_up_efficient_loader(negative_prompt=settings.basic_neg_text_prompt, 
+        #                                         ckpt_name=settings.basic_model, 
+        #                                         batch_size=settings.basic_batch_size)
 
-        print("KSAMPLER EFFICIENT 1")
-        model_interface.set_up_ksampler_efficient1(steps=settings.basic_sampling_steps, sampler=settings.basic_sampler_method, cfg_scale=settings.basic_cfg_scale, denoise=settings.basic_denoise)
+        # print("KSAMPLER EFFICIENT 1")
+        # model_interface.set_up_ksampler_efficient1(steps=settings.basic_sampling_steps,
+        #                                            sampler=settings.basic_sampler_method, 
+        #                                            cfg_scale=settings.basic_cfg_scale, 
+        #                                            denoise=settings.basic_denoise)
 
-        if settings.refinement_enabled:
-            print("KSAMPLER EFFICIENT 2")
-            model_interface.connect_ksampler_efficient2(seed=settings.refinement_seed, steps=settings.refinement_steps, cfg_scale=settings.refinement_cfg_scale, denoise=settings.refinement_denoise, sampler_name=settings.refinement_sampler)
+        # if settings.ipa_1_enabled:
+        #     print("IPA 1 ENABLED")
+        #     file_extension = format_map[image_formats[0]]
+        #     settings.ipa_1_reference_image = predefined_path + "/" + image_ids[0] + file_extension
+        #     model_interface.connect_ip_adapter_1(image_path=settings.ipa_1_reference_image, 
+        #                                          model=settings.ipa_1_model, 
+        #                                          weight=settings.ipa_1_weight, 
+        #                                          noise=settings.ipa_1_noise, 
+        #                                          weight_type=settings.ipa_1_weight_type, 
+        #                                          start_at=settings.ipa_1_start_at, 
+        #                                          end_at=settings.ipa_1_end_at)
+
+        # if settings.refinement_enabled:
+        #     print("KSAMPLER EFFICIENT 2")
+        #     model_interface.connect_ksampler_efficient2(seed=settings.refinement_seed, 
+        #                                                 sampler=settings.refinement_sampler, 
+        #                                                 steps=settings.refinement_steps, 
+        #                                                 cfg_scale=settings.refinement_cfg_scale, 
+        #                                                 denoise=settings.refinement_denoise)
+
+
+            # if settings.ipa_2_enabled:
+            #     print("IPA 2 ENABLED") 
+            #     file_extension = format_map[image_formats[1]]
+            #     settings.ipa_2_reference_image = predefined_path + "/" + image_ids[1] + file_extension
+            #     model_interface.connect_ip_adapter_2(image_path=settings.ipa_2_reference_image, 
+            #                                          ipa_model=settings.ipa_2_model, 
+            #                                          ckpt_model=settings.refinement_civitai_model, 
+            #                                          weight=settings.ipa_2_weight, 
+            #                                          noise=settings.ipa_2_noise, 
+            #                                          weight_type=settings.ipa_2_weight_type, 
+            #                                          start_at=settings.ipa_2_start_at, 
+            #                                          end_at=settings.ipa_2_end_at)
 
         print("CONNECTING PREVIEW IMAGE")
         model_interface.connect_preview_image(settings.refinement_enabled)
-
-        if settings.ipa_1_enabled:
-            print("IPA 1 ENABLED")
-            file_extension = format_map[image_formats[0]]
-            settings.ipa_1_reference_image = predefined_path + "\\" + image_ids[0] + file_extension
-            model_interface.connect_ip_adapter_1(image_path=settings.ipa_1_reference_image, model=settings.ipa_1_model, weight=settings.ipa_1_weight, noise=settings.ipa_1_noise, weight_type=settings.ipa_1_weight_type, start_at=settings.ipa_1_start_at, end_at=settings.ipa_1_end_at)
-
-        if settings.ipa_2_enabled:
-            print("IPA 2 ENABLED") 
-            file_extension = format_map[image_formats[1]]
-            settings.ipa_2_reference_image = predefined_path + "\\" + image_ids[1] + file_extension
-            model_interface.connect_ip_adapter_2(image_path=settings.ipa_2_reference_image, model=settings.ipa_2_model, weight=settings.ipa_2_weight, noise=settings.ipa_2_noise, weight_type=settings.ipa_2_weight_type, start_at=settings.ipa_2_start_at, end_at=settings.ipa_2_end_at)
 
         final_json = model_interface.finalize()
 

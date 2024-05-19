@@ -65,7 +65,7 @@ class Settings(BaseModel):
 class Message(BaseModel):
     user_id: Optional[str] = None
     status: Optional[str] = None
-    uploadcare_uris: Optional[Dict[str, str]] = None
+    uploadcare_uris: Optional[List[str]] = None
     created_at: datetime | None = None
     message_id: Optional[str] = None
     settings_id: Optional[str] = None

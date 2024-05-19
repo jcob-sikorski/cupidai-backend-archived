@@ -9,7 +9,7 @@ from model.image_generation import Settings, Message
 from pymongo import ReturnDocument, DESCENDING
 from .init import comfyui_col, settings_col
 
-def update_message(user_id: str, status: Optional[str] = None, uploadcare_uris: Optional[Dict[str, str]] = None, message_id: Optional[str] = None, settings_id: Optional[str] = None, s3_uris: Optional[List[str]] = None) -> None:
+def update_message(user_id: str, status: Optional[str] = None, uploadcare_uris: Optional[List[str]] = None, message_id: Optional[str] = None, settings_id: Optional[str] = None, s3_uris: Optional[List[str]] = None) -> None:
     message = Message(
         user_id=user_id,
         status=status,
