@@ -54,13 +54,8 @@ class Settings(BaseModel):
     lora_strengths: Optional[List[float]] = None # max is 10.0
     lora_enabled: List[bool] = [False, False, False, False]
 
-    # ControlNet settings (optional)
-    controlnet_enabled: bool = False
-    controlnet_model: Optional[str] = None # in checkpoint models
-    controlnet_reference_image: Optional[str] = None # uploadcare uri
-    controlnet_strength: Optional[float] = None # max is 10.0
-    controlnet_start_percent: Optional[float] = None # in the range of smapling steps
-    controlnet_end_percent: Optional[float] = None
+    civitai_enabled: bool = False
+    civitai_model: Optional[str] = None
 
 class Message(BaseModel):
     user_id: Optional[str] = None

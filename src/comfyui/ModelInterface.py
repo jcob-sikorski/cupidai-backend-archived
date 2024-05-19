@@ -8,10 +8,6 @@ from model.image_generation import Settings
 
 class ModelInterface():
     def __init__(self):
-        self.open_pose_dwp = self.load_json("open_pose_dwp")
-        self.canny = self.load_json("canny")
-        self.midas_depth_map = self.load_json("midas_depth_map")
-        self.ip2p = self.load_json("ip2p")
         self.lora_stacker = self.load_json("lora_stacker")
         self.image_size = self.load_json("image_size")
         self.get_image_size = self.load_json("get_image_size")
@@ -60,56 +56,6 @@ class ModelInterface():
 
         return combined_json_sorted
 
-    def connect_control_net(self, 
-                            unit: int, 
-                            image_path: str, 
-                            strength: float = 1.0, 
-                            start_percent: float = 0.0, 
-                            end_percent: float = 1.0):
-        """
-        ################# CHOOSE CONTROLNET #################
-        (Optional) Enable and choose ControlNet
-        1. Select unit
-        2. Then set the image path
-        3. (Optional) set strength, set start percent, set end percent (0-1)
-        4. Connect ControlNet to the cnet_stack in efficient loader
-        """
-        # Mapping unit numbers to unit names
-        unit_names = {
-            1: "open_pose_dwp",
-            2: "midas_depth_map",
-            3: "canny",
-            4: "ip2p"
-        }
-
-        # Mapping unit names to their respective JSON keys
-        json_keys = {
-            "open_pose_dwp": ["210", "208"],
-            "midas_depth_map": ["213", "211"],
-            "canny": ["216", "214"],
-            "ip2p": ["218", "217"]
-        }
-
-        # Select unit
-        unit_name = unit_names.get(unit)
-        
-        # Get JSON keys based on unit name
-        keys = json_keys.get(unit_name)
-        
-        json_dict = getattr(self, unit_name, "Variable not found")
-
-        # Set image path
-        json_dict[keys[0]]["inputs"]["image"] = image_path
-        
-        # Set strength, set start percent, set end percent (0-1)
-        json_dict[keys[1]]["inputs"]["strength"] = strength
-        json_dict[keys[1]]["inputs"]["start_percent"] = start_percent
-        json_dict[keys[1]]["inputs"]["end_percent"] = end_percent
-
-        self.used_components.add(unit_name)
-
-        # Connect ControlNet to the cnet_stack in efficient loader
-        self.efficient_loader["206"]["inputs"]["cnet_stack"] = [keys[1], 0]
 
     def choose_output_size(self, 
                            int1: int, 
@@ -166,7 +112,6 @@ class ModelInterface():
                     self.lora_stacker["207"]["inputs"][f"lora_name_{index}"] = models[i]
                     self.lora_stacker["207"]["inputs"][f"model_str_{index}"] = strengths[i]
 
-        self.efficient_loader["206"]["inputs"]["lora_stack"] = ["207", 0]
         self.used_components.add("lora_stacker")
 
     def connect_random_prompts(self, 
@@ -181,13 +126,12 @@ class ModelInterface():
         self.random_prompts["222"]["inputs"]["text"] = positive_prompt
         self.used_components.add("random_prompts")
 
-        # Connect RandomPrompts to the efficient_loader
-        self.efficient_loader["206"]["inputs"]["positive"] = ["222", 0]
-
     def connect_efficient_loader(self, 
                                 ckpt_name: str, 
                                 negative_prompt: str, 
-                                batch_size: int):
+                                batch_size: int,
+                                lora_enabled: bool = False,
+                                random_prompts_enabled: bool = True):
         """
         ################# SET UP EFFICIENT LOADER #################
         (Default) Provide a configuration for the efficient loader
@@ -207,6 +151,12 @@ class ModelInterface():
         self.efficient_loader["206"]["inputs"]["batch_size"] = batch_size
 
         self.used_components.add("efficient_loader")
+
+        if random_prompts_enabled:
+            self.efficient_loader["206"]["inputs"]["positive"] = ["222", 0]
+
+        if lora_enabled:
+            self.efficient_loader["206"]["inputs"]["lora_stack"] = ["207", 0]
 
     def connect_ksampler_efficient1(self,
                                     steps: int, 
@@ -358,16 +308,6 @@ def generate_workflow(settings: Settings,
                       "heic": ".heic",
                       "png": ".png"}
 
-        if settings.controlnet_enabled:
-            print("CONTROLNET ENABLED")
-            file_extension = format_map[image_formats[2]]
-            settings.controlnet_reference_image = predefined_path + "/" + image_ids[2] + file_extension
-            model_interface.connect_control_net(unit=settings.controlnet_model, 
-                                                image_path=settings.controlnet_reference_image, 
-                                                strength=settings.controlnet_strength, 
-                                                start_percent=settings.controlnet_start_percent, 
-                                                end_percent=settings.controlnet_end_percent)
-
         print("CHOOSING OUTPUT SIZE")
         model_interface.choose_output_size(int1=settings.basic_width, 
                                            int2=settings.basic_height)
@@ -386,7 +326,9 @@ def generate_workflow(settings: Settings,
         print("CONNECTING EFFICIENT LOADER")
         model_interface.connect_efficient_loader(ckpt_name=settings.basic_model,
                                                  negative_prompt=settings.basic_neg_text_prompt,
-                                                 batch_size=settings.basic_batch_size)
+                                                 batch_size=settings.basic_batch_size,
+                                                 lora_enabled=settings.lora_enabled,
+                                                 random_prompts_enabled=settings.pos_prompt_enabled)
         
         if settings.ipa_1_enabled:
             print("CONNECTING IPA 1")
