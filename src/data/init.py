@@ -18,7 +18,7 @@ def get_db():
     account_col = db['Account']
     invite_col = db['Invite']
     password_reset_col = db['PasswordReset']
-    stripe_account_col = db['StripeAccount']
+    payment_account_col = db['PaymentAccount']
     # team_col = db['Team']
     tos_col = db['TermsOfService']
     plan_col = db['Plan']
@@ -37,6 +37,6 @@ def get_db():
     social_account_col = db['SocialAccount']
     # member_col = db['Member']
 
-    return account_col, invite_col, password_reset_col, stripe_account_col, tos_col, plan_col, usage_history_col, comfyui_col, settings_col, midjourney_col, midjourney_prompt_col, referral_col, payout_submission_col, payout_history_col, earnings_col, statistics_col, bug_col, deepfake_col, social_account_col
+    return account_col, invite_col, password_reset_col, payment_account_col, tos_col, plan_col, usage_history_col, comfyui_col, settings_col, midjourney_col, midjourney_prompt_col, referral_col, payout_submission_col, payout_history_col, earnings_col, statistics_col, bug_col, deepfake_col, social_account_col
 
-account_col, invite_col, password_reset_col, stripe_account_col, tos_col, plan_col, usage_history_col, comfyui_col, settings_col, midjourney_col, midjourney_prompt_col, referral_col, payout_submission_col, payout_history_col, earnings_col, statistics_col, bug_col, deepfake_col, social_account_col = get_db()
+account_col, invite_col, password_reset_col, payment_account_col, tos_col, plan_col, usage_history_col, comfyui_col, settings_col, midjourney_col, midjourney_prompt_col, referral_col, payout_submission_col, payout_history_col, earnings_col, statistics_col, bug_col, deepfake_col, social_account_col = get_db()
