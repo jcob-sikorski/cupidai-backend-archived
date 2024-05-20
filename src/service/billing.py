@@ -29,16 +29,20 @@ stripe.api_key = os.getenv('STRIPE_API_KEY')
 endpoint_secret = os.getenv('STRIPE_ENDPOINT_SECRET')
 
 
+# TODO: check if the user has current plan - if he has then check 
+#       if the requested feature in is the plan features
 def has_permissions(feature: str, 
                     user: Account) -> bool:
     # TODO: unccomment this for hollistic tests
     # return data.has_permissions(feature, user.user_id)
     return True
 
+# TODO: need to create sth similar in radom and get the checkout url
 def create_checkout_session(create_checkout_session_request: CreateCheckoutSessionRequest,
                             user: Account) -> str:
     session = stripe.checkout.Session.create(
-        success_url="https://deep-safe-spaniel.ngrok-free.app/dashboard",
+        success_url="http://localhost:3000/dashboard",
+        # success_url="https://deep-safe-spaniel.ngrok-free.app/dashboard",
         cancel_url="https://deep-safe-spaniel.ngrok-free.app/billing",
         line_items=[
             {
@@ -55,6 +59,7 @@ def create_checkout_session(create_checkout_session_request: CreateCheckoutSessi
 
     return session.url
 
+# TODO: do the similar steps but for radom API
 async def webhook(item: Item, 
                   request: Request) -> None:
     event = None
@@ -105,86 +110,20 @@ async def webhook(item: Item,
     else:
         print('Unhandled event type {}'.format(event['type']))
 
+# TODO: instead create a payment account with the requested 
+#       provider - each webhook for payment provider uses that
 def create_stripe_account(user_id: str, 
                           customer_id: str):
     return data.create_stripe_account(user_id, customer_id)
 
-# TODO: this does not in any way allows user to donwload a csv in chunks
-def download_history(user: Account) -> None:
-    # Fetch purchase history from Stripe
-    invoices = get_history(solo=True, user_id=user.user_id)
-
-    if invoices:
-        # Prepare CSV data
-        csv_data = []
-        for invoice in invoices.auto_paging_iter():
-            for line_item in invoice.lines.auto_paging_iter():
-                csv_data.append([invoice.created, invoice.id, line_item.type, line_item.description])
-
-        # Write CSV data to file
-        file_name = f"{user.user_id}_purchase_history.csv"
-        with open(file_name, mode='w', newline='') as file:
-            writer = csv.writer(file)
-            writer.writerow(['Date', 'Invoice ID', 'Purchase Method', 'Plan Name'])
-            writer.writerows(csv_data)
-
-        print(f"Purchase history downloaded and saved to {file_name}")
-    else:
-        raise HTTPException(status_code=404, detail="No purchase history found.")
-
-
-# def get_transaction_history(last_object_id: str, 
-#                             limit: str, 
-#                             user: Account) -> Tuple[List[dict], Optional[str], bool]:
-#     try:
-#         customer_id = data.get_customer_id(user.user_id)
-
-#         transaction_history = []
-#         has_more = False
-
-#         if customer_id:
-#             payment_intents = stripe.PaymentIntent.list(customer=customer_id,
-#                                                         starting_after=last_object_id if last_object_id else None,
-#                                                         limit=int(limit))
-            
-#             print("PAYMENT INTENTS: ", payment_intents)
-
-#             for intent in payment_intents.data:
-#                 date = datetime.fromtimestamp(intent.created).strftime("%Y-%m-%d %H:%M:%S")
-
-#                 # Creating transaction dictionary
-#                 transaction = {
-#                     "date": date,
-#                     "id": intent.id,
-#                     "description": intent.description,
-#                     "status": intent.status
-#                 }
-#                 transaction_history.append(transaction)
-
-#             # Extract the ID of the last object for pagination
-#             if payment_intents.data:
-#                 last_object_id = payment_intents.data[-1].id
-#                 has_more = payment_intents.has_more
-
-#         return transaction_history, last_object_id, has_more
-
-#     except stripe.error.InvalidRequestError as e:
-#         raise HTTPException(status_code=404, detail="There is no track record of payment intents for this user.")
-
-
-def accept_tos(user: Account) -> None:
-    try:
-        data.accept_tos(user.user_id)
-    except ValueError:
-        raise HTTPException(status_code=400, detail="Failed to accept Terms of Conditions.")
-
-
+# TODO: return a Plan document based on the customer's subscription_id/price_id whatever
 def get_current_plan(user: Account) -> Optional[str]:
     customer_id = data.get_customer_id(user.user_id)
 
     if customer_id:
         try:
             customer = stripe.Customer.retrieve(customer_id, expand=['subscriptions'])
+            print(customer)
             if 'subscriptions' in customer:
                 subscriptions = customer.subscriptions.data  # Access the list of subscriptions
     
@@ -196,7 +135,8 @@ def get_current_plan(user: Account) -> Optional[str]:
             print(f"Error retrieving customer {customer_id}: {e}")
             return None
         
-
+# TODO: get the customer id from database and create a 
+#       request to radom to cancel the plan for this specific user
 def cancel_plan(user: Account) -> bool:
     customer_id = data.get_customer_id(user.user_id)
 
@@ -219,7 +159,9 @@ def cancel_plan(user: Account) -> bool:
 
     return False
 
-        
+
+# TODO: instead use the plan representation in the database
+#       get available plans from there
 def get_available_plans() -> Optional[List[Plan]]:
     try:
         products = stripe.Product.list(limit=4, active=True)
@@ -247,6 +189,7 @@ def get_available_plans() -> Optional[List[Plan]]:
         raise HTTPException(status_code=404, detail="There are no available plans at the moment.")
     
 
+# TODO: based on the Radom API return the product by it's id or sth similar
 def get_product(product_id: str) -> Optional[Plan]:
     try:
         product = stripe.Product.retrieve(product_id)
