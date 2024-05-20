@@ -7,6 +7,9 @@ class PaymentAccount(BaseModel):
     user_id: str | None = None
     subscription_id: str | None = None
     checkout_session_id: str | None = None
+    amount: float | None = None
+    radom_product_id: str | None = None
+    referral_id: Optional[str] = None
 
 class TermsOfService(BaseModel):
     user_id: str | None = None

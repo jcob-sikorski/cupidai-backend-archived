@@ -19,21 +19,33 @@ import service.account as account_service
 import service.email as email_service
 import service.referral as referral_service
 
-# from data.init import stripe_account_col, referral_col
 
-# The library needs to be configured with your account's secret key.
-# Ensure the key is kept out of any version control system you might be using.
-# stripe.api_key = os.getenv('STRIPE_API_KEY')
-
-# This is your Stripe CLI webhook secret for testing your endpoint locally.
-
-
-# TODO: check if the user has current plan - if he has then check 
-#       if the requested feature in is the plan features
 def has_permissions(feature: str, 
                     user: Account) -> bool:
-    pass
+    
+    payment_account = get_payment_account(user.user_id)
 
+    if payment_account and payment_account.subscription_id:
+        url = f"https://api.radom.com/subscription/{payment_account.subscription_id}"
+
+        headers = {
+            "Content-Type": "application/json",
+            "Authorization": os.getenv("RADOM_ACCESS_TOKEN")
+        }
+
+        response = requests.request("GET", url, headers=headers)
+
+        response_json = response.json()
+
+        status = response_json.get("status", {})
+
+        if status == "active":
+            plan = get_current_plan(user)
+
+            if plan and feature in plan.features:
+                return True
+            
+        return False
 
 def create_checkout_session(
     req: CheckoutSessionRequest,
@@ -162,7 +174,7 @@ async def webhook(request: Request) -> None:
                                subscription_id=subscription_id, 
                                checkout_session_id=checkout_session_id, 
                                amount=amount,
-                               product_id=product_id,
+                               radom_product_id=product_id,
                                referral_id=referral_id)
 
     elif event_type == "paymentTransactionConfirmed":
@@ -222,7 +234,7 @@ def get_available_plans(user: Account) -> Optional[Dict[str, Any]]:
     current_plan = get_current_plan(user)
     
     # Extract the current plan ID
-    current_plan_id = current_plan.id if current_plan else None
+    current_plan_id = current_plan.radom_product_id if current_plan else None
     
     # Format available plans as a list of Plan instances
     formatted_plans = [Plan(**plan_dict) for plan_dict in plans]
@@ -242,14 +254,14 @@ def create_payment_account(user_id: str,
                            subscription_id: str,
                            checkout_session_id: str,
                            amount: float,
-                           product_id: str,
+                           radom_product_id: str,
                            referral_id: Optional[str] = None):
     
     return data.create_payment_account(user_id, 
                                        subscription_id,
                                        checkout_session_id,
                                        amount,
-                                       product_id,
+                                       radom_product_id,
                                        referral_id)
 
 def remove_payment_account(checkout_session_id: str):
@@ -263,9 +275,8 @@ def get_payment_account(user_id: str,
                                     checkout_session_id)
 
 
-# TODO: return a Plan document based on the customer's subscription_id/price_id whatever
-def get_current_plan(user: Account) -> Optional[str]:
-    customer_id = data.get_customer_id(user.user_id)
+def get_current_plan(user: Account) -> Optional[Plan]:
+    payment_account = get_payment_account(user)
 
-    if customer_id:
-        pass
+    if payment_account and payment_account.radom_product_id:
+        return get_product(payment_account.radom_product_id)
