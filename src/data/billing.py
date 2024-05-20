@@ -56,6 +56,13 @@ def create_payment_account(user_id: str,
         )
 
 
+def remove_payment_account(checkout_session_id: str) -> None:
+    # Find the payment account
+    payment_account = payment_account_col.find_one({"checkout_session_id": checkout_session_id})
+
+    if payment_account:
+        payment_account_col.delete_one({"checkout_session_id": checkout_session_id})
+
 
 def get_payment_account(user_id: str, 
                         checkout_session_id: str = None) -> Optional[PaymentAccount]:

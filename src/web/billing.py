@@ -2,6 +2,10 @@ from fastapi import APIRouter, Depends, Request
 
 from typing import Annotated, Optional, Dict, Any
 
+from fastapi import HTTPException
+
+import os
+
 from model.account import Account
 from model.billing import Plan, CheckoutSessionRequest
 
@@ -24,11 +28,17 @@ async def create_checkout_session(req: CheckoutSessionRequest,
     return service.create_checkout_session(req,
                                            user)
 
-
-# TODO: this will accept the event type "managedRecurringPayment" some event 
-#       data and radomData which contains the checkoutSessionId
+# TODO: add here the webhook access token so it's safe
 @router.post('/webhook')
 async def webhook(request: Request) -> None:
+    radom_verification_key = request.headers.get("radom-verification-key")
+    
+    if radom_verification_key != os.getenv("RADOM_WEBHOOK_SECRET"):
+        raise HTTPException(
+            status_code=401,
+            detail="Invalid verification key"
+        )
+
     return await service.webhook(request)
 
 

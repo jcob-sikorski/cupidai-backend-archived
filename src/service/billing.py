@@ -10,12 +10,10 @@ import requests
 
 import json
 
-from stripe.error import InvalidRequestError
-
 import data.billing as data
 
 from model.account import Account
-from model.billing import Plan, CheckoutSessionRequest
+from model.billing import Plan, CheckoutSessionRequest, PaymentAccount
 
 import service.account as account_service
 import service.email as email_service
@@ -37,15 +35,17 @@ def has_permissions(feature: str,
     pass
 
 
-# TODO: need to create sth similar in radom and get the checkout url
 def create_checkout_session(
     req: CheckoutSessionRequest,
     user: Account
 ) -> Dict[str, Any]:
-    
-    # TODO: check if the customer has referenced subscription id.
-    #       if cusomter has subscription id then return error - he needs 
-    #       to cancel the plan in order to make a new subscription
+    payment_account = get_payment_account(user.user_id)
+
+    if payment_account:
+        raise HTTPException(
+            status_code=403,
+            detail="You have to first cancel your plan to create a new one."
+        )
     
     product = get_product(req.radom_product_id)
 
@@ -110,7 +110,7 @@ def create_checkout_session(
     }
 
     headers = {
-        'Authorization': "eyJhZGRyZXNzIjpudWxsLCJvcmdhbml6YXRpb25faWQiOiI1Njc3ZTU0OC0zMWEwLTRmZWMtODA5OS1kM2QyODkzYjYwZmQiLCJzZXNzaW9uX2lkIjoiYWY4ZjA2YTktNzliOS00NGM3LTk0ODgtZDk2MGUyMDRlZTAzIiwiZXhwaXJlZF9hdCI6IjIwMjUtMDUtMjBUMTQ6MzM6NDQuMjczNDU0NTExWiIsImlzX2FwaV90b2tlbiI6dHJ1ZX0=",
+        'Authorization': os.getenv('RADOM_ACCESS_TOKEN'),
         'Content-Type': 'application/json'
     }
 
@@ -166,9 +166,6 @@ async def webhook(request: Request) -> None:
                                referral_id=referral_id)
 
     elif event_type == "paymentTransactionConfirmed":
-        # Handle payment transaction confirmed event
-        # TODO: using checkout session id mark the referral as eligible for payment just like in the webhook in the past
-
         checkout_session_id = body_dict.get("radomData", {}).get("checkoutSession", {}).get("checkoutSessionId")
 
         payment_account = get_payment_account(user_id='',
@@ -177,39 +174,44 @@ async def webhook(request: Request) -> None:
             referral = referral_service.get_referral(payment_account.referral_id)
 
             if referral:
-                # TODO: get the price from the payment_account
-                referral_service.update_statistics(referral.host_id, session["amount_total"], False, False)
+                referral_service.update_statistics(referral.host_id, 
+                                                   payment_account.amount,
+                                                   clicked=False, 
+                                                   signup_ref=False)
 
                 user = account_service.get_by_id(referral.host_id)
                 if user:
                     email_service.send(user.email, 'clv2tl6jd00vybfeainihiu2j')
 
     elif event_type == "subscriptionExpired":
-        # TODO: get the subscription_id
-        # TODO: based on the subscription id find the payment account 
-        #       and remove the subscription id from the payment account
-
         subscription_id = body_dict.get("eventData", {}).get("newSubscription", {}).get("subscriptionId")
-        
-        pass
+
+        remove_payment_account(subscription_id)
     elif event_type == "subscriptionCancelled":
-        # TODO: get the subscription_id
-        # TODO: based on the subscription id find the payment account 
-        #       and remove the subscription id from the payment account
-        pass
+        subscription_id = body_dict.get("eventData", {}).get("newSubscription", {}).get("subscriptionId")
+
+        remove_payment_account(subscription_id)
 
     return
 
 
-# TODO: get the customer id from database and create a 
-#       request to radom to cancel the plan for this specific user
 def cancel_plan(user: Account) -> bool:
-    # TODO: instead get subscription id
-    # TODO: subscription
-    customer_id = data.get_customer_id(user.user_id)
+    payment_account = get_payment_account(user.user_id)
 
-    if customer_id:
-        pass
+    if payment_account:
+        url = f"https://api.radom.com/subscription/{payment_account.subscription_id}/cancel"
+
+        headers = {
+            "Content-Type": "application/json",
+            "Authorization": os.getenv('RADOM_ACCESS_TOKEN')
+        }
+
+        response = requests.request("POST", url, headers=headers)
+
+        if response.status_code == 200:
+            return True
+
+    return False
 
 
 def get_available_plans(user: Account) -> Optional[Dict[str, Any]]:
@@ -249,6 +251,16 @@ def create_payment_account(user_id: str,
                                        amount,
                                        product_id,
                                        referral_id)
+
+def remove_payment_account(checkout_session_id: str):
+    return data.remove_payment_account(checkout_session_id)
+
+
+def get_payment_account(user_id: str, 
+                        checkout_session_id: str = None) -> Optional[PaymentAccount]:
+    
+    return data.get_payment_account(user_id,
+                                    checkout_session_id)
 
 
 # TODO: return a Plan document based on the customer's subscription_id/price_id whatever
