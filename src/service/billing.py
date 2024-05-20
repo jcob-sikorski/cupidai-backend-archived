@@ -58,21 +58,19 @@ def create_checkout_session(
             status_code=403,
             detail="You have to first cancel your plan to create a new one."
         )
-    
-    product = get_product(req.radom_product_id)
 
     line_items = [
         {
             "productId": req.radom_product_id,
-            "itemData": {
-                "name": product.name,
-                "description": product.description,
-                "chargingIntervalSeconds": 3600 * 24 * 30,
-                "price": product.price,
+            # "itemData": {
+            #     "name": product.name,
+            #     "description": product.description,
+            #     "chargingIntervalSeconds": 3600 * 24 * 30,
+            #     "price": product.price,
                 "isMetered": False,
-                "currency": "GBP",
+            #     "currency": "GBP",
                 "sendSubscriptionEmails": True
-            }
+            # }
         }
     ]
     
@@ -80,8 +78,21 @@ def create_checkout_session(
         "managed": {
             "methods": [
                 {
-                    "network": "SepoliaTestnet",
-                    "token": "0xa4fCE8264370437e718aE207805b4e6233638b9E",
+                    "network": "Bitcoin",
+                    "discountPercentOff": 0
+                },
+                {
+                    "network": "Ethereum",
+                    "discountPercentOff": 0
+                },
+                {
+                    "network": "Ethereum",
+                    "token": "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
+                    "discountPercentOff": 0
+                },
+                {
+                    "network": "Ethereum",
+                    "token": "0xdAC17F958D2ee523a2206206994597C13D831ec7",
                     "discountPercentOff": 0
                 }
             ]
@@ -111,7 +122,7 @@ def create_checkout_session(
     payload = {
         "lineItems": line_items,
         # "total": total,
-        "currency": "ETH",
+        # "currency": "GBP",
         "gateway": gateway,
         "successUrl": "http://localhost:3000/dashboard",
         "cancelUrl": "http://localhost:3000/dashboard",

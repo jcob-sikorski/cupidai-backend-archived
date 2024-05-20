@@ -23,9 +23,9 @@ class FeatureRequest(BaseModel):
 @router.post("/has-permissions", status_code=200)  # Retrieves the check of access tothe feature
 async def has_permissions(req: FeatureRequest,
                           user: Annotated[Account, Depends(account_service.get_current_active_user)]) -> bool:
-    return True
-    # return service.has_permissions(req.feature,
-    #                                user)
+    # return True
+    return service.has_permissions(req.feature,
+                                   user)
 
 
 @router.post('/create-checkout-session', status_code=200)
