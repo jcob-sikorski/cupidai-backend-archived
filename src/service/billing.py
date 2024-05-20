@@ -140,20 +140,57 @@ async def webhook(request: Request) -> None:
     event_type = body_dict.get("eventType")
 
     if event_type == "newSubscription":
-        # Handle new subscription event
-        # TODO: get the subscription_id
-        # TODO: get the user_id
-        # TODO: get the referral_id
-        # TODO: get the checkout session_id
-        pass
+        subscription_id = body_dict.get("eventData", {}).get("newSubscription", {}).get("subscriptionId")
+
+        checkout_session_id = body_dict.get("radomData", {}).get("checkoutSession", {}).get("checkoutSessionId")
+
+        amount = body_dict.get("eventData", {}).get("newSubscription", {}).get("amount", {})
+
+        product_id = body_dict.get("eventData", {}).get("newSubscription", {}).get("tags", {}).get("productId")
+
+        metadata = body_dict.get("radomData", {}).get("checkoutSession", {}).get("metadata", [])
+
+        user_id = None
+        referral_id = None
+        for item in metadata:
+            if item.get("key") == "user_id":
+                user_id = item.get("value")
+            elif item.get("key") == "referral_id":
+                referral_id = item.get("value")
+
+        create_payment_account(user_id=user_id, 
+                               subscription_id=subscription_id, 
+                               checkout_session_id=checkout_session_id, 
+                               amount=amount,
+                               product_id=product_id,
+                               referral_id=referral_id)
+
     elif event_type == "paymentTransactionConfirmed":
         # Handle payment transaction confirmed event
         # TODO: using checkout session id mark the referral as eligible for payment just like in the webhook in the past
-        pass
+
+        checkout_session_id = body_dict.get("radomData", {}).get("checkoutSession", {}).get("checkoutSessionId")
+
+        payment_account = get_payment_account(user_id='',
+                                              checkout_session_id=checkout_session_id)
+        if payment_account.referral_id:
+            referral = referral_service.get_referral(payment_account.referral_id)
+
+            if referral:
+                # TODO: get the price from the payment_account
+                referral_service.update_statistics(referral.host_id, session["amount_total"], False, False)
+
+                user = account_service.get_by_id(referral.host_id)
+                if user:
+                    email_service.send(user.email, 'clv2tl6jd00vybfeainihiu2j')
+
     elif event_type == "subscriptionExpired":
         # TODO: get the subscription_id
         # TODO: based on the subscription id find the payment account 
         #       and remove the subscription id from the payment account
+
+        subscription_id = body_dict.get("eventData", {}).get("newSubscription", {}).get("subscriptionId")
+        
         pass
     elif event_type == "subscriptionCancelled":
         # TODO: get the subscription_id
@@ -199,11 +236,19 @@ def get_product(radom_product_id: str) -> Optional[Plan]:
     return data.get_product(radom_product_id)
 
 
-# TODO: instead create a payment account with the requested 
-#       provider - each webhook for payment provider uses that
 def create_payment_account(user_id: str, 
-                          customer_id: str):
-    return data.create_payment_account(user_id, customer_id)
+                           subscription_id: str,
+                           checkout_session_id: str,
+                           amount: float,
+                           product_id: str,
+                           referral_id: Optional[str] = None):
+    
+    return data.create_payment_account(user_id, 
+                                       subscription_id,
+                                       checkout_session_id,
+                                       amount,
+                                       product_id,
+                                       referral_id)
 
 
 # TODO: return a Plan document based on the customer's subscription_id/price_id whatever

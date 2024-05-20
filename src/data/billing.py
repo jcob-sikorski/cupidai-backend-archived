@@ -18,28 +18,58 @@ def has_permissions(feature: str, user_id: str) -> bool:
     return current_plan and feature in current_plan.features
 
 
-def create_payment_account(user_id: str, customer_id: str):
+def create_payment_account(user_id: str, 
+                           subscription_id: str,
+                           checkout_session_id: str,
+                           amount: float,
+                           product_id: str,
+                           referral_id: Optional[str] = None):
     # If Stripe account does not exist then add it to the collection
     payment_account = payment_account_col.find_one({"user_id": user_id})
 
     if not payment_account:
-        payment_account = PaymentAccount(
-            user_id=user_id,
-            customer_id=customer_id
+        # Create a new payment account
+        payment_account = {
+            "user_id": user_id,
+            "subscription_id": subscription_id,
+            "checkout_session_id": checkout_session_id,
+            "amount": amount,
+            "product_id": product_id,
+            "referral_id": referral_id
+        }
+        payment_account_col.insert_one(payment_account)
+    else:
+        # Update the existing payment account
+        update_fields = {
+            "subscription_id": subscription_id,
+            "checkout_session_id": checkout_session_id,
+            "amount": amount,
+            "product_id": product_id
+        }
+        
+        if referral_id is not None:
+            update_fields["referral_id"] = referral_id
+        
+        payment_account_col.update_one(
+            {"user_id": user_id},
+            {"$set": update_fields}
         )
-        payment_account_col.insert_one(payment_account.dict())
 
 
-def get_customer_id(user_id: str) -> Optional[str]:
+
+def get_payment_account(user_id: str, 
+                        checkout_session_id: str = None) -> Optional[PaymentAccount]:
     print("GETTING CUSTOMER ID FROM MONGODB")
 
-    result = payment_account_col.find_one({"user_id": user_id})
+    if checkout_session_id is not None:
+        result = payment_account_col.find_one({"checkout_session_id": checkout_session_id})
+    else:
+        result = payment_account_col.find_one({"user_id": user_id})
 
     if result is not None:
         payment_account = PaymentAccount(**result)
+        return payment_account
 
-        return payment_account.customer_id
-    
     return None
 
 
