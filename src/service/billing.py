@@ -45,7 +45,7 @@ def has_permissions(feature: str,
             if plan and feature in plan.features:
                 return True
             
-        return False
+    return False
 
 def create_checkout_session(
     req: CheckoutSessionRequest,
@@ -158,7 +158,7 @@ async def webhook(request: Request) -> None:
 
         amount = body_dict.get("eventData", {}).get("newSubscription", {}).get("amount", {})
 
-        product_id = body_dict.get("eventData", {}).get("newSubscription", {}).get("tags", {}).get("productId")
+        radom_product_id = body_dict.get("eventData", {}).get("newSubscription", {}).get("tags", {}).get("productId")
 
         metadata = body_dict.get("radomData", {}).get("checkoutSession", {}).get("metadata", [])
 
@@ -174,7 +174,7 @@ async def webhook(request: Request) -> None:
                                subscription_id=subscription_id, 
                                checkout_session_id=checkout_session_id, 
                                amount=amount,
-                               radom_product_id=product_id,
+                               radom_product_id=radom_product_id,
                                referral_id=referral_id)
 
     elif event_type == "paymentTransactionConfirmed":
@@ -182,7 +182,7 @@ async def webhook(request: Request) -> None:
 
         payment_account = get_payment_account(user_id='',
                                               checkout_session_id=checkout_session_id)
-        if payment_account.referral_id:
+        if payment_account and payment_account.referral_id:
             referral = referral_service.get_referral(payment_account.referral_id)
 
             if referral:
@@ -200,7 +200,7 @@ async def webhook(request: Request) -> None:
 
         remove_payment_account(subscription_id)
     elif event_type == "subscriptionCancelled":
-        subscription_id = body_dict.get("eventData", {}).get("newSubscription", {}).get("subscriptionId")
+        subscription_id = body_dict.get("eventData", {}).get("subscriptionCancelled", {}).get("subscriptionId")
 
         remove_payment_account(subscription_id)
 
@@ -229,20 +229,21 @@ def cancel_plan(user: Account) -> bool:
 def get_available_plans(user: Account) -> Optional[Dict[str, Any]]:
     # Retrieve available plans
     plans = data.get_available_plans()
+
+    print(plans)
     
     # Get the current plan for the user
     current_plan = get_current_plan(user)
+
+    print(current_plan)
     
     # Extract the current plan ID
     current_plan_id = current_plan.radom_product_id if current_plan else None
     
-    # Format available plans as a list of Plan instances
-    formatted_plans = [Plan(**plan_dict) for plan_dict in plans]
-    
     # Return the result as a dictionary
     return {
-        "plans": formatted_plans,
-        "current_plan_id": current_plan_id
+        "plans": plans,
+        "radom_product_id": current_plan_id
     }
     
 
@@ -264,8 +265,8 @@ def create_payment_account(user_id: str,
                                        radom_product_id,
                                        referral_id)
 
-def remove_payment_account(checkout_session_id: str):
-    return data.remove_payment_account(checkout_session_id)
+def remove_payment_account(subscription_id: str):
+    return data.remove_payment_account(subscription_id)
 
 
 def get_payment_account(user_id: str, 
@@ -276,7 +277,9 @@ def get_payment_account(user_id: str,
 
 
 def get_current_plan(user: Account) -> Optional[Plan]:
-    payment_account = get_payment_account(user)
+    payment_account = get_payment_account(user.user_id)
+
+    print(payment_account)
 
     if payment_account and payment_account.radom_product_id:
         return get_product(payment_account.radom_product_id)

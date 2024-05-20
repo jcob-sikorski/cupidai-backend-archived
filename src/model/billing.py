@@ -24,5 +24,5 @@ class Plan(BaseModel):
     radom_product_id: str | None = None
 
 class CheckoutSessionRequest(BaseModel):
-    random_product_id: str
-    referral_id: str | None = None
+    radom_product_id: str
+    referral_id: Optional[str] = None

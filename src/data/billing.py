@@ -22,7 +22,7 @@ def create_payment_account(user_id: str,
                            subscription_id: str,
                            checkout_session_id: str,
                            amount: float,
-                           product_id: str,
+                           radom_product_id: str,
                            referral_id: Optional[str] = None):
     # If Stripe account does not exist then add it to the collection
     payment_account = payment_account_col.find_one({"user_id": user_id})
@@ -34,7 +34,7 @@ def create_payment_account(user_id: str,
             "subscription_id": subscription_id,
             "checkout_session_id": checkout_session_id,
             "amount": amount,
-            "product_id": product_id,
+            "radom_product_id": radom_product_id,
             "referral_id": referral_id
         }
         payment_account_col.insert_one(payment_account)
@@ -44,7 +44,7 @@ def create_payment_account(user_id: str,
             "subscription_id": subscription_id,
             "checkout_session_id": checkout_session_id,
             "amount": amount,
-            "product_id": product_id
+            "radom_product_id": radom_product_id
         }
         
         if referral_id is not None:
@@ -56,12 +56,12 @@ def create_payment_account(user_id: str,
         )
 
 
-def remove_payment_account(checkout_session_id: str) -> None:
+def remove_payment_account(subscription_id: str) -> None:
     # Find the payment account
-    payment_account = payment_account_col.find_one({"checkout_session_id": checkout_session_id})
+    payment_account = payment_account_col.find_one({"subscription_id": subscription_id})
 
     if payment_account:
-        payment_account_col.delete_one({"checkout_session_id": checkout_session_id})
+        payment_account_col.delete_one({"subscription_id": subscription_id})
 
 
 def get_payment_account(user_id: str, 
@@ -96,8 +96,9 @@ def accept_tos(user_id: str) -> None:
     
 
 def get_available_plans() -> Optional[List[Plan]]:
-    result = plan_col.find()
-    return result
+    results = plan_col.find()
+    plans = [Plan(**result) for result in results]
+    return plans
 
 
 def get_product(radom_product_id: str) -> Optional[Plan]:

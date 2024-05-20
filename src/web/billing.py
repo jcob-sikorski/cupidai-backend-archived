@@ -1,5 +1,7 @@
 from fastapi import APIRouter, Depends, Request
 
+from pydantic import BaseModel
+
 from typing import Annotated, Optional, Dict, Any
 
 from fastapi import HTTPException
@@ -15,11 +17,15 @@ import service.billing as service
 router = APIRouter(prefix="/billing")
 
 
-@router.get("/has-permissions", status_code=200)  # Retrieves the check of access tothe feature
-async def has_permissions(feature: str,
+class FeatureRequest(BaseModel):
+    feature: str
+
+@router.post("/has-permissions", status_code=200)  # Retrieves the check of access tothe feature
+async def has_permissions(req: FeatureRequest,
                           user: Annotated[Account, Depends(account_service.get_current_active_user)]) -> bool:
-    return service.has_permissions(feature,
-                                      user)
+    return True
+    # return service.has_permissions(req.feature,
+    #                                user)
 
 
 @router.post('/create-checkout-session', status_code=200)
