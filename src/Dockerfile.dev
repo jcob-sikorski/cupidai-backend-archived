@@ -23,4 +23,3 @@ EXPOSE 8000
 
 # Use an array for the CMD instruction to ensure the process runs directly without being wrapped in a shell
 CMD ["fastapi", "run", "main.py", "--port", "8000"]
-
