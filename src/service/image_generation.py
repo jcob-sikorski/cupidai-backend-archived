@@ -271,7 +271,7 @@ async def generate(settings: Settings,
             update_message(user.user_id, message_id, "failed")
             raise HTTPException(status_code=500, detail="Error while processing the workflow.")
         
-        url = "https://deep-safe-spaniel.ngrok-free.app/image-generation/"
+        url = f"{os.getenv("RUNPOD_DOMAIN")}/image-generation/"
 
         # Define the headers for the request
         headers = {
