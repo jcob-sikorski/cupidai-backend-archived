@@ -1,4 +1,8 @@
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
+
+import os
+
 import uvicorn
 
 from web import (
@@ -8,6 +12,20 @@ from web import (
 )
 
 app = FastAPI()
+
+origins = [
+    os.getenv("WEBAPP_DOMAIN"),
+    os.getenv("LANDING_DOMAIN"),
+    os.getenv("RUNPOD_DOMAIN")
+]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 app.include_router(account.router)
 app.include_router(ai_verification.router)

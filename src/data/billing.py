@@ -1,5 +1,3 @@
-import stripe
-
 from typing import Optional, List
 
 from datetime import datetime
@@ -24,7 +22,6 @@ def create_payment_account(user_id: str,
                            amount: float,
                            radom_product_id: str,
                            referral_id: Optional[str] = None):
-    # If Stripe account does not exist then add it to the collection
     payment_account = payment_account_col.find_one({"user_id": user_id})
 
     if not payment_account:
