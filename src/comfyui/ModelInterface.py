@@ -285,16 +285,6 @@ class ModelInterface():
         else:
             self.ipa2["284"]["inputs"]["model"] = ["229", 0]
 
-    def connect_preview_image(self, refinement_enabled: bool = False):
-        """
-        ################# CONNECT PREVIEW IMAGE #################
-        """
-
-        if refinement_enabled:
-            self.used_components.add("preview_image2")
-        else:
-            self.used_components.add("preview_image1")
-
 def generate_workflow(settings: Settings, 
                       image_ids: List[str], 
                       image_formats: List[str]) -> Optional[dict]:
@@ -373,9 +363,6 @@ def generate_workflow(settings: Settings,
                                                         denoise=settings.refinement_denoise,
                                                         sampler=settings.refinement_sampler,
                                                         ipa2_enabled=settings.ipa_2_enabled)
-
-        print("CONNECTING PREVIEW IMAGE")
-        model_interface.connect_preview_image(settings.refinement_enabled)
 
         final_json = model_interface.finalize()
 
