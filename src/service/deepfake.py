@@ -254,7 +254,7 @@ def generate(source_uri: str,
              modify_video: str,
              user: Account) -> Optional[Message]:
     
-    if billing_service.has_permissions('deepfake', user):
+    if billing_service.has_permissions("Realistic AI Content Deepfake", user):
         source_id = extract_id_from_uri(source_uri)
         source_format = get_file_format(source_id)
 

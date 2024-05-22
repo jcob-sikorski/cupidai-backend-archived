@@ -223,7 +223,7 @@ def send_post_request(url: str, headers: dict, payload: dict) -> None:
 async def generate(settings: Settings, 
                    user: Account, 
                    background_tasks: BackgroundTasks) -> None:
-    if billing_service.has_permissions('image_generation', user):
+    if billing_service.has_permissions("Realistic AI Content Creation", user):
         check = check_settings(settings)
         if check is not True:
             # print("CHECK: ", check)
