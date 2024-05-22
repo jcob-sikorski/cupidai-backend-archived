@@ -93,7 +93,7 @@ def check_settings(settings: Settings):
         "analogFilmPhotography_10.safetensors",
         "beard_slider_v10.safetensors",
         "breasts_slider_v10.safetensors",
-        "clothing_slider_v19_000000030.safetensors",
+        # "clothing_slider_v19_000000030.safetensors",
         "contrast_slider_v10.safetensors",
         "curly_hair_slider_v1.safetensors",
         "DarkLighting.safetensors",
