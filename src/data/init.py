@@ -8,7 +8,12 @@ import os
 env = os.getenv('ENV', 'production')
 
 # Map the environment to the corresponding .env file
-env_file = '.env.development' if env == 'development' else '.env.production'
+if env == 'development':
+    env_file = '.env.development'
+elif env == 'staging':
+    env_file = '.env.staging'
+else:
+    env_file = '.env.production'
 
 # Load the .env file
 load_dotenv(env_file)
