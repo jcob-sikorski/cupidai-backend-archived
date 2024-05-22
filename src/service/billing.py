@@ -58,19 +58,21 @@ def create_checkout_session(
             status_code=403,
             detail="You have to first cancel your plan to create a new one."
         )
+    
+    product = get_product(req.radom_product_id)
 
     line_items = [
         {
             "productId": req.radom_product_id,
-            # "itemData": {
-            #     "name": product.name,
+            "itemData": {
+                "name": product.name,
             #     "description": product.description,
             #     "chargingIntervalSeconds": 3600 * 24 * 30,
-            #     "price": product.price,
+                "price": product.price,
                 "isMetered": False,
-            #     "currency": "GBP",
+                "currency": "GBP",
                 "sendSubscriptionEmails": True
-            # }
+            }
         }
     ]
     
