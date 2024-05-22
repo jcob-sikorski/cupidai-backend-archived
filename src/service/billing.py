@@ -4,8 +4,6 @@ from typing import Optional, Dict, Any
 
 import os
 
-from datetime import datetime
-
 import requests
 
 import json
@@ -13,7 +11,8 @@ import json
 import data.billing as data
 
 from model.account import Account
-from model.billing import Plan, CheckoutSessionRequest, PaymentAccount
+from model.billing import (Plan, CheckoutSessionRequest, 
+                           CheckoutSessionMetadata, PaymentAccount)
 
 import service.account as account_service
 import service.email as email_service
@@ -151,6 +150,15 @@ def create_checkout_session(
         response_data = response.json()
         print("CHECKOUT SESSION RESPONSE")
         print(response_data)
+        
+        checkout_session_id = response_data.get('checkoutSessionId')
+        checkout_session_url = response_data.get('checkoutSessionUrl')
+        
+        if checkout_session_id and checkout_session_url:
+            create_checkout_session_metadata(user.user_id,
+                                             checkout_session_id,
+                                             req.referral_id)
+        
         return response_data
     except requests.exceptions.RequestException as e:
         print("Error creating checkout session:", e)
@@ -182,12 +190,12 @@ async def webhook(request: Request) -> None:
         metadata = body_dict.get("radomData", {}).get("checkoutSession", {}).get("metadata", [])
 
         user_id = None
-        referral_id = None
         for item in metadata:
             if item.get("key") == "user_id":
                 user_id = item.get("value")
-            elif item.get("key") == "referral_id":
-                referral_id = item.get("value")
+
+        internal_metadata = get_checkout_session_metadata(checkout_session_id)
+        referral_id = internal_metadata.referral_id if internal_metadata else None
 
         create_payment_account(user_id=user_id, 
                                subscription_id=subscription_id, 
@@ -264,7 +272,18 @@ def get_available_plans(user: Account) -> Optional[Dict[str, Any]]:
         "plans": plans,
         "radom_product_id": current_plan_id
     }
+
+def create_checkout_session_metadata(user_id: str, 
+                                     checkout_session_id: str,
+                                     referral_id: Optional[str] = None) -> None:
     
+    
+    return data.create_checkout_session_metadata(user_id, 
+                                                 checkout_session_id,
+                                                 referral_id)
+    
+def get_checkout_session_metadata(checkout_session_id: str) -> Optional[CheckoutSessionMetadata]:
+    return data.get_checkout_session_metadata(checkout_session_id)
 
 def get_product(radom_product_id: str) -> Optional[Plan]:
     return data.get_product(radom_product_id)

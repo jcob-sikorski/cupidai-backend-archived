@@ -26,3 +26,8 @@ class Plan(BaseModel):
 class CheckoutSessionRequest(BaseModel):
     radom_product_id: str
     referral_id: Optional[str] = None
+
+class CheckoutSessionMetadata(BaseModel):
+    checkout_session_id: str
+    user_id: str
+    referral_id: Optional[str] = None

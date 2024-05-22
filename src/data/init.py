@@ -31,7 +31,7 @@ def get_db():
     invite_col = db['Invite']
     password_reset_col = db['PasswordReset']
     payment_account_col = db['PaymentAccount']
-    # team_col = db['Team']
+    checkout_session_metadata_col = db['CheckoutSessionMetadata']
     tos_col = db['TermsOfService']
     plan_col = db['Plan']
     usage_history_col = db['UsageHistory']
