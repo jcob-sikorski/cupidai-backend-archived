@@ -133,7 +133,7 @@ def create_checkout_session(
         "chargeCustomerNetworkFee": True
     }
 
-    if os.getenv('MODE') == 'development':
+    if os.getenv('MODE') == 'staging':
         payload["gateway"]["managed"]["methods"].append({
             "network": "SepoliaTestnet",
             "token": "0xa4fCE8264370437e718aE207805b4e6233638b9E",
