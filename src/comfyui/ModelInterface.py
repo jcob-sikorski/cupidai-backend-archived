@@ -279,12 +279,12 @@ class ModelInterface():
 
         self.used_components.add("ipa2")
 
-        if civitai_enabled:
-            self.ipa2["251"]["inputs"]["ckpt_name"] = civitai_model
+        # if civitai_enabled:
+        #     self.ipa2["251"]["inputs"]["ckpt_name"] = civitai_model
 
-            self.ipa2["284"]["inputs"]["model"] = ["251", 0]
-        else:
-            self.ipa2["284"]["inputs"]["model"] = ["229", 0]
+        #     self.ipa2["284"]["inputs"]["model"] = ["251", 0]
+        # else:
+        #     self.ipa2["284"]["inputs"]["model"] = ["229", 0]
 
 def generate_workflow(settings: Settings, 
                       image_ids: List[str], 
