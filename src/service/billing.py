@@ -59,88 +59,80 @@ def create_checkout_session(
             detail="You have to first cancel your plan to create a new one."
         )
     
+    url = "https://api.radom.com/checkout_session"
+    
     product = get_product(req.radom_product_id)
 
-    line_items = [
-        {
-            "productId": req.radom_product_id,
-            "itemData": {
-                "name": product.name,
-            #     "description": product.description,
-            #     "chargingIntervalSeconds": 3600 * 24 * 30,
-                "price": product.price,
-                "isMetered": False,
-                "currency": "GBP",
-                "sendSubscriptionEmails": True
-            }
-        }
-    ]
-    
-    gateway = {
-        "managed": {
-            "methods": [
-                {
-                    "network": "Bitcoin",
-                    "discountPercentOff": 0
-                },
-                {
-                    "network": "Ethereum",
-                    "discountPercentOff": 0
-                },
-                {
-                    "network": "Ethereum",
-                    "token": "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
-                    "discountPercentOff": 0
-                },
-                {
-                    "network": "Ethereum",
-                    "token": "0xdAC17F958D2ee523a2206206994597C13D831ec7",
-                    "discountPercentOff": 0
-                }
-            ]
-        }
-    }
-    
-    metadata = [
-        {
-            "key": "user_id",
-            "value": user.user_id
-        },
-        {
-            "key": "referral_id",
-            "value": req.referral_id
-        }
-    ]
-    
-    customizations = {
-        "leftPanelColor": "#FFFFFF",
-        "primaryButtonColor": "#000000",
-        "slantedEdge": True,
-        "allowDiscountCodes": False
-    }
-
-    url = "https://api.radom.com/checkout_session"
+    print(product)
 
     payload = {
-        "lineItems": line_items,
-        # "total": total,
-        # "currency": "GBP",
-        "gateway": gateway,
+        "lineItems": [
+            {
+                "productId": req.radom_product_id,
+                "itemData": {
+                    "name": product.name,
+                    "description": product.description,
+                    "chargingIntervalSeconds": 0,
+                    "price": product.price,
+                    "isMetered": False,
+                    "currency": "GBP",
+                    "sendSubscriptionEmails": True
+                }
+            }
+        ],
+        "gateway": {
+            "managed": {
+                "methods": [
+                    {
+                        "network": "Bitcoin",
+                        "discountPercentOff": 0
+                    },
+                    {
+                        "network": "Ethereum",
+                        "discountPercentOff": 0
+                    },
+                    {
+                        "network": "Ethereum",
+                        "token": "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
+                        "discountPercentOff": 0
+                    },
+                    {
+                        "network": "Ethereum",
+                        "token": "0xdAC17F958D2ee523a2206206994597C13D831ec7",
+                        "discountPercentOff": 0
+                    }
+                ]
+            }
+        },
         "successUrl": f"{os.getenv('WEBAPP_DOMAIN')}/dashboard",
         "cancelUrl": f"{os.getenv('WEBAPP_DOMAIN')}/dashboard",
-        "metadata": metadata,
+        "metadata": [
+            {
+                "key": "user_id",
+                "value": user.user_id
+            },
+            {
+                "key": "referral_id",
+                "value": req.referral_id
+            }
+        ],
         "expiresAt": 1747827000,
-        "customizations": customizations,
+        "customizations": {
+            "leftPanelColor": "#FFFFFF",
+            "primaryButtonColor": "#000000",
+            "slantedEdge": True,
+            "allowDiscountCodes": False
+        },
         "chargeCustomerNetworkFee": True
     }
 
     headers = {
-        'Authorization': os.getenv('RADOM_ACCESS_TOKEN'),
-        'Content-Type': 'application/json'
+        "Content-Type": "application/json",
+        "Authorization": os.getenv('RADOM_ACCESS_TOKEN')
     }
 
     try:
-        response = requests.post(url, headers=headers, json=payload)
+        response = requests.request("POST", url, json=payload, headers=headers)
         response.raise_for_status()  # Raise an exception for any HTTP error
         response_data = response.json()
         print("CHECKOUT SESSION RESPONSE")
