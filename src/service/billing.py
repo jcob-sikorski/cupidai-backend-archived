@@ -121,10 +121,6 @@ def create_checkout_session(
             {
                 "key": "user_id",
                 "value": user.user_id
-            },
-            {
-                "key": "referral_id",
-                "value": req.referral_id
             }
         ],
         "expiresAt": 1747827000,
