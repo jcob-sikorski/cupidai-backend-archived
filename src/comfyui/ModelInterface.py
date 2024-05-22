@@ -155,7 +155,8 @@ class ModelInterface():
         if random_prompts_enabled:
             self.efficient_loader["206"]["inputs"]["positive"] = ["222", 0]
 
-        if any(lora_enabled):
+        print(f"LORA ENABLED: {lora_enabled}")
+        if sum(1 for value in lora_enabled if value == True) > 0:
             self.efficient_loader["206"]["inputs"]["lora_stack"] = ["207", 0]
 
     def connect_ksampler_efficient1(self,
