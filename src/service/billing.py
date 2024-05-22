@@ -65,6 +65,16 @@ def create_checkout_session(
 
     print(product)
 
+    print(req.radom_product_id)
+
+    print(os.getenv('WEBAPP_DOMAIN'))
+
+    print(user.user_id)
+
+    print(req.referral_id)
+
+    print(os.getenv('RADOM_ACCESS_TOKEN'))
+
     payload = {
         "lineItems": [
             {
