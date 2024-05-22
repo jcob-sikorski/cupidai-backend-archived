@@ -82,7 +82,7 @@ def create_checkout_session(
                 "itemData": {
                     "name": product.name,
                     "description": product.description,
-                    "chargingIntervalSeconds": 0,
+                    "chargingIntervalSeconds": 3600 * 24 * 30,
                     "price": product.price,
                     "isMetered": False,
                     "currency": "GBP",
@@ -90,6 +90,7 @@ def create_checkout_session(
                 }
             }
         ],
+        "currency": "GBP",
         "gateway": {
             "managed": {
                 "methods": [
